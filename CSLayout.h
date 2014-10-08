@@ -27,49 +27,15 @@
 #import <UIKit/UIKit.h>
 
 
-@interface CSCoord : NSObject
-
-- (instancetype)offset:(float)offset;
-
-- (instancetype)factor:(float)factor;
-
-@end
-
-
-@interface CSCoords : NSObject
-
-+ (instancetype)coordsOfView:(UIView *)view;
-
-@property (nonatomic, readonly) CSCoord *tt;
-@property (nonatomic, readonly) CSCoord *tb;
-
-@property (nonatomic, readonly) CSCoord *ll;
-@property (nonatomic, readonly) CSCoord *lr;
-
-@property (nonatomic, readonly) CSCoord *bb;
-@property (nonatomic, readonly) CSCoord *bt;
-
-@property (nonatomic, readonly) CSCoord *rr;
-@property (nonatomic, readonly) CSCoord *rl;
-
-@property (nonatomic, readonly) CSCoord *ct;
-@property (nonatomic, readonly) CSCoord *cl;
-
-@property (nonatomic, readonly) CSCoord *w;
-@property (nonatomic, readonly) CSCoord *h;
-
-@end
-
-
 @interface CSLayout : NSObject
 
 + (instancetype)layoutOfView:(UIView *)view;
 
-@property (nonatomic, strong) id minw;
-@property (nonatomic, strong) id maxw;
+@property (nonatomic, strong) id minWidth;
+@property (nonatomic, strong) id maxWidth;
 
-@property (nonatomic, strong) id minh;
-@property (nonatomic, strong) id maxh;
+@property (nonatomic, strong) id minHeight;
+@property (nonatomic, strong) id maxHeight;
 
 @property (nonatomic, strong) id tt;
 @property (nonatomic, strong) id tb;
@@ -89,12 +55,45 @@
 @end
 
 
+@interface CSCoord : NSObject
+
+- (instancetype)add:(float)value;
+- (instancetype)times:(float)value;
+
+@end
+
+
+@interface CSCoords : NSObject
+
++ (instancetype)coordsOfView:(UIView *)view;
+
+@property (nonatomic, readonly) CSCoord *width;
+@property (nonatomic, readonly) CSCoord *height;
+
+@property (nonatomic, readonly) CSCoord *tt;
+@property (nonatomic, readonly) CSCoord *tb;
+
+@property (nonatomic, readonly) CSCoord *ll;
+@property (nonatomic, readonly) CSCoord *lr;
+
+@property (nonatomic, readonly) CSCoord *bb;
+@property (nonatomic, readonly) CSCoord *bt;
+
+@property (nonatomic, readonly) CSCoord *rr;
+@property (nonatomic, readonly) CSCoord *rl;
+
+@property (nonatomic, readonly) CSCoord *ct;
+@property (nonatomic, readonly) CSCoord *cl;
+
+@end
+
+
 @interface CSPercentOffset : NSObject
 
 - (instancetype)initWithPercent:(float)percent offset:(float)offset;
 
-- (float)percentValue;
-- (float)offsetValue;
+- (float)percent;
+- (float)offset;
 
 @end
 

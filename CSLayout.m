@@ -239,17 +239,17 @@ do {                                                       \
     return frame;                                          \
 } while (0)
 
-#define CS_MM_RAW_VALUE(layout, name)             \
-({                                                \
-    CGFloat rawValue = NAN;                       \
-                                                  \
-    CSLayoutRule *rule = layout.ruleMap[@#name];  \
-                                                  \
-    if (rule && rule.coord) {                     \
-        rawValue = rule.coord.coordBlock(rule);   \
-    }                                             \
-                                                  \
-    rawValue;                                     \
+#define CS_MM_RAW_VALUE(layout, var)             \
+({                                               \
+    CGFloat rawValue = NAN;                      \
+                                                 \
+    CSLayoutRule *rule = layout.ruleMap[@#var];  \
+                                                 \
+    if (rule && rule.coord) {                    \
+        rawValue = rule.coord.coordBlock(rule);  \
+    }                                            \
+                                                 \
+    rawValue;                                    \
 })
 
 #define CS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
@@ -260,16 +260,16 @@ do {                                                       \
 - (CGFloat)calcWidth:(CGFloat)width {
     CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
 
-    CGFloat minw = CS_MM_RAW_VALUE(layout, minw);
+    CGFloat minWidth = CS_MM_RAW_VALUE(layout, minWidth);
 
-    if (CS_VALID_DIM(minw) && width < minw) {
-        width = minw;
+    if (CS_VALID_DIM(minWidth) && width < minWidth) {
+        width = minWidth;
     }
 
-    CGFloat maxw = CS_MM_RAW_VALUE(layout, maxw);
+    CGFloat maxWidth = CS_MM_RAW_VALUE(layout, maxWidth);
 
-    if (CS_VALID_DIM(maxw) && width > maxw) {
-        width = maxw;
+    if (CS_VALID_DIM(maxWidth) && width > maxWidth) {
+        width = maxWidth;
     }
 
     return MAX(width, 0);
@@ -278,16 +278,16 @@ do {                                                       \
 - (CGFloat)calcHeight:(CGFloat)height {
     CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
 
-    CGFloat minh = CS_MM_RAW_VALUE(layout, minh);
+    CGFloat minHeight = CS_MM_RAW_VALUE(layout, minHeight);
 
-    if (CS_VALID_DIM(minh) && height < minh) {
-        height = minh;
+    if (CS_VALID_DIM(minHeight) && height < minHeight) {
+        height = minHeight;
     }
 
-    CGFloat maxh = CS_MM_RAW_VALUE(layout, maxh);
+    CGFloat maxHeight = CS_MM_RAW_VALUE(layout, maxHeight);
 
-    if (CS_VALID_DIM(maxh) && height > maxh) {
-        height = maxh;
+    if (CS_VALID_DIM(maxHeight) && height > maxHeight) {
+        height = maxHeight;
     }
 
     return MAX(height, 0);
@@ -805,28 +805,28 @@ static Class cs_create_layout_class(UIView *view) {
 - (void)updateFrame:(CGRect)frame {
     CGSize size = frame.size;
 
-    CGFloat minw = CS_MM_RAW_VALUE(self, minw);
+    CGFloat minWidth = CS_MM_RAW_VALUE(self, minWidth);
 
-    if (CS_VALID_DIM(minw) && size.width < minw) {
-        size.width = minw;
+    if (CS_VALID_DIM(minWidth) && size.width < minWidth) {
+        size.width = minWidth;
     }
 
-    CGFloat maxw = CS_MM_RAW_VALUE(self, maxw);
+    CGFloat maxWidth = CS_MM_RAW_VALUE(self, maxWidth);
 
-    if (CS_VALID_DIM(maxw) && size.width > maxw) {
-        size.width = maxw;
+    if (CS_VALID_DIM(maxWidth) && size.width > maxWidth) {
+        size.width = maxWidth;
     }
 
-    CGFloat minh = CS_MM_RAW_VALUE(self, minh);
+    CGFloat minHeight = CS_MM_RAW_VALUE(self, minHeight);
 
-    if (CS_VALID_DIM(minh) && size.height < minh) {
-        size.height = minh;
+    if (CS_VALID_DIM(minHeight) && size.height < minHeight) {
+        size.height = minHeight;
     }
 
-    CGFloat maxh = CS_MM_RAW_VALUE(self, maxh);
+    CGFloat maxHeight = CS_MM_RAW_VALUE(self, maxHeight);
 
-    if (CS_VALID_DIM(maxh) && size.height > maxh) {
-        size.height = maxh;
+    if (CS_VALID_DIM(maxHeight) && size.height > maxHeight) {
+        size.height = maxHeight;
     }
 
     frame.size = size;
@@ -848,6 +848,22 @@ static Class cs_create_layout_class(UIView *view) {
     }
 
     [self updateFrame:_view.frame];
+}
+
+- (void)setMinWidth:(id)minWidth {
+    CSLAYOUT_ADD_RULE_MAP(minWidth, h);
+}
+
+- (void)setMaxWidth:(id)maxWidth {
+    CSLAYOUT_ADD_RULE_MAP(maxWidth, h);
+}
+
+- (void)setMinHeight:(id)minHeight {
+    CSLAYOUT_ADD_RULE_MAP(minHeight, v);
+}
+
+- (void)setMaxHeight:(id)maxHeight {
+    CSLAYOUT_ADD_RULE_MAP(maxHeight, v);
 }
 
 - (void)setTt:(id)tt {
@@ -910,22 +926,6 @@ static Class cs_create_layout_class(UIView *view) {
     CSLAYOUT_ADD_RULE(cl, h);
 }
 
-- (void)setMinw:(id)minw {
-    CSLAYOUT_ADD_RULE_MAP(minw, h);
-}
-
-- (void)setMaxw:(id)maxw {
-    CSLAYOUT_ADD_RULE_MAP(maxw, h);
-}
-
-- (void)setMinh:(id)minh {
-    CSLAYOUT_ADD_RULE_MAP(minh, v);
-}
-
-- (void)setMaxh:(id)maxh {
-    CSLAYOUT_ADD_RULE_MAP(maxh, v);
-}
-
 - (CSLayoutRuleHub *)ruleHub {
     return (_ruleHub ?: (_ruleHub = [[CSLayoutRuleHub alloc] init]));
 }
@@ -958,8 +958,8 @@ static Class cs_create_layout_class(UIView *view) {
 + (CSCoord *)coordWithPercentOffset:(CSPercentOffset *)object {
     CSCoord *coord = [[CSCoord alloc] init];
 
-    float percent = [object percentValue] / 100;
-    float offset = [object offsetValue];
+    float percent = [object percent] / 100;
+    float offset = [object offset];
 
     coord.coordBlock = ^float(CSLayoutRule *rule) {
         UIView *view = rule.view;
@@ -985,7 +985,7 @@ static Class cs_create_layout_class(UIView *view) {
     return coord;
 }
 
-- (instancetype)offset:(float)offset {
+- (instancetype)add:(float)value {
     CSCoord *coord = [[CSCoord alloc] init];
 
     __weak CSCoord *that = self;
@@ -993,13 +993,13 @@ static Class cs_create_layout_class(UIView *view) {
     coord.view = _view;
     coord.coordBlock = ^float(CSLayoutRule *rule) {
         CSCoord *this = that;
-        return this.coordBlock(rule) + offset;
+        return this.coordBlock(rule) + value;
     };
 
     return coord;
 }
 
-- (instancetype)factor:(float)factor {
+- (instancetype)times:(float)value {
     CSCoord *coord = [[CSCoord alloc] init];
 
     __weak CSCoord *that = self;
@@ -1007,7 +1007,7 @@ static Class cs_create_layout_class(UIView *view) {
     coord.view = _view;
     coord.coordBlock = ^float(CSLayoutRule *rule) {
         CSCoord *this = that;
-        return this.coordBlock(rule) * factor;
+        return this.coordBlock(rule) * value;
     };
 
     return coord;
@@ -1019,6 +1019,9 @@ static Class cs_create_layout_class(UIView *view) {
 @interface CSCoords ()
 
 @property (nonatomic, weak) UIView *view;
+
+@property (nonatomic, strong) CSCoord *width;
+@property (nonatomic, strong) CSCoord *height;
 
 @property (nonatomic, strong) CSCoord *tt;
 @property (nonatomic, strong) CSCoord *tb;
@@ -1034,9 +1037,6 @@ static Class cs_create_layout_class(UIView *view) {
 
 @property (nonatomic, strong) CSCoord *ct;
 @property (nonatomic, strong) CSCoord *cl;
-
-@property (nonatomic, strong) CSCoord *w;
-@property (nonatomic, strong) CSCoord *h;
 
 @end
 
@@ -1111,39 +1111,39 @@ static Class cs_create_layout_class(UIView *view) {
     return LAZY_LOAD_COORD(_cl, CS_VIEW_LEFT + CS_VIEW_WIDTH / 2);
 }
 
-- (CSCoord *)w {
-    return LAZY_LOAD_COORD(_w, CS_VIEW_WIDTH);
+- (CSCoord *)width {
+    return LAZY_LOAD_COORD(_width, CS_VIEW_WIDTH);
 }
 
-- (CSCoord *)h {
-    return LAZY_LOAD_COORD(_h, CS_VIEW_HEIGHT);
+- (CSCoord *)height {
+    return LAZY_LOAD_COORD(_height, CS_VIEW_HEIGHT);
 }
 
 @end
 
 
 @implementation CSPercentOffset {
-    float _percentValue;
-    float _offsetValue;
+    float _percent;
+    float _offset;
 }
 
 - (instancetype)initWithPercent:(float)percent offset:(float)offset {
     self = [super init];
 
     if (self) {
-        _percentValue = percent;
-        _offsetValue = offset;
+        _percent = percent;
+        _offset = offset;
     }
 
     return self;
 }
 
-- (float)percentValue {
-    return _percentValue;
+- (float)percent {
+    return _percent;
 }
 
-- (float)offsetValue {
-    return _offsetValue;
+- (float)offset {
+    return _offset;
 }
 
 @end
