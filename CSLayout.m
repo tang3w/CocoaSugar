@@ -83,6 +83,8 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 @property (nonatomic, strong) CSLayoutRuleHub *ruleHub;
 @property (nonatomic, strong) NSMutableDictionary *ruleMap;
 
+@property (nonatomic, assign) CGRect frame;
+
 - (void)updateLayoutDriver;
 
 - (NSSet *)dependencies;
@@ -193,12 +195,15 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 #define CS_SUPERVIEW_WIDTH  (view.superview.frame.size.width)
 #define CS_SUPERVIEW_HEIGHT (view.superview.frame.size.height)
 
+#define CSLAYOUT_FRAME(view) \
+([objc_getAssociatedObject(view, CSLayoutKey) frame])
+
 #define CSLAYOUT_SOLVE_SINGLE_H(var, left)        \
 do {                                              \
     CSLayoutRule *rule = rules[0];                \
     float var = [[rule coord] coordBlock](rule);  \
     UIView *view = _view;                         \
-    CGRect frame = view.frame;                    \
+    CGRect frame = CSLAYOUT_FRAME(view);          \
     frame.origin.x = (left);                      \
     return frame;                                 \
 } while (0)
@@ -208,7 +213,7 @@ do {                                              \
     CSLayoutRule *rule = rules[0];                \
     float var = [[rule coord] coordBlock](rule);  \
     UIView *view = _view;                         \
-    CGRect frame = view.frame;                    \
+    CGRect frame = CSLAYOUT_FRAME(view);          \
     frame.origin.y = (top);                       \
     return frame;                                 \
 } while (0)
@@ -220,7 +225,7 @@ do {                                                       \
     float var1 = [[rule0 coord] coordBlock](rule0);        \
     float var2 = [[rule1 coord] coordBlock](rule1);        \
     UIView *view = _view;                                  \
-    CGRect frame = view.frame;                             \
+    CGRect frame = CSLAYOUT_FRAME(view);                  \
     frame.size.width = [self calcWidth:(width_)];          \
     frame.origin.x = (left);                               \
     return frame;                                          \
@@ -233,7 +238,7 @@ do {                                                       \
     float var1 = [[rule0 coord] coordBlock](rule0);        \
     float var2 = [[rule1 coord] coordBlock](rule1);        \
     UIView *view = _view;                                  \
-    CGRect frame = view.frame;                             \
+    CGRect frame = CSLAYOUT_FRAME(view);                   \
     frame.size.height = [self calcHeight:(height_)];       \
     frame.origin.y = (top);                                \
     return frame;                                          \
@@ -797,13 +802,13 @@ static Class cs_create_layout_class(UIView *view) {
     SEL sel = NSSelectorFromString(selStr);
     CGRect (*imp)(id, SEL, NSArray *) = (void *)[solver methodForSelector:sel];
 
-    CGRect newFrame = imp(solver, sel, rules);
+    _frame = imp(solver, sel, rules);
 
-    [self updateFrame:newFrame];
+    [self checkBounds];
 }
 
-- (void)updateFrame:(CGRect)frame {
-    CGSize size = frame.size;
+- (void)checkBounds {
+    CGSize size = _frame.size;
 
     CGFloat minWidth = CS_MM_RAW_VALUE(self, minWidth);
 
@@ -829,15 +834,13 @@ static Class cs_create_layout_class(UIView *view) {
         size.height = maxHeight;
     }
 
-    frame.size = size;
-
-    if (!CGRectEqualToRect(frame, _view.frame)) {
-        _view.frame = frame;
-    }
+    _frame.size = size;
 }
 
 - (void)startLayout {
-    [self updateFrame:_view.frame];
+    _frame = _view.frame;
+
+    [self checkBounds];
 
     if ([_ruleHub.vRules count]) {
         [self solveRules:_ruleHub.vRules];
@@ -847,7 +850,11 @@ static Class cs_create_layout_class(UIView *view) {
         [self solveRules:_ruleHub.hRules];
     }
 
-    [self updateFrame:_view.frame];
+    [self checkBounds];
+
+    if (!CGRectEqualToRect(_frame, _view.frame)) {
+        _view.frame = _frame;
+    }
 }
 
 - (void)setMinWidth:(id)minWidth {
