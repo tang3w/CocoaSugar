@@ -192,8 +192,8 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 #define CS_FRAME_WIDTH  (frame.size.width)
 #define CS_FRAME_HEIGHT (frame.size.height)
 
-#define CS_SUPERVIEW_WIDTH  (view.superview.frame.size.width)
-#define CS_SUPERVIEW_HEIGHT (view.superview.frame.size.height)
+#define CS_SUPERVIEW_WIDTH  (view.superview.bounds.size.width)
+#define CS_SUPERVIEW_HEIGHT (view.superview.bounds.size.height)
 
 #define CSLAYOUT_FRAME(view) \
 ([objc_getAssociatedObject(view, CSLayoutKey) frame])
@@ -225,7 +225,7 @@ do {                                                       \
     float var1 = [[rule0 coord] coordBlock](rule0);        \
     float var2 = [[rule1 coord] coordBlock](rule1);        \
     UIView *view = _view;                                  \
-    CGRect frame = CSLAYOUT_FRAME(view);                  \
+    CGRect frame = CSLAYOUT_FRAME(view);                   \
     frame.size.width = [self calcWidth:(width_)];          \
     frame.origin.x = (left);                               \
     return frame;                                          \
@@ -246,15 +246,11 @@ do {                                                       \
 
 #define CS_MM_RAW_VALUE(layout, var)             \
 ({                                               \
-    CGFloat rawValue = NAN;                      \
-                                                 \
     CSLayoutRule *rule = layout.ruleMap[@#var];  \
                                                  \
-    if (rule && rule.coord) {                    \
-        rawValue = rule.coord.coordBlock(rule);  \
-    }                                            \
-                                                 \
-    rawValue;                                    \
+    rule.coord ?                                 \
+    rule.coord.coordBlock(rule) :                \
+    NAN;                                         \
 })
 
 #define CS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
@@ -1050,8 +1046,8 @@ static Class cs_create_layout_class(UIView *view) {
 
 #define CS_VIEW_TOP    (view.frame.origin.y)
 #define CS_VIEW_LEFT   (view.frame.origin.x)
-#define CS_VIEW_WIDTH  (view.frame.size.width)
-#define CS_VIEW_HEIGHT (view.frame.size.height)
+#define CS_VIEW_WIDTH  (view.bounds.size.width)
+#define CS_VIEW_HEIGHT (view.bounds.size.height)
 
 #define LAZY_LOAD_COORD(ivar, expr) (ivar ?: (ivar = CSCOORD_MAKE(_view, expr)))
 
