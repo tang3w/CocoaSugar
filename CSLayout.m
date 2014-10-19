@@ -585,27 +585,24 @@ static void cs_layout_subviews(id self, SEL _cmd) {
 }
 
 static Class cs_create_driver_class(UIView *view) {
+    Class driverClass = Nil;
+
+    char *clsname = NULL;
     static const char *fmt = "CSLayoutDriverView_%p_%u";
 
-    UInt32 suffix = arc4random();
-    int size = snprintf(NULL, 0, fmt, view, suffix) + 1;
-
-    char clsname[size];
-
-    snprintf(clsname, size, fmt, view, suffix);
-
-    Class layoutClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
-
-    if (layoutClass == Nil) {
-        return cs_create_driver_class(view);
+    while (driverClass == Nil) {
+        if (asprintf(&clsname, fmt, view, arc4random()) > 0) {
+            driverClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
+            free(clsname);
+        }
     }
 
-    objc_registerClassPair(layoutClass);
+    objc_registerClassPair(driverClass);
 
-    class_addMethod(layoutClass, @selector(layoutSubviews), (IMP)cs_layout_subviews, @encode(typeof(cs_layout_subviews)));
-    class_addMethod(layoutClass, @selector(class), (IMP)cs_driver_class, @encode(typeof(cs_driver_class)));
+    class_addMethod(driverClass, @selector(layoutSubviews), (IMP)cs_layout_subviews, "v@:");
+    class_addMethod(driverClass, @selector(class), (IMP)cs_driver_class, "#@:");
 
-    return layoutClass;
+    return driverClass;
 }
 
 
@@ -707,25 +704,22 @@ static void cs_did_move_to_superview(id self, SEL _cmd) {
 }
 
 static Class cs_create_layout_class(UIView *view) {
+    Class layoutClass = Nil;
+
+    char *clsname = NULL;
     static const char *fmt = "CSLayoutView_%p_%u";
 
-    UInt32 suffix = arc4random();
-    int size = snprintf(NULL, 0, fmt, view, suffix) + 1;
-
-    char clsname[size];
-
-    snprintf(clsname, size, fmt, view, suffix);
-
-    Class layoutClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
-
-    if (layoutClass == Nil) {
-        return cs_create_layout_class(view);
+    while (layoutClass == Nil) {
+        if (asprintf(&clsname, fmt, view, arc4random()) > 0) {
+            layoutClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
+            free(clsname);
+        }
     }
 
     objc_registerClassPair(layoutClass);
 
-    class_addMethod(layoutClass, @selector(didMoveToSuperview), (IMP)cs_did_move_to_superview, @encode(typeof(cs_did_move_to_superview)));
-    class_addMethod(layoutClass, @selector(class), (IMP)cs_layout_class, @encode(typeof(cs_layout_class)));
+    class_addMethod(layoutClass, @selector(didMoveToSuperview), (IMP)cs_did_move_to_superview, "v@:");
+    class_addMethod(layoutClass, @selector(class), (IMP)cs_layout_class, "#@:");
 
     return layoutClass;
 }

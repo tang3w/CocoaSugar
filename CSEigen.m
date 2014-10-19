@@ -44,21 +44,23 @@ static inline Class cs_class(id self, SEL _cmd) {
 }
 
 static inline Class cs_create_eigen_class(NSObject *object) {
+    Class eigenClass = Nil;
+
     char *clsname = NULL;
+    static const char *fmt = "CSEigen_%s_%p_%u";
 
-    asprintf(&clsname, "CSEigen_%s_%p_%u", class_getName([object class]), object, arc4random());
+    while (eigenClass == Nil) {
+        if (asprintf(&clsname, fmt, class_getName([object class]), object, arc4random()) > 0) {
+            eigenClass = objc_allocateClassPair(object_getClass(object), clsname, 0);
+            free(clsname);
+        }
+    }
 
-    Class eigen = objc_allocateClassPair(object_getClass(object), clsname, 0);
+    objc_registerClassPair(eigenClass);
 
-    free(clsname);
+    class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
 
-    if (eigen == Nil) return cs_create_eigen_class(object);
-
-    objc_registerClassPair(eigen);
-
-    class_addMethod(eigen, @selector(class), (IMP)cs_class, "#@:");
-
-    return eigen;
+    return eigenClass;
 }
 
 static inline void cs_dispose_eigen_class(Class eigenClass) {

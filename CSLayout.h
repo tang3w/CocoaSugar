@@ -98,22 +98,22 @@
 @end
 
 
-CG_INLINE CSLayout *CSLayoutMake(UIView *view)
+static inline CSLayout *CSLayoutMake(UIView *view)
 {
     return [CSLayout layoutOfView:view];
 }
 
-CG_INLINE CSCoords *CSCoordsMake(UIView *view)
+static inline CSCoords *CSCoordsMake(UIView *view)
 {
     return [CSCoords coordsOfView:view];
 }
 
-CG_INLINE CSPercentOffset *CSPercentOffsetMake(float percent, float offset)
+static inline CSPercentOffset *CSPercentOffsetMake(float percent, float offset)
 {
     return [[CSPercentOffset alloc] initWithPercent:percent offset:offset];
 }
 
-CG_INLINE CSPercentOffset *CSPercentMake(float percent)
+static inline CSPercentOffset *CSPercentMake(float percent)
 {
     return [[CSPercentOffset alloc] initWithPercent:percent offset:0];
 }
