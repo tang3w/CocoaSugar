@@ -39,7 +39,7 @@ typedef id  (*CSIMPI)(id self, SEL name, ...);
 
 @end
 
-static inline CSEigen *CSEigenMake(NSObject *object)
-{
+static inline
+CSEigen *CSEigenMake(NSObject *object) {
     return [CSEigen eigenOfObject:object];
 }
