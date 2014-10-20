@@ -43,6 +43,10 @@ static inline Class cs_class(id self, SEL _cmd) {
     return objc_getAssociatedObject(self, classKey);
 }
 
+static inline BOOL cs_responds_to_selector(id self, SEL _cmd, SEL sel) {
+    return class_respondsToSelector([CSEigen eigenOfObject:self].eigenClass, sel);
+}
+
 static inline Class cs_create_eigen_class(NSObject *object) {
     Class eigenClass = Nil;
 
@@ -59,6 +63,7 @@ static inline Class cs_create_eigen_class(NSObject *object) {
     objc_registerClassPair(eigenClass);
 
     class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
+    class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cs_responds_to_selector, "c@::");
 
     return eigenClass;
 }
@@ -134,7 +139,9 @@ static inline void cs_dispose_eigen_class(Class eigenClass) {
 }
 
 - (CSIMP)superImp:(SEL)name {
-    return (CSIMP)class_getMethodImplementation(class_getSuperclass(self.eigenClass), name);
+    Method method = class_getInstanceMethod(class_getSuperclass(self.eigenClass), name);
+
+    return method != NULL ? (CSIMP)method_getImplementation(method) : NULL;
 }
 
 - (void)dealloc {
