@@ -88,34 +88,40 @@ static inline void cs_dispose_eigen_class(Class eigenClass) {
     deallocSel = NSSelectorFromString(@"dealloc");
 }
 
++ (NSMutableArray *)slotsOfObject:(NSObject *)object {
+    static const void *slotsKey = &slotsKey;
+
+    NSMutableArray *slots = objc_getAssociatedObject(object, slotsKey);
+
+    if (!slots) {
+        slots = [[NSMutableArray alloc] init];
+
+        objc_setAssociatedObject(object, slotsKey, slots, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
+    }
+
+    return slots;
+}
+
 + (instancetype)eigenOfObject:(NSObject *)object {
     CSEigen *eigen = nil;
 
     if (object) {
-        static const void *eigenKey = &eigenKey;
+        eigen = [[CSEigen alloc] init];
 
-        eigen = objc_getAssociatedObject(object, eigenKey);
+        Class eigenClass = cs_create_eigen_class(object);
+        eigen.eigenClass = eigenClass;
 
-        if (!eigen) {
-            eigen = [[CSEigen alloc] init];
-            Class eigenClass = cs_create_eigen_class(object);
+        [[self slotsOfObject:object] addObject:eigen];
 
-            eigen.eigenClass = eigenClass;
-
-            objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
-            objc_setAssociatedObject(object, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
-            
-            object_setClass(object, eigenClass);
-        }
+        object_setClass(object, eigenClass);
     }
 
     return eigen;
 }
 
 - (void)setMethod:(SEL)name types:(const char *)types block:(id)block {
-    IMP imp = class_getMethodImplementation(self.eigenClass, name);
-
-    if (imp) imp_removeBlock(imp);
+    IMP imp = NULL;
 
     if (sel_isEqual(name, deallocSel)) {
         OSSpinLock *disposingLock = _disposingLock;
