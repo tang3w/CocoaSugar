@@ -379,15 +379,15 @@ typedef enum CSLayoutVisitStat CSLayoutVisitStat;
 
 static const void *CSVisitKey = &CSVisitKey;
 
-CG_INLINE void CSMakeViewUnvisited(UIView *view) {
+static inline void CSMakeViewUnvisited(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, nil, OBJC_ASSOCIATION_RETAIN);
 }
 
-CG_INLINE void CSMakeViewVisiting(UIView *view) {
+static inline void CSMakeViewVisiting(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisiting), OBJC_ASSOCIATION_RETAIN);
 }
 
-CG_INLINE void CSMakeViewVisited(UIView *view) {
+static inline void CSMakeViewVisited(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisited), OBJC_ASSOCIATION_RETAIN);
 }
 
