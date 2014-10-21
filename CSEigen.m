@@ -44,7 +44,7 @@ static inline Class cs_class(id self, SEL _cmd) {
 }
 
 static inline BOOL cs_responds_to_selector(id self, SEL _cmd, SEL sel) {
-    return class_respondsToSelector([CSEigen eigenOfObject:self].eigenClass, sel);
+    return class_respondsToSelector(object_getClass(self), sel);
 }
 
 static inline Class cs_create_eigen_class(NSObject *object) {
