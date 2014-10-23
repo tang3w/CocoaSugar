@@ -78,7 +78,7 @@ static inline void cs_dispose_eigen_class(Class eigenClass) {
 
     objc_disposeClassPair(eigenClass);
 
-    free(methods);
+    if (count) free(methods);
 }
 
 
@@ -132,9 +132,9 @@ static inline void cs_dispose_eigen_class(Class eigenClass) {
             _disposingLock = disposingLock;
         }
 
-        imp = imp_implementationWithBlock(^(id object) {
+        imp = imp_implementationWithBlock(^(void *object) {
             OSSpinLockLock(disposingLock);
-            ((void(^)(id))block)(object);
+            ((void(^)(id))block)((__bridge id)object);
             OSSpinLockUnlock(disposingLock);
         });
     } else {
