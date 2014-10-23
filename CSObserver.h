@@ -32,7 +32,7 @@ typedef void(^CSObserverBlock)(id object, id target, NSDictionary *change);
 
 + (instancetype)observerForObject:(NSObject *)object;
 
-@property (nonatomic, weak, readonly) NSObject *object;
+@property (atomic, weak, readonly) NSObject *object;
 
 - (void)addTarget:(NSObject *)target
        forKeyPath:(NSString *)keyPath

@@ -31,18 +31,18 @@ typedef void (*vIMP)(id, SEL);
 
 @interface CSObserver ()
 
-@property (nonatomic, weak) NSObject *object;
+@property (atomic, weak) NSObject *object;
 
 @end
 
 
 @interface CSObservation : NSObject
 
-@property (nonatomic, unsafe_unretained) NSObject *object;
-@property (nonatomic, unsafe_unretained) NSObject *target;
-@property (nonatomic, copy) NSString *keyPath;
-@property (nonatomic, assign) NSKeyValueObservingOptions options;
-@property (nonatomic, copy) CSObserverBlock block;
+@property (atomic, unsafe_unretained) NSObject *object;
+@property (atomic, unsafe_unretained) NSObject *target;
+@property (atomic, copy) NSString *keyPath;
+@property (atomic, assign) NSKeyValueObservingOptions options;
+@property (atomic, copy) CSObserverBlock block;
 
 - (void)deregister;
 
@@ -173,10 +173,20 @@ void cs_hook_object_if_needed(NSObject *object) {
         [cs_observation_pool(object) addObject:observation];
         [cs_observation_pool(target) addObject:observation];
 
-        [target addObserver:observation
-                 forKeyPath:keyPath
-                    options:options
-                    context:csContext];
+        if ([target isKindOfClass:[NSArray class]]) {
+            NSArray *array = (NSArray *)target;
+
+            [array addObserver:observation
+            toObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [array count])]
+                    forKeyPath:keyPath
+                       options:options
+                       context:csContext];
+        } else {
+            [target addObserver:observation
+                     forKeyPath:keyPath
+                        options:options
+                        context:csContext];
+        }
     }
 }
 
@@ -213,7 +223,7 @@ void cs_hook_object_if_needed(NSObject *object) {
             }
         }
     } else {
-        find = [observationPool mutableCopy];
+        find = [observationPool copy];
     }
 
     for (CSObservation *observation in find) {
