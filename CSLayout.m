@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import "CSLayout.h"
+#import "CSEigen.h"
 
 #import <objc/runtime.h>
 
@@ -32,7 +33,6 @@ typedef void(*vIMP)(id, SEL);
 typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 
 static const void *CSLayoutKey = &CSLayoutKey;
-static const void *CSLayoutDriverKey = &CSLayoutDriverKey;
 
 
 @interface CSLayoutRule : NSObject
@@ -77,8 +77,6 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 @interface CSLayout ()
 
 @property (nonatomic, weak) UIView *view;
-@property (nonatomic, weak) Class originClass;
-@property (nonatomic, weak) Class layoutClass;
 
 @property (nonatomic, strong) CSLayoutRuleHub *ruleHub;
 @property (nonatomic, strong) NSMutableDictionary *ruleMap;
@@ -502,9 +500,9 @@ static inline void CSMakeViewVisited(UIView *view) {
 
 @interface CSLayoutSolver : NSObject
 
-@property (nonatomic, weak) UIView *view;
++ (instancetype)layoutSolverOfView:(UIView *)view;
 
-- (instancetype)initWithView:(UIView *)view;
+@property (nonatomic, weak) UIView *view;
 
 - (void)solve;
 
@@ -513,12 +511,20 @@ static inline void CSMakeViewVisited(UIView *view) {
 
 @implementation CSLayoutSolver
 
-- (instancetype)initWithView:(UIView *)view {
-    self = [super init];
++ (instancetype)layoutSolverOfView:(UIView *)view {
+    static const void *layoutSolverKey = &layoutSolverKey;
 
-    if (self) _view = view;
+    CSLayoutSolver *solver = objc_getAssociatedObject(view, layoutSolverKey);
 
-    return self;
+    if (!solver) {
+        solver = [[CSLayoutSolver alloc] init];
+
+        solver.view = view;
+
+        objc_setAssociatedObject(view, layoutSolverKey, solver, OBJC_ASSOCIATION_RETAIN);
+    }
+
+    return solver;
 }
 
 - (void)solve {
@@ -547,96 +553,6 @@ static inline void CSMakeViewVisited(UIView *view) {
 
         [layout startLayout];
     }
-}
-
-@end
-
-
-@interface CSLayoutDriver : NSObject
-
-+ (instancetype)layoutDriverOfView:(UIView *)view;
-
-@property (nonatomic, weak) UIView *view;
-@property (nonatomic, weak) Class originClass;
-@property (nonatomic, weak) Class driverClass;
-
-@property (nonatomic, strong) CSLayoutSolver *solver;
-
-- (void)layoutSubviews;
-
-@end
-
-
-static Class cs_driver_class(id self, SEL _cmd) {
-    CSLayoutDriver *layoutDriver = objc_getAssociatedObject(self, CSLayoutDriverKey);
-
-    return layoutDriver.originClass;
-}
-
-static void cs_layout_subviews(id self, SEL _cmd) {
-    CSLayoutDriver *layoutDriver = [CSLayoutDriver layoutDriverOfView:self];
-
-    Class superCls = class_getSuperclass(layoutDriver.driverClass);
-    vIMP  superImp = (vIMP)class_getMethodImplementation(superCls, _cmd);
-
-    superImp(self, _cmd);
-
-    [layoutDriver layoutSubviews];
-}
-
-static Class cs_create_driver_class(UIView *view) {
-    Class driverClass = Nil;
-
-    char *clsname = NULL;
-    static const char *fmt = "CSLayoutDriverView_%p_%u";
-
-    while (driverClass == Nil) {
-        if (asprintf(&clsname, fmt, view, arc4random()) > 0) {
-            driverClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
-            free(clsname);
-        }
-    }
-
-    objc_registerClassPair(driverClass);
-
-    class_addMethod(driverClass, @selector(layoutSubviews), (IMP)cs_layout_subviews, "v@:");
-    class_addMethod(driverClass, @selector(class), (IMP)cs_driver_class, "#@:");
-
-    return driverClass;
-}
-
-
-@implementation CSLayoutDriver
-
-+ (instancetype)layoutDriverOfView:(UIView *)view {
-    CSLayoutDriver *layoutDriver = objc_getAssociatedObject(view, CSLayoutDriverKey);
-
-    if (!layoutDriver) {
-        Class driverClass = cs_create_driver_class(view);
-
-        layoutDriver = [[CSLayoutDriver alloc] init];
-
-        layoutDriver.view = view;
-        layoutDriver.originClass = [view class];
-        layoutDriver.driverClass = driverClass;
-
-        objc_setAssociatedObject(view, CSLayoutDriverKey, layoutDriver, OBJC_ASSOCIATION_RETAIN);
-        object_setClass(view, driverClass);
-    }
-
-    return layoutDriver;
-}
-
-- (CSLayoutSolver *)solver {
-    return (_solver ?: (_solver = [[CSLayoutSolver alloc] initWithView:_view]));
-}
-
-- (void)layoutSubviews {
-    [self.solver solve];
-}
-
-- (void)dealloc {
-    objc_disposeClassPair(self.driverClass);
 }
 
 @end
@@ -686,75 +602,70 @@ do {                                            \
     [self.ruleMap setObject:rule forKey:name];  \
 } while (0)
 
-static Class cs_layout_class(id self, SEL _cmd) {
-    CSLayout *layout = objc_getAssociatedObject(self, CSLayoutKey);
+static inline
+void cs_initialize_layout_if_needed(UIView *view) {
+    static const void *eigenKey = &eigenKey;
 
-    return layout.originClass;
+    if (objc_getAssociatedObject(view, eigenKey)) return;
+
+    __weak CSEigen *eigen = [CSEigen eigenOfObject:view];
+
+    objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
+
+    SEL selector = @selector(didMoveToSuperview);
+
+    [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
+        ((CSIMPV)[eigen superImp:selector])(view, selector);
+
+        [[CSLayout layoutOfView:view] updateLayoutDriver];
+    }];
 }
 
-static void cs_did_move_to_superview(id self, SEL _cmd) {
-    CSLayout *layout = [CSLayout layoutOfView:self];
+static inline
+void cs_initialize_driver_if_needed(UIView *view) {
+    static const void *eigenKey = &eigenKey;
 
-    Class superCls = class_getSuperclass(layout.layoutClass);
-    vIMP  superImp = (vIMP)class_getMethodImplementation(superCls, _cmd);
+    if (objc_getAssociatedObject(view, eigenKey)) return;
 
-    superImp(self, _cmd);
+    __weak CSEigen *eigen = [CSEigen eigenOfObject:view];
 
-    [layout updateLayoutDriver];
-}
+    objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
 
-static Class cs_create_layout_class(UIView *view) {
-    Class layoutClass = Nil;
+    SEL selector = @selector(layoutSubviews);
 
-    char *clsname = NULL;
-    static const char *fmt = "CSLayoutView_%p_%u";
+    [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
+        ((CSIMPV)[eigen superImp:selector])(view, selector);
 
-    while (layoutClass == Nil) {
-        if (asprintf(&clsname, fmt, view, arc4random()) > 0) {
-            layoutClass = objc_allocateClassPair(object_getClass(view), clsname, 0);
-            free(clsname);
-        }
-    }
-
-    objc_registerClassPair(layoutClass);
-
-    class_addMethod(layoutClass, @selector(didMoveToSuperview), (IMP)cs_did_move_to_superview, "v@:");
-    class_addMethod(layoutClass, @selector(class), (IMP)cs_layout_class, "#@:");
-
-    return layoutClass;
+        [[CSLayoutSolver layoutSolverOfView:(view)] solve];
+    }];
 }
 
 
 @implementation CSLayout
 
 + (instancetype)layoutOfView:(UIView *)view {
-    if ([view isKindOfClass:[UIView class]]) {
-        CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+    if (![view isKindOfClass:[UIView class]]) return nil;
 
-        if (!layout) {
-            Class layoutClass = cs_create_layout_class(view);
+    CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
 
-            layout = [[CSLayout alloc] init];
+    if (!layout) {
+        layout = [[CSLayout alloc] init];
 
-            layout.view = view;
-            layout.originClass = [view class];
-            layout.layoutClass = layoutClass;
+        layout.view = view;
 
-            [layout updateLayoutDriver];
+        objc_setAssociatedObject(view, CSLayoutKey, layout, OBJC_ASSOCIATION_RETAIN);
 
-            objc_setAssociatedObject(view, CSLayoutKey, layout, OBJC_ASSOCIATION_RETAIN);
-            object_setClass(view, layoutClass);
-        }
+        cs_initialize_layout_if_needed(view);
 
-        return layout;
+        [layout updateLayoutDriver];
     }
 
-    return nil;
+    return layout;
 }
 
 - (void)updateLayoutDriver {
     if (_view.superview) {
-        [CSLayoutDriver layoutDriverOfView:_view.superview];
+        cs_initialize_driver_if_needed(_view.superview);
     }
 }
 
@@ -929,10 +840,6 @@ static Class cs_create_layout_class(UIView *view) {
 
 - (NSMutableDictionary *)ruleMap {
     return (_ruleMap ?: (_ruleMap = [[NSMutableDictionary alloc] init]));
-}
-
-- (void)dealloc {
-    objc_disposeClassPair(self.layoutClass);
 }
 
 @end
