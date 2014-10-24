@@ -24,6 +24,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import "CSObserver.h"
+#import "CSEigen.h"
+
 #import <objc/runtime.h>
 
 typedef void (*vIMP)(id, SEL);
@@ -50,8 +52,6 @@ typedef void (*vIMP)(id, SEL);
 
 
 static SEL deallocSel = NULL;
-static const void *classKey = &classKey;
-static const void *hookClassKey = &hookClassKey;
 static void *csContext = &csContext;
 
 static inline
@@ -70,59 +70,20 @@ NSMutableSet *cs_observation_pool(NSObject *object) {
 }
 
 static inline
-Class cs_class(id self, SEL _cmd) {
-    return objc_getAssociatedObject(self, classKey);
-}
-
-static inline
-void cs_dealloc(void *self, SEL _cmd) {
-    for (CSObservation *observation in cs_observation_pool((__bridge id)self)) {
-        [observation deregister];
-    }
-
-    Class hookClass = objc_getAssociatedObject((__bridge id)self, hookClassKey);
-
-    vIMP superImp = (vIMP)class_getMethodImplementation(class_getSuperclass(hookClass), deallocSel);
-
-    objc_disposeClassPair(hookClass);
-
-    superImp((__bridge id)self, deallocSel);
-}
-
-static inline
-Class cs_create_hook_class(NSObject *object) {
-    Class hookClass = Nil;
-
-    char *clsname = NULL;
-    static const char *fmt = "CSObserver_%s_%p_%u";
-
-    while (hookClass == Nil) {
-        if (asprintf(&clsname, fmt, class_getName([object class]), object, arc4random()) > 0) {
-            hookClass = objc_allocateClassPair(object_getClass(object), clsname, 0);
-            free(clsname);
-        }
-    }
-
-    objc_registerClassPair(hookClass);
-
-    class_addMethod(hookClass, @selector(class), (IMP)cs_class, "#@:");
-    class_addMethod(hookClass, deallocSel, (IMP)cs_dealloc, "v@:");
-
-    return hookClass;
-}
-
-static inline
 void cs_hook_object_if_needed(NSObject *object) {
-    static const void *neededKey = &neededKey;
+    static const void *eigenKey = &eigenKey;
 
-    if (!objc_getAssociatedObject(object, classKey)) {
-        Class hookClass = cs_create_hook_class(object);
+    if (objc_getAssociatedObject(object, eigenKey)) return;
 
-        objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
-        objc_setAssociatedObject(object, hookClassKey, hookClass, OBJC_ASSOCIATION_ASSIGN);
+    __weak CSEigen *eigen = [CSEigen eigenOfObject:object];
 
-        object_setClass(object, hookClass);
-    }
+    [eigen setMethod:deallocSel types:"v#:" block:^(void *object) {
+        for (CSObservation *observation in cs_observation_pool((__bridge id)object)) {
+            [observation deregister];
+        }
+
+        ((CSIMPV)[eigen superImp:deallocSel])((__bridge id)object, deallocSel);
+    }];
 }
 
 
