@@ -118,6 +118,12 @@ void cs_dispose_eigen_class(Class eigenClass) {
 
     Class rootEigenClass = cs_create_eigen_class(object);
 
+    CSEigen *rootEigen = [[CSEigen alloc] init];
+
+    rootEigen.eigenClass = rootEigenClass;
+
+    [eigenSlots addEigen:rootEigen];
+
     IMP superDeallocImp = class_getMethodImplementation(object_getClass(object), deallocSel);
 
     OSSpinLock *deallocLock = (OSSpinLock *)malloc(sizeof(OSSpinLock));
