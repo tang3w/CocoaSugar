@@ -116,6 +116,9 @@ void cs_dispose_eigen_class(Class eigenClass) {
 
     eigenSlots = [[CSEigenSlots alloc] init];
 
+    objc_setAssociatedObject(object, eigenSlotsKey, eigenSlots, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
+
     Class rootEigenClass = cs_create_eigen_class(object);
 
     CSEigen *rootEigen = [[CSEigen alloc] init];
@@ -138,9 +141,6 @@ void cs_dispose_eigen_class(Class eigenClass) {
         OSSpinLockUnlock(deallocLock);
     }), "v@:");
 
-    objc_setAssociatedObject(object, eigenSlotsKey, eigenSlots, OBJC_ASSOCIATION_RETAIN);
-    objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
-
     object_setClass(object, rootEigenClass);
 
     return eigenSlots;
@@ -157,13 +157,12 @@ void cs_dispose_eigen_class(Class eigenClass) {
 }
 
 - (void)dealloc {
-    OSSpinLock *deallocLock = _deallocLock;
+    NSArray *slots = [self.slots copy];
+    OSSpinLock *deallocLock = self.deallocLock;
 
     dispatch_queue_t queue = [NSThread isMainThread] ?
     dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) :
     dispatch_get_main_queue();
-
-    NSArray *slots = [self.slots copy];
 
     dispatch_async(queue, ^{
         OSSpinLockLock(deallocLock);
@@ -204,8 +203,8 @@ void cs_dispose_eigen_class(Class eigenClass) {
     unsigned int count;
     Method *methods = class_copyMethodList(self.eigenClass, &count);
 
-    for (int i = 0; i < count; i++) {
-        Method method = methods[i];
+    while (count--) {
+        Method method = methods[count];
         if (sel_isEqual(method_getName(method), sel)) {
             imp_removeBlock(method_getImplementation(method));
             break;
