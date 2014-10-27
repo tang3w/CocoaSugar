@@ -1,6 +1,6 @@
 // CSLayout.m
 //
-// Copyright (c) 2014 Tang Tianyong
+// Copyright (c) 2014 Tianyong Tang
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -377,15 +377,18 @@ typedef enum CSLayoutVisitStat CSLayoutVisitStat;
 
 static const void *CSVisitKey = &CSVisitKey;
 
-static inline void CSMakeViewUnvisited(UIView *view) {
+NS_INLINE
+void CSMakeViewUnvisited(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, nil, OBJC_ASSOCIATION_RETAIN);
 }
 
-static inline void CSMakeViewVisiting(UIView *view) {
+NS_INLINE
+void CSMakeViewVisiting(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisiting), OBJC_ASSOCIATION_RETAIN);
 }
 
-static inline void CSMakeViewVisited(UIView *view) {
+NS_INLINE
+void CSMakeViewVisited(UIView *view) {
     objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisited), OBJC_ASSOCIATION_RETAIN);
 }
 
@@ -602,39 +605,39 @@ do {                                            \
     [self.ruleMap setObject:rule forKey:name];  \
 } while (0)
 
-static inline
+NS_INLINE
 void cs_initialize_layout_if_needed(UIView *view) {
     static const void *eigenKey = &eigenKey;
 
     if (objc_getAssociatedObject(view, eigenKey)) return;
 
-    __weak CSEigen *eigen = [CSEigen eigenOfObject:view];
+    __weak CSEigen *eigen = [CSEigen eigenForObject:view];
 
     objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
 
     SEL selector = @selector(didMoveToSuperview);
 
     [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
-        ((CSIMPV)[eigen superImp:selector])(view, selector);
+        ((CS_IMP_V)[eigen superImp:selector])(view, selector);
 
         [[CSLayout layoutOfView:view] updateLayoutDriver];
     }];
 }
 
-static inline
+NS_INLINE
 void cs_initialize_driver_if_needed(UIView *view) {
     static const void *eigenKey = &eigenKey;
 
     if (objc_getAssociatedObject(view, eigenKey)) return;
 
-    __weak CSEigen *eigen = [CSEigen eigenOfObject:view];
+    __weak CSEigen *eigen = [CSEigen eigenForObject:view];
 
     objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
 
     SEL selector = @selector(layoutSubviews);
 
     [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
-        ((CSIMPV)[eigen superImp:selector])(view, selector);
+        ((CS_IMP_V)[eigen superImp:selector])(view, selector);
 
         [[CSLayoutSolver layoutSolverOfView:(view)] solve];
     }];

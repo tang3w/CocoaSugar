@@ -1,6 +1,6 @@
 // CSLayout.h
 //
-// Copyright (c) 2014 Tang Tianyong
+// Copyright (c) 2014 Tianyong Tang
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -98,22 +98,22 @@
 @end
 
 
-static inline
+NS_INLINE
 CSLayout *CSLayoutMake(UIView *view) {
     return [CSLayout layoutOfView:view];
 }
 
-static inline
+NS_INLINE
 CSCoords *CSCoordsMake(UIView *view) {
     return [CSCoords coordsOfView:view];
 }
 
-static inline
+NS_INLINE
 CSPercentOffset *CSPercentOffsetMake(float percent, float offset) {
     return [[CSPercentOffset alloc] initWithPercent:percent offset:offset];
 }
 
-static inline
+NS_INLINE
 CSPercentOffset *CSPercentMake(float percent) {
     return [[CSPercentOffset alloc] initWithPercent:percent offset:0];
 }

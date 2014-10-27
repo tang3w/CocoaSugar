@@ -25,21 +25,22 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void(*CSIMP)(void);
-typedef void(*CSIMPV)(id self, SEL name, ...);
-typedef id  (*CSIMPI)(id self, SEL name, ...);
+typedef void (*CS_IMP)   (void);
+typedef void (*CS_IMP_V) (id, SEL, ...);
+typedef id   (*CS_IMP_I) (id, SEL, ...);
 
 
 @interface CSEigen : NSObject
 
-+ (instancetype)eigenOfObject:(NSObject *)object;
++ (instancetype)eigenForObject:(NSObject *)object;
 
-- (void)setMethod:(SEL)name types:(const char *)types block:(id)block;
-- (CSIMP)superImp:(SEL)name;
+- (void)setMethod:(SEL)sel types:(const char *)types block:(id)block;
+- (CS_IMP)superImp:(SEL)sel;
 
 @end
 
-static inline
+
+NS_INLINE
 CSEigen *CSEigenMake(NSObject *object) {
-    return [CSEigen eigenOfObject:object];
+    return [CSEigen eigenForObject:object];
 }

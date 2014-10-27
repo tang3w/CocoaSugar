@@ -1,6 +1,6 @@
 // CSObserver.h
 //
-// Copyright (c) 2014 Tang Tianyong
+// Copyright (c) 2014 Tianyong Tang
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -45,7 +45,7 @@ typedef void(^CSObserverBlock)(id object, id target, NSDictionary *change);
 @end
 
 
-static inline
+NS_INLINE
 CSObserver *CSObserverMake(NSObject *object) {
     return [CSObserver observerForObject:object];
 }

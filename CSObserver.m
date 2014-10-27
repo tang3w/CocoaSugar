@@ -1,6 +1,6 @@
 // CSObserver.m
 //
-// Copyright (c) 2014 Tang Tianyong
+// Copyright (c) 2014 Tianyong Tang
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -54,7 +54,7 @@ typedef void (*vIMP)(id, SEL);
 static SEL deallocSel = NULL;
 static void *csContext = &csContext;
 
-static inline
+NS_INLINE
 NSMutableSet *cs_observation_pool(NSObject *object) {
     static const void *CSObservationPoolKey = &CSObservationPoolKey;
 
@@ -69,20 +69,20 @@ NSMutableSet *cs_observation_pool(NSObject *object) {
     return observationPool;
 }
 
-static inline
+NS_INLINE
 void cs_hook_object_if_needed(NSObject *object) {
     static const void *eigenKey = &eigenKey;
 
     if (objc_getAssociatedObject(object, eigenKey)) return;
 
-    __weak CSEigen *eigen = [CSEigen eigenOfObject:object];
+    __weak CSEigen *eigen = [CSEigen eigenForObject:object];
 
     [eigen setMethod:deallocSel types:"v#:" block:^(void *object) {
         for (CSObservation *observation in cs_observation_pool((__bridge id)object)) {
             [observation deregister];
         }
 
-        ((CSIMPV)[eigen superImp:deallocSel])((__bridge id)object, deallocSel);
+        ((CS_IMP_V)[eigen superImp:deallocSel])((__bridge id)object, deallocSel);
     }];
 }
 
