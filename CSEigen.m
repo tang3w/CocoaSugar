@@ -78,9 +78,6 @@ Class cs_create_eigen_class(NSObject *object) {
 
     objc_registerClassPair(eigenClass);
 
-    class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
-    class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cs_responds_to_selector, "c@::");
-
     return eigenClass;
 }
 
@@ -89,13 +86,13 @@ void cs_dispose_eigen_class(Class eigenClass) {
     unsigned int count = 0;
     Method *methods = class_copyMethodList(eigenClass, &count);
 
-    for (int i = 0; i < count; i++) {
-        imp_removeBlock(method_getImplementation(methods[i]));
+    while (count--) {
+        imp_removeBlock(method_getImplementation(methods[count]));
     }
 
-    objc_disposeClassPair(eigenClass);
+    if (methods != NULL) free(methods);
 
-    if (count > 0) free(methods);
+    objc_disposeClassPair(eigenClass);
 }
 
 
@@ -120,26 +117,24 @@ void cs_dispose_eigen_class(Class eigenClass) {
     objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
 
     Class rootEigenClass = cs_create_eigen_class(object);
-
-    CSEigen *rootEigen = [[CSEigen alloc] init];
-
-    rootEigen.eigenClass = rootEigenClass;
-
-    [eigenSlots addEigen:rootEigen];
-
     IMP superDeallocImp = class_getMethodImplementation(object_getClass(object), deallocSel);
-
     OSSpinLock *deallocLock = (OSSpinLock *)malloc(sizeof(OSSpinLock));
 
-    *deallocLock = OS_SPINLOCK_INIT;
-
     eigenSlots.deallocLock = deallocLock;
+
+    *deallocLock = OS_SPINLOCK_INIT;
 
     class_addMethod(rootEigenClass, deallocSel, imp_implementationWithBlock(^(void *self) {
         OSSpinLockLock(deallocLock);
         ((void(*)(id, SEL))superDeallocImp)((__bridge id)self, deallocSel);
         OSSpinLockUnlock(deallocLock);
     }), "v@:");
+
+    CSEigen *rootEigen = [[CSEigen alloc] init];
+
+    rootEigen.eigenClass = rootEigenClass;
+
+    [eigenSlots addEigen:rootEigen];
 
     object_setClass(object, rootEigenClass);
 
@@ -189,6 +184,9 @@ void cs_dispose_eigen_class(Class eigenClass) {
 
         Class eigenClass = cs_create_eigen_class(object);
 
+        class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
+        class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cs_responds_to_selector, "c@::");
+
         eigen.eigenClass = eigenClass;
 
         [eigenSlots addEigen:eigen];
@@ -210,6 +208,8 @@ void cs_dispose_eigen_class(Class eigenClass) {
             break;
         }
     }
+
+    if (methods != NULL) free(methods);
 
     class_replaceMethod(self.eigenClass, sel, imp_implementationWithBlock(block), types);
 }
