@@ -32,6 +32,8 @@
 
 @property (atomic, unsafe_unretained) Class eigenClass;
 
+- (instancetype)initWithEigenClass:(Class)eigenClass;
+
 - (void)dispose;
 
 @end
@@ -131,11 +133,7 @@ void cs_dispose_eigen_class(Class eigenClass) {
         OSSpinLockUnlock(deallocLock);
     }), "v@:");
 
-    CSEigen *rootEigen = [[CSEigen alloc] init];
-
-    rootEigen.eigenClass = rootEigenClass;
-
-    [eigenSlots addEigen:rootEigen];
+    [eigenSlots addEigen:[[CSEigen alloc] initWithEigenClass:rootEigenClass]];
 
     object_setClass(object, rootEigenClass);
 
@@ -181,14 +179,12 @@ void cs_dispose_eigen_class(Class eigenClass) {
     if (object) {
         CSEigenSlots *eigenSlots = [CSEigenSlots eigenSlotsOfObject:object];
 
-        eigen = [[CSEigen alloc] init];
-
         Class eigenClass = cs_create_eigen_class(object);
 
         class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
         class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cs_responds_to_selector, "c@::");
 
-        eigen.eigenClass = eigenClass;
+        eigen = [[CSEigen alloc] initWithEigenClass:eigenClass];
 
         [eigenSlots addEigen:eigen];
 
@@ -196,6 +192,14 @@ void cs_dispose_eigen_class(Class eigenClass) {
     }
 
     return eigen;
+}
+
+- (instancetype)initWithEigenClass:(Class)eigenClass {
+    if ((self = [super init])) {
+        self.eigenClass = eigenClass;
+    }
+
+    return self;
 }
 
 - (void)setMethod:(SEL)sel types:(const char *)types block:(id)block {
