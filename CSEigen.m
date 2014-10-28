@@ -68,9 +68,10 @@ Class cs_create_eigen_class(NSObject *object) {
 
     char *clsname = NULL;
     static const char *fmt = "CSEigen_%s_%p_%u";
+    Class class = cs_class(object, NULL);
 
     while (eigenClass == Nil) {
-        if (asprintf(&clsname, fmt, class_getName([object class]), object, arc4random()) > 0) {
+        if (asprintf(&clsname, fmt, class_getName(class), object, arc4random()) > 0) {
             eigenClass = objc_allocateClassPair(object_getClass(object), clsname, 0);
             free(clsname);
         }
