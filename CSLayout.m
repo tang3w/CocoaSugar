@@ -28,11 +28,9 @@
 
 #import <objc/runtime.h>
 
-typedef void(*vIMP)(id, SEL);
+static const void *CSLayoutKey = &CSLayoutKey;
 
 typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
-
-static const void *CSLayoutKey = &CSLayoutKey;
 
 
 @interface CSLayoutRule : NSObject
