@@ -25,10 +25,32 @@
 
 #import "CSLayout.h"
 #import "CSEigen.h"
+#import "CSLayoutParser.h"
 
 #import <objc/runtime.h>
 
+@class CSLayoutRule;
+
 static const void *CSLayoutKey = &CSLayoutKey;
+
+typedef float(^CSCoordBlock)(CSLayoutRule *);
+
+
+@interface CSCoord : NSObject
+
++ (instancetype)coordWithFloat:(float)value;
++ (instancetype)coordWithPercentage:(float)percentage;
+
+@property (nonatomic, strong) NSMutableSet *dependencies;
+@property (nonatomic, copy) CSCoordBlock block;
+
+- (instancetype)add:(CSCoord *)other;
+- (instancetype)sub:(CSCoord *)other;
+- (instancetype)mul:(CSCoord *)other;
+- (instancetype)div:(CSCoord *)other;
+
+@end
+
 
 typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 
@@ -48,15 +70,9 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 @end
 
 
-typedef float(^CSCoordBlock)(CSLayoutRule *);
+@interface CSCoords : NSObject
 
-
-@interface CSCoord ()
-
-+ (instancetype)coordWithObject:(id)object;
-
-@property (nonatomic, weak) UIView *view;
-@property (nonatomic, copy) CSCoordBlock coordBlock;
++ (instancetype)coordsOfView:(UIView *)view;
 
 @end
 
@@ -78,6 +94,27 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 
 @property (nonatomic, strong) CSLayoutRuleHub *ruleHub;
 @property (nonatomic, strong) NSMutableDictionary *ruleMap;
+
+@property (nonatomic, strong) CSCoord *minw;
+@property (nonatomic, strong) CSCoord *maxw;
+
+@property (nonatomic, strong) CSCoord *minh;
+@property (nonatomic, strong) CSCoord *maxh;
+
+@property (nonatomic, strong) CSCoord *tt;
+@property (nonatomic, strong) CSCoord *tb;
+
+@property (nonatomic, strong) CSCoord *ll;
+@property (nonatomic, strong) CSCoord *lr;
+
+@property (nonatomic, strong) CSCoord *bb;
+@property (nonatomic, strong) CSCoord *bt;
+
+@property (nonatomic, strong) CSCoord *rr;
+@property (nonatomic, strong) CSCoord *rl;
+
+@property (nonatomic, strong) CSCoord *ct;
+@property (nonatomic, strong) CSCoord *cl;
 
 @property (nonatomic, assign) CGRect frame;
 
@@ -192,34 +229,34 @@ typedef float(^CSCoordBlock)(CSLayoutRule *);
 #define CS_SUPERVIEW_HEIGHT (view.superview.bounds.size.height)
 
 #define CSLAYOUT_FRAME(view) \
-([objc_getAssociatedObject(view, CSLayoutKey) frame])
+    ([objc_getAssociatedObject(view, CSLayoutKey) frame])
 
-#define CSLAYOUT_SOLVE_SINGLE_H(var, left)        \
-do {                                              \
-    CSLayoutRule *rule = rules[0];                \
-    float var = [[rule coord] coordBlock](rule);  \
-    UIView *view = _view;                         \
-    CGRect frame = CSLAYOUT_FRAME(view);          \
-    frame.origin.x = (left);                      \
-    return frame;                                 \
+#define CSLAYOUT_SOLVE_SINGLE_H(var, left)   \
+do {                                         \
+    CSLayoutRule *rule = rules[0];           \
+    float var = [[rule coord] block](rule);  \
+    UIView *view = _view;                    \
+    CGRect frame = CSLAYOUT_FRAME(view);     \
+    frame.origin.x = (left);                 \
+    return frame;                            \
 } while (0)
 
-#define CSLAYOUT_SOLVE_SINGLE_V(var, top)         \
-do {                                              \
-    CSLayoutRule *rule = rules[0];                \
-    float var = [[rule coord] coordBlock](rule);  \
-    UIView *view = _view;                         \
-    CGRect frame = CSLAYOUT_FRAME(view);          \
-    frame.origin.y = (top);                       \
-    return frame;                                 \
+#define CSLAYOUT_SOLVE_SINGLE_V(var, top)    \
+do {                                         \
+    CSLayoutRule *rule = rules[0];           \
+    float var = [[rule coord] block](rule);  \
+    UIView *view = _view;                    \
+    CGRect frame = CSLAYOUT_FRAME(view);     \
+    frame.origin.y = (top);                  \
+    return frame;                            \
 } while (0)
 
 #define CSLAYOUT_SOLVE_DOUBLE_H(var1, var2, width_, left)  \
 do {                                                       \
     CSLayoutRule *rule0 = rules[0];                        \
     CSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] coordBlock](rule0);        \
-    float var2 = [[rule1 coord] coordBlock](rule1);        \
+    float var1 = [[rule0 coord] block](rule0);             \
+    float var2 = [[rule1 coord] block](rule1);             \
     UIView *view = _view;                                  \
     CGRect frame = CSLAYOUT_FRAME(view);                   \
     frame.size.width = [self calcWidth:(width_)];          \
@@ -231,8 +268,8 @@ do {                                                       \
 do {                                                       \
     CSLayoutRule *rule0 = rules[0];                        \
     CSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] coordBlock](rule0);        \
-    float var2 = [[rule1 coord] coordBlock](rule1);        \
+    float var1 = [[rule0 coord] block](rule0);             \
+    float var2 = [[rule1 coord] block](rule1);             \
     UIView *view = _view;                                  \
     CGRect frame = CSLAYOUT_FRAME(view);                   \
     frame.size.height = [self calcHeight:(height_)];       \
@@ -245,7 +282,7 @@ do {                                                       \
     CSLayoutRule *rule = layout.ruleMap[@#var];  \
                                                  \
     rule.coord ?                                 \
-    rule.coord.coordBlock(rule) :                \
+    rule.coord.block(rule) :                     \
     NAN;                                         \
 })
 
@@ -257,16 +294,16 @@ do {                                                       \
 - (CGFloat)calcWidth:(CGFloat)width {
     CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
 
-    CGFloat minWidth = CS_MM_RAW_VALUE(layout, minWidth);
+    CGFloat minw = CS_MM_RAW_VALUE(layout, minw);
 
-    if (CS_VALID_DIM(minWidth) && width < minWidth) {
-        width = minWidth;
+    if (CS_VALID_DIM(minw) && width < minw) {
+        width = minw;
     }
 
-    CGFloat maxWidth = CS_MM_RAW_VALUE(layout, maxWidth);
+    CGFloat maxw = CS_MM_RAW_VALUE(layout, maxw);
 
-    if (CS_VALID_DIM(maxWidth) && width > maxWidth) {
-        width = maxWidth;
+    if (CS_VALID_DIM(maxw) && width > maxw) {
+        width = maxw;
     }
 
     return MAX(width, 0);
@@ -275,16 +312,16 @@ do {                                                       \
 - (CGFloat)calcHeight:(CGFloat)height {
     CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
 
-    CGFloat minHeight = CS_MM_RAW_VALUE(layout, minHeight);
+    CGFloat minh = CS_MM_RAW_VALUE(layout, minh);
 
-    if (CS_VALID_DIM(minHeight) && height < minHeight) {
-        height = minHeight;
+    if (CS_VALID_DIM(minh) && height < minh) {
+        height = minh;
     }
 
-    CGFloat maxHeight = CS_MM_RAW_VALUE(layout, maxHeight);
+    CGFloat maxh = CS_MM_RAW_VALUE(layout, maxh);
 
-    if (CS_VALID_DIM(maxHeight) && height > maxHeight) {
-        height = maxHeight;
+    if (CS_VALID_DIM(maxh) && height > maxh) {
+        height = maxh;
     }
 
     return MAX(height, 0);
@@ -559,48 +596,48 @@ void CSMakeViewVisited(UIView *view) {
 @end
 
 
-#define CSCOORD_MAKE(bound, expr)                    \
-({                                                   \
-    __weak UIView *__view = _view;                   \
-                                                     \
-    CSCoord *coord = [[CSCoord alloc] init];         \
-                                                     \
-    coord.view = (bound);                            \
-    coord.coordBlock = ^float(CSLayoutRule *rule) {  \
-        UIView *view = __view;                       \
-                                                     \
-        return (expr);                               \
-    };                                               \
-                                                     \
-    coord;                                           \
+#define CSCOORD_MAKE(dependencies_, expr)       \
+({                                              \
+    __weak UIView *__view = _view;              \
+                                                \
+    CSCoord *coord = [[CSCoord alloc] init];    \
+                                                \
+    coord.dependencies = (dependencies_);       \
+    coord.block = ^float(CSLayoutRule *rule) {  \
+        UIView *view = __view;                  \
+                                                \
+        return (expr);                          \
+    };                                          \
+                                                \
+    coord;                                      \
 })
 
-#define CSLAYOUT_ADD_RULE(var, dir_)            \
-do {                                            \
-    _##var = (var);                             \
-    NSString *name = @#var;                     \
-                                                \
-    CSLayoutRule *rule =                        \
-    [CSLayoutRule layoutRuleWithView:_view      \
-        name:name                               \
-        coord:[CSCoord coordWithObject:_##var]  \
-        dir:CSLayoutDir##dir_];                 \
-                                                \
-    [self.ruleHub dir_##AddRule:rule];          \
+#define CSLAYOUT_ADD_RULE(var, dir_)        \
+do {                                        \
+    _##var = (var);                         \
+    NSString *name = @#var;                 \
+                                            \
+    CSLayoutRule *rule =                    \
+    [CSLayoutRule layoutRuleWithView:_view  \
+        name:name                           \
+        coord:_##var                        \
+        dir:CSLayoutDir##dir_];             \
+                                            \
+    [self.ruleHub dir_##AddRule:rule];      \
 } while (0)
 
-#define CSLAYOUT_ADD_RULE_MAP(var, dir_)        \
-do {                                            \
-    _##var = (var);                             \
-    NSString *name = @#var;                     \
-                                                \
-    CSLayoutRule *rule =                        \
-    [CSLayoutRule layoutRuleWithView:_view      \
-        name:name                               \
-        coord:[CSCoord coordWithObject:_##var]  \
-        dir:CSLayoutDir##dir_];                 \
-                                                \
-    [self.ruleMap setObject:rule forKey:name];  \
+#define CSLAYOUT_ADD_RULE_MAP(var, dir_)    \
+do {                                        \
+    _##var = (var);                         \
+    NSString *name = @#var;                 \
+                                            \
+    CSLayoutRule *rule =                    \
+    [CSLayoutRule layoutRuleWithView:_view  \
+        name:name                           \
+        coord:_##var                        \
+        dir:CSLayoutDir##dir_];             \
+                                            \
+    self.ruleMap[name] = rule;              \
 } while (0)
 
 NS_INLINE
@@ -664,6 +701,138 @@ void cs_initialize_driver_if_needed(UIView *view) {
     return layout;
 }
 
+- (void)addRule:(NSString *)format, ... {
+    va_list argv;
+    va_start(argv, format);
+
+    NSArray *subRules = [format componentsSeparatedByString:@","];
+
+    for (NSString *subRule in subRules) {
+        int argc = 0;
+        char *expr = (char *)[subRule cStringUsingEncoding:NSASCIIStringEncoding];
+        CSLAYOUT_AST *ast = cslayout_parse_rule(expr, &argc);
+
+        if (ast != NULL) {
+            NSMutableArray *views = nil;
+
+            if (argc > 0) {
+                views = [[NSMutableArray alloc] init];
+                while (argc--) [views addObject:va_arg(argv, UIView *)];
+            }
+
+            NSMutableSet *keeper = [NSMutableSet set];
+
+            [self parseAst:ast withViews:views keeper:keeper];
+
+            cslayout_destroy_ast(ast);
+        } else {
+            break;
+        }
+    }
+
+    va_end(argv);
+}
+
+- (void)parseAst:(CSLAYOUT_AST *)ast withViews:(NSMutableArray *)views keeper:(NSMutableSet *)keeper {
+    if (ast == NULL) return;
+
+    [self parseAst:ast->l withViews:views keeper:keeper];
+    [self parseAst:ast->r withViews:views keeper:keeper];
+
+    switch (ast->node_type) {
+    case CSLAYOUT_TOKEN_NUMBER: {
+        CSCoord *coord = [CSCoord coordWithFloat:ast->value.number];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case CSLAYOUT_TOKEN_PERCENTAGE: {
+        CSCoord *coord = [CSCoord coordWithPercentage:ast->value.percentage];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case CSLAYOUT_TOKEN_COORD: {
+        CSCoords *coords = [CSCoords coordsOfView:[views firstObject]];
+        CSCoord *coord = [coords valueForKey:[NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding]];
+
+        ast->data = (__bridge void *)(coord);
+
+        [views removeObjectAtIndex:0];
+        [keeper addObject:coord];
+    }
+        break;
+
+    case '+': {
+        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
+        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+
+        CSCoord *coord = [coord1 add:coord2];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case '-': {
+        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
+        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+
+        CSCoord *coord = [coord1 sub:coord2];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case '*': {
+        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
+        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+
+        CSCoord *coord = [coord1 mul:coord2];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+    case '/': {
+        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
+        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+
+        CSCoord *coord = [coord1 div:coord2];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case '=': {
+        CSCoord *coord = (__bridge CSCoord *)(ast->r->data);
+        NSString *key = [NSString stringWithCString:ast->l->value.coord encoding:NSASCIIStringEncoding];
+
+        [self setValue:coord forKey:key];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    default:
+        break;
+    }
+}
+
 - (void)updateLayoutDriver {
     if (_view.superview) {
         cs_initialize_driver_if_needed(_view.superview);
@@ -674,15 +843,20 @@ void cs_initialize_driver_if_needed(UIView *view) {
     NSMutableSet *set = [[NSMutableSet alloc] init];
 
     for (CSLayoutRule *rule in _ruleHub.vRules) {
-        [set addObject:(rule.coord.view ?: _view.superview)];
+        [set unionSet:rule.coord.dependencies];
     }
 
     for (CSLayoutRule *rule in _ruleHub.hRules) {
-        [set addObject:(rule.coord.view ?: _view.superview)];
+        [set unionSet:rule.coord.dependencies];
     }
 
     for (CSLayoutRule *rule in [_ruleMap allValues]) {
-        [set addObject:(rule.coord.view ?: _view.superview)];
+        [set unionSet:rule.coord.dependencies];
+    }
+
+    if ([set containsObject:[NSNull null]]) {
+        [set removeObject:[NSNull null]];
+        [set addObject:_view.superview];
     }
 
     return set;
@@ -712,28 +886,28 @@ void cs_initialize_driver_if_needed(UIView *view) {
 - (void)checkBounds {
     CGSize size = _frame.size;
 
-    CGFloat minWidth = CS_MM_RAW_VALUE(self, minWidth);
+    CGFloat minw = CS_MM_RAW_VALUE(self, minw);
 
-    if (CS_VALID_DIM(minWidth) && size.width < minWidth) {
-        size.width = minWidth;
+    if (CS_VALID_DIM(minw) && size.width < minw) {
+        size.width = minw;
     }
 
-    CGFloat maxWidth = CS_MM_RAW_VALUE(self, maxWidth);
+    CGFloat maxw = CS_MM_RAW_VALUE(self, maxw);
 
-    if (CS_VALID_DIM(maxWidth) && size.width > maxWidth) {
-        size.width = maxWidth;
+    if (CS_VALID_DIM(maxw) && size.width > maxw) {
+        size.width = maxw;
     }
 
-    CGFloat minHeight = CS_MM_RAW_VALUE(self, minHeight);
+    CGFloat minh = CS_MM_RAW_VALUE(self, minh);
 
-    if (CS_VALID_DIM(minHeight) && size.height < minHeight) {
-        size.height = minHeight;
+    if (CS_VALID_DIM(minh) && size.height < minh) {
+        size.height = minh;
     }
 
-    CGFloat maxHeight = CS_MM_RAW_VALUE(self, maxHeight);
+    CGFloat maxh = CS_MM_RAW_VALUE(self, maxh);
 
-    if (CS_VALID_DIM(maxHeight) && size.height > maxHeight) {
-        size.height = maxHeight;
+    if (CS_VALID_DIM(maxh) && size.height > maxh) {
+        size.height = maxh;
     }
 
     _frame.size = size;
@@ -759,79 +933,75 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
 }
 
-- (void)setMinWidth:(id)minWidth {
-    CSLAYOUT_ADD_RULE_MAP(minWidth, h);
+- (void)setMinw:(CSCoord *)minw {
+    CSLAYOUT_ADD_RULE_MAP(minw, h);
 }
 
-- (void)setMaxWidth:(id)maxWidth {
-    CSLAYOUT_ADD_RULE_MAP(maxWidth, h);
+- (void)setMaxw:(CSCoord *)maxw {
+    CSLAYOUT_ADD_RULE_MAP(maxw, h);
 }
 
-- (void)setMinHeight:(id)minHeight {
-    CSLAYOUT_ADD_RULE_MAP(minHeight, v);
+- (void)setMinh:(CSCoord *)minh {
+    CSLAYOUT_ADD_RULE_MAP(minh, v);
 }
 
-- (void)setMaxHeight:(id)maxHeight {
-    CSLAYOUT_ADD_RULE_MAP(maxHeight, v);
+- (void)setMaxh:(CSCoord *)maxh {
+    CSLAYOUT_ADD_RULE_MAP(maxh, v);
 }
 
-- (void)setTt:(id)tt {
+- (void)setTt:(CSCoord *)tt {
     CSLAYOUT_ADD_RULE(tt, v);
 }
 
-- (void)setTb:(id)tb {
+- (void)setTb:(CSCoord *)tb {
     _tb = tb;
 
-    CSCoord *tbCoord = [CSCoord coordWithObject:tb];
-    CSCoord *ttCoord = tbCoord ? CSCOORD_MAKE(tbCoord.view, CS_SUPERVIEW_HEIGHT - tbCoord.coordBlock(rule)) : nil;
+    CSCoord *tt = tb ? CSCOORD_MAKE(tb.dependencies, CS_SUPERVIEW_HEIGHT - tb.block(rule)) : nil;
 
-    [self setTt:ttCoord];
+    [self setTt:tt];
 }
 
-- (void)setLl:(id)ll {
+- (void)setLl:(CSCoord *)ll {
     CSLAYOUT_ADD_RULE(ll, h);
 }
 
-- (void)setLr:(id)lr {
+- (void)setLr:(CSCoord *)lr {
     _lr = lr;
 
-    CSCoord *lrCoord = [CSCoord coordWithObject:lr];
-    CSCoord *llCoord = lrCoord ? CSCOORD_MAKE(lrCoord.view, CS_SUPERVIEW_WIDTH - lrCoord.coordBlock(rule)) : nil;
+    CSCoord *ll = lr ? CSCOORD_MAKE(lr.dependencies, CS_SUPERVIEW_WIDTH - lr.block(rule)) : nil;
 
-    [self setLl:llCoord];
+    [self setLl:ll];
 }
 
-- (void)setBb:(id)bb {
+- (void)setBb:(CSCoord *)bb {
     _bb = bb;
 
-    CSCoord *bbCoord = [CSCoord coordWithObject:bb];
-    CSCoord *btCoord = bbCoord ? CSCOORD_MAKE(bbCoord.view, CS_SUPERVIEW_HEIGHT - bbCoord.coordBlock(rule)) : nil;
+    CSCoord *bt = bb ? CSCOORD_MAKE(bb.dependencies, CS_SUPERVIEW_HEIGHT - bb.block(rule)) : nil;
 
-    [self setBt:btCoord];
+    [self setBt:bt];
 }
 
-- (void)setBt:(id)bt {
+- (void)setBt:(CSCoord *)bt {
     CSLAYOUT_ADD_RULE(bt, v);
 }
 
-- (void)setRr:(id)rr {
+- (void)setRr:(CSCoord *)rr {
     _rr = rr;
 
-    CSCoord *rrCoord = [CSCoord coordWithObject:rr];
-    CSCoord *rlCoord = rrCoord ? CSCOORD_MAKE(rrCoord.view, CS_SUPERVIEW_WIDTH - rrCoord.coordBlock(rule)) : nil;
+    CSCoord *rl = rr ? CSCOORD_MAKE(rr.dependencies, CS_SUPERVIEW_WIDTH - rr.block(rule)) : nil;
 
-    [self setRl:rlCoord];
+    [self setRl:rl];
 }
 
-- (void)setRl:(id)rl {
+- (void)setRl:(CSCoord *)rl {
     CSLAYOUT_ADD_RULE(rl, h);
 }
 
-- (void)setCt:(id)ct {
+- (void)setCt:(CSCoord *)ct {
     CSLAYOUT_ADD_RULE(ct, v);
 }
 
-- (void)setCl:(id)cl {
+- (void)setCl:(CSCoord *)cl {
     CSLAYOUT_ADD_RULE(cl, h);
 }
 
@@ -846,76 +1016,69 @@ void cs_initialize_driver_if_needed(UIView *view) {
 @end
 
 
+#define CSCOORD_CALC(expr)                           \
+do {                                                 \
+    CSCoord *coord = [[CSCoord alloc] init];         \
+    NSMutableSet *dependencies = self.dependencies;  \
+                                                     \
+    [dependencies unionSet:other.dependencies];      \
+                                                     \
+    coord.dependencies = dependencies;               \
+    coord.block = ^float(CSLayoutRule *rule) {       \
+        return (expr);                               \
+    };                                               \
+                                                     \
+    return coord;                                    \
+} while (0);
+
+
 @implementation CSCoord
 
-+ (CSCoord *)coordWithNumber:(NSNumber *)number {
++ (instancetype)coordWithFloat:(float)value {
     CSCoord *coord = [[CSCoord alloc] init];
 
-    float value = [number floatValue];
-
-    coord.coordBlock = ^float(CSLayoutRule *rule) {
+    coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
+    coord.block = ^float(CSLayoutRule *rule) {
         return value;
     };
 
     return coord;
 }
 
-+ (CSCoord *)coordWithPercentOffset:(CSPercentOffset *)object {
++ (instancetype)coordWithPercentage:(float)percentage {
     CSCoord *coord = [[CSCoord alloc] init];
 
-    float percent = [object percent] / 100;
-    float offset = [object offset];
+    percentage /= 100.0f;
 
-    coord.coordBlock = ^float(CSLayoutRule *rule) {
+    coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
+    coord.block = ^float(CSLayoutRule *rule) {
         UIView *view = rule.view;
         CGFloat size = (rule.dir == CSLayoutDirv ? CS_SUPERVIEW_HEIGHT : CS_SUPERVIEW_WIDTH);
 
-        return size * percent + offset;
+        return size * percentage;
     };
 
     return coord;
 }
 
-+ (instancetype)coordWithObject:(id)object {
-    CSCoord *coord = nil;
-
-    if ([object isKindOfClass:[NSNumber class]]) {
-        coord = [self coordWithNumber:object];
-    } else if ([object isKindOfClass:[CSPercentOffset class]]) {
-        coord = [self coordWithPercentOffset:object];
-    } else if ([object isKindOfClass:[CSCoord class]]) {
-        coord = object;
-    }
-
-    return coord;
+- (instancetype)add:(CSCoord *)other {
+    CSCOORD_CALC(self.block(rule) + other.block(rule));
 }
 
-- (instancetype)add:(float)value {
-    CSCoord *coord = [[CSCoord alloc] init];
-
-    __weak CSCoord *that = self;
-
-    coord.view = _view;
-    coord.coordBlock = ^float(CSLayoutRule *rule) {
-        CSCoord *this = that;
-        return this.coordBlock(rule) + value;
-    };
-
-    return coord;
+- (instancetype)sub:(CSCoord *)other {
+    CSCOORD_CALC(self.block(rule) - other.block(rule));
 }
 
-- (instancetype)times:(float)value {
-    CSCoord *coord = [[CSCoord alloc] init];
+- (instancetype)mul:(CSCoord *)other {
+    CSCOORD_CALC(self.block(rule) * other.block(rule));
+}
 
-    __weak CSCoord *that = self;
+- (instancetype)div:(CSCoord *)other {
+    CSCOORD_CALC(self.block(rule) / other.block(rule));
+}
 
-    coord.view = _view;
-    coord.coordBlock = ^float(CSLayoutRule *rule) {
-        CSCoord *this = that;
-        return this.coordBlock(rule) * value;
-    };
-
-    return coord;
+- (NSMutableSet *)dependencies {
+    return _dependencies ?: (_dependencies = [[NSMutableSet alloc] init]);
 }
 
 @end
@@ -951,7 +1114,8 @@ void cs_initialize_driver_if_needed(UIView *view) {
 #define CS_VIEW_WIDTH  (view.bounds.size.width)
 #define CS_VIEW_HEIGHT (view.bounds.size.height)
 
-#define LAZY_LOAD_COORD(ivar, expr) (ivar ?: (ivar = CSCOORD_MAKE(_view, expr)))
+#define LAZY_LOAD_COORD(ivar, expr) \
+    (ivar ?: (ivar = CSCOORD_MAKE([NSMutableSet setWithObject:_view], expr)))
 
 
 @implementation CSCoords
@@ -1022,33 +1186,6 @@ void cs_initialize_driver_if_needed(UIView *view) {
 
 - (CSCoord *)height {
     return LAZY_LOAD_COORD(_height, CS_VIEW_HEIGHT);
-}
-
-@end
-
-
-@implementation CSPercentOffset {
-    float _percent;
-    float _offset;
-}
-
-- (instancetype)initWithPercent:(float)percent offset:(float)offset {
-    self = [super init];
-
-    if (self) {
-        _percent = percent;
-        _offset = offset;
-    }
-
-    return self;
-}
-
-- (float)percent {
-    return _percent;
-}
-
-- (float)offset {
-    return _offset;
 }
 
 @end
