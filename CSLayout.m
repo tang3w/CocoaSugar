@@ -1088,8 +1088,8 @@ do {                                                 \
 
 @property (nonatomic, weak) UIView *view;
 
-@property (nonatomic, strong) CSCoord *width;
-@property (nonatomic, strong) CSCoord *height;
+@property (nonatomic, strong) CSCoord *w;
+@property (nonatomic, strong) CSCoord *h;
 
 @property (nonatomic, strong) CSCoord *tt;
 @property (nonatomic, strong) CSCoord *tb;
@@ -1180,12 +1180,12 @@ do {                                                 \
     return LAZY_LOAD_COORD(_cl, CS_VIEW_LEFT + CS_VIEW_WIDTH / 2);
 }
 
-- (CSCoord *)width {
-    return LAZY_LOAD_COORD(_width, CS_VIEW_WIDTH);
+- (CSCoord *)w {
+    return LAZY_LOAD_COORD(_w, CS_VIEW_WIDTH);
 }
 
-- (CSCoord *)height {
-    return LAZY_LOAD_COORD(_height, CS_VIEW_HEIGHT);
+- (CSCoord *)h {
+    return LAZY_LOAD_COORD(_h, CS_VIEW_HEIGHT);
 }
 
 @end
