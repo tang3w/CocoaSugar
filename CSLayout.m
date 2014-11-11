@@ -759,8 +759,8 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case CSLAYOUT_TOKEN_COORD: {
-        CSCoords *coords = [CSCoords coordsOfView:[views firstObject]];
-        CSCoord *coord = [coords valueForKey:[NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding]];
+        NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
+        CSCoord *coord = [[CSCoords coordsOfView:[views firstObject]] valueForKey:key];
 
         ast->data = (__bridge void *)(coord);
 
