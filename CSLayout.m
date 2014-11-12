@@ -744,11 +744,12 @@ void cs_initialize_driver_if_needed(UIView *view) {
         NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
         CSCoord *coord = [self valueForKey:key];
 
-        if (!coord) coord = [CSCoord coordWithFloat:0];
+        if (!coord) {
+            coord = [CSCoord coordWithFloat:0];
+            [keeper addObject:coord];
+        }
 
         ast->data = (__bridge void *)(coord);
-
-        [keeper addObject:coord];
     }
         break;
 
@@ -777,7 +778,6 @@ void cs_initialize_driver_if_needed(UIView *view) {
         ast->data = (__bridge void *)(coord);
 
         [views removeObjectAtIndex:0];
-        [keeper addObject:coord];
     }
         break;
 
@@ -835,8 +835,6 @@ void cs_initialize_driver_if_needed(UIView *view) {
         [self setValue:coord forKey:key];
 
         ast->data = (__bridge void *)(coord);
-
-        [keeper addObject:coord];
     }
         break;
 
