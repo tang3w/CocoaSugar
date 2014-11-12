@@ -740,6 +740,18 @@ void cs_initialize_driver_if_needed(UIView *view) {
     [self parseAst:ast->r withViews:views keeper:keeper];
 
     switch (ast->node_type) {
+    case CSLAYOUT_TOKEN_ATTR: {
+        NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
+        CSCoord *coord = [self valueForKey:key];
+
+        if (!coord) coord = [CSCoord coordWithFloat:0];
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
     case CSLAYOUT_TOKEN_NUMBER: {
         CSCoord *coord = [CSCoord coordWithFloat:ast->value.number];
 
