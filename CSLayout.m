@@ -708,36 +708,31 @@ void cs_initialize_driver_if_needed(UIView *view) {
     NSArray *subRules = [format componentsSeparatedByString:@","];
 
     for (NSString *subRule in subRules) {
-        int argc = 0;
+        CSLAYOUT_AST *ast = NULL;
+
         char *expr = (char *)[subRule cStringUsingEncoding:NSASCIIStringEncoding];
-        CSLAYOUT_AST *ast = cslayout_parse_rule(expr, &argc);
+        int result = cslayout_parse_rule(expr, &ast);
 
-        if (ast != NULL) {
-            NSMutableArray *args = nil;
-
-            if (argc > 0) {
-                args = [[NSMutableArray alloc] init];
-                while (argc--) [args addObject:va_arg(argv, id)];
-            }
-
+        if (!result) {
             NSMutableSet *keeper = [NSMutableSet set];
 
-            [self parseAst:ast withArgs:args keeper:keeper];
+            [self parseAst:ast withArgv:argv keeper:keeper];
 
             cslayout_destroy_ast(ast);
         } else {
-            break;
+            [NSException raise:@"CSLayoutRuleSyntaxError"
+                        format:@"Layout can not be solved because of rule syntax error"];
         }
     }
 
     va_end(argv);
 }
 
-- (void)parseAst:(CSLAYOUT_AST *)ast withArgs:(NSMutableArray *)args keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(CSLAYOUT_AST *)ast withArgv:(va_list)argv keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
-    [self parseAst:ast->l withArgs:args keeper:keeper];
-    [self parseAst:ast->r withArgs:args keeper:keeper];
+    [self parseAst:ast->l withArgv:argv keeper:keeper];
+    [self parseAst:ast->r withArgv:argv keeper:keeper];
 
     switch (ast->node_type) {
     case CSLAYOUT_TOKEN_ATTR: {
@@ -774,18 +769,17 @@ void cs_initialize_driver_if_needed(UIView *view) {
     case CSLAYOUT_TOKEN_COORD: {
         CSCoord *coord = nil;
 
-        if (!strcmp(ast->value.coord, "n")) {
-            float value = [[args firstObject] floatValue];
+        if (!strcmp(ast->value.coord, "f")) {
+            float value = va_arg(argv, double);
             coord = [CSCoord coordWithFloat:value];
             [keeper addObject:coord];
         } else {
+            UIView *view = va_arg(argv, id);
             NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
-            coord = [[CSCoords coordsOfView:[args firstObject]] valueForKey:key];
+            coord = [[CSCoords coordsOfView:view] valueForKey:key];
         }
 
         ast->data = (__bridge void *)(coord);
-
-        [args removeObjectAtIndex:0];
     }
         break;
 

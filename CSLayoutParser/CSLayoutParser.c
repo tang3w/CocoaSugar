@@ -75,8 +75,8 @@
 #include "CSLayoutParser.h"
 #include "CSLayoutLex.h"
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, int *argc, char *s);
-int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp, int *argc);
+void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *s);
+int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp);
 
 #line 82 "CSLayoutParser.c" /* yacc.c:339  */
 
@@ -116,12 +116,12 @@ int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp, int *argc);
 extern int cslayoutdebug;
 #endif
 /* "%code requires" blocks.  */
-#line 20 "CSLayoutParser.y" /* yacc.c:355  */
+#line 18 "CSLayoutParser.y" /* yacc.c:355  */
 
 #define YYSTYPE CSLAYOUTSTYPE
 
 #define YY_DECL int cslayoutlex \
-    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp, int *argc)
+    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp)
 
 struct CSLAYOUT_AST {
     int node_type;
@@ -139,7 +139,7 @@ typedef struct CSLAYOUT_AST CSLAYOUT_AST;
 
 CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r);
 
-CSLAYOUT_AST *cslayout_parse_rule(char *rule, int *argc);
+int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp);
 void cslayout_destroy_ast(CSLAYOUT_AST *astp);
 
 #line 146 "CSLayoutParser.c" /* yacc.c:355  */
@@ -165,7 +165,7 @@ typedef CSLAYOUT_AST * CSLAYOUTSTYPE;
 
 
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp, int *argc);
+int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
 
 #endif /* !YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED  */
 
@@ -469,8 +469,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    57,    57,    58,    59,    61,    62,    63,    65,    66,
-      67,    69,    70,    71,    72,    73
+       0,    55,    55,    56,    57,    59,    60,    61,    63,    64,
+      65,    67,    68,    69,    70,    71
 };
 #endif
 
@@ -602,7 +602,7 @@ do                                                              \
     }                                                           \
   else                                                          \
     {                                                           \
-      yyerror (scanner, astpp, argc, YY_("syntax error: cannot back up")); \
+      yyerror (scanner, astpp, YY_("syntax error: cannot back up")); \
       YYERROR;                                                  \
     }                                                           \
 while (0)
@@ -639,7 +639,7 @@ do {                                                                      \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value, scanner, astpp, argc); \
+                  Type, Value, scanner, astpp); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -650,13 +650,12 @@ do {                                                                      \
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp, int *argc)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
   YYUSE (scanner);
   YYUSE (astpp);
-  YYUSE (argc);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -672,12 +671,12 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp, int *argc)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, scanner, astpp, argc);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, scanner, astpp);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -710,7 +709,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner, CSLAYOUT_AST **astpp, int *argc)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner, CSLAYOUT_AST **astpp)
 {
   unsigned long int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -724,7 +723,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner,
       yy_symbol_print (stderr,
                        yystos[yyssp[yyi + 1 - yynrhs]],
                        &(yyvsp[(yyi + 1) - (yynrhs)])
-                                              , scanner, astpp, argc);
+                                              , scanner, astpp);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -732,7 +731,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner,
 # define YY_REDUCE_PRINT(Rule)          \
 do {                                    \
   if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, Rule, scanner, astpp, argc); \
+    yy_reduce_print (yyssp, yyvsp, Rule, scanner, astpp); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -990,12 +989,11 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, CSLAYOUT_AST **astpp, int *argc)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
 {
   YYUSE (yyvaluep);
   YYUSE (scanner);
   YYUSE (astpp);
-  YYUSE (argc);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
@@ -1013,7 +1011,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, CSL
 `----------*/
 
 int
-yyparse (void *scanner, CSLAYOUT_AST **astpp, int *argc)
+yyparse (void *scanner, CSLAYOUT_AST **astpp)
 {
 /* The lookahead symbol.  */
 int yychar;
@@ -1182,7 +1180,7 @@ yybackup:
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
-      yychar = yylex (&yylval, scanner, astpp, argc);
+      yychar = yylex (&yylval, scanner, astpp);
     }
 
   if (yychar <= YYEOF)
@@ -1261,85 +1259,85 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 58 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 56 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = cslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
-#line 1267 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1265 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 59 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 57 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1273 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1271 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 61 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 59 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = cslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
-#line 1279 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1277 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 62 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 60 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = cslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
-#line 1285 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1283 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 63 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 61 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1291 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1289 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 65 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 63 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = cslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
-#line 1297 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1295 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 66 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 64 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = cslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
-#line 1303 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1301 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 67 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 65 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1309 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1307 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 69 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 67 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1315 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1313 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 70 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 68 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1321 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1319 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 71 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 69 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1327 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1325 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 72 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 70 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1333 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1331 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 73 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 71 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[-1]); }
-#line 1339 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1337 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
 
-#line 1343 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1341 "CSLayoutParser.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1389,7 +1387,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (scanner, astpp, argc, YY_("syntax error"));
+      yyerror (scanner, astpp, YY_("syntax error"));
 #else
 # define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
                                         yyssp, yytoken)
@@ -1416,7 +1414,7 @@ yyerrlab:
                 yymsgp = yymsg;
               }
           }
-        yyerror (scanner, astpp, argc, yymsgp);
+        yyerror (scanner, astpp, yymsgp);
         if (yysyntax_error_status == 2)
           goto yyexhaustedlab;
       }
@@ -1440,7 +1438,7 @@ yyerrlab:
       else
         {
           yydestruct ("Error: discarding",
-                      yytoken, &yylval, scanner, astpp, argc);
+                      yytoken, &yylval, scanner, astpp);
           yychar = YYEMPTY;
         }
     }
@@ -1490,7 +1488,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp, scanner, astpp, argc);
+                  yystos[yystate], yyvsp, scanner, astpp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1527,7 +1525,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (scanner, astpp, argc, YY_("memory exhausted"));
+  yyerror (scanner, astpp, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1539,7 +1537,7 @@ yyreturn:
          user semantic actions for why this is necessary.  */
       yytoken = YYTRANSLATE (yychar);
       yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval, scanner, astpp, argc);
+                  yytoken, &yylval, scanner, astpp);
     }
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYABORT or YYACCEPT.  */
@@ -1548,7 +1546,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp, scanner, astpp, argc);
+                  yystos[*yyssp], yyvsp, scanner, astpp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1561,14 +1559,14 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 76 "CSLayoutParser.y" /* yacc.c:1906  */
+#line 74 "CSLayoutParser.y" /* yacc.c:1906  */
 
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, int *argc, char *s) {
+void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp, int *argc);
+int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
 int cslayoutlex_init (yyscan_t* scanner);
 int cslayoutlex_destroy (yyscan_t yyscanner);
 
@@ -1584,24 +1582,22 @@ CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r) {
     return astp;
 }
 
-CSLAYOUT_AST *cslayout_parse_rule(char *rule, int *argc) {
-    CSLAYOUT_AST *astp = NULL;
-
+int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp) {
     yyscan_t scanner;
     cslayoutlex_init(&scanner);
     YY_BUFFER_STATE state = cslayout_scan_string(rule, scanner);
 
-    int failed = cslayoutparse(scanner, &astp, argc);
+    int result = cslayoutparse(scanner, astpp);
 
     cslayout_delete_buffer(state, scanner);
     cslayoutlex_destroy(scanner);
 
-    if (failed) {
-        cslayout_destroy_ast(astp);
-        astp = NULL;
+    if (result) {
+        cslayout_destroy_ast(*astpp);
+        *astpp = NULL;
     }
 
-    return astp;
+    return result;
 }
 
 void cslayout_destroy_ast(CSLAYOUT_AST *astp) {

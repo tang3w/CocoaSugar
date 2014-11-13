@@ -48,12 +48,12 @@
 extern int cslayoutdebug;
 #endif
 /* "%code requires" blocks.  */
-#line 20 "CSLayoutParser.y" /* yacc.c:1915  */
+#line 18 "CSLayoutParser.y" /* yacc.c:1915  */
 
 #define YYSTYPE CSLAYOUTSTYPE
 
 #define YY_DECL int cslayoutlex \
-    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp, int *argc)
+    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp)
 
 struct CSLAYOUT_AST {
     int node_type;
@@ -71,7 +71,7 @@ typedef struct CSLAYOUT_AST CSLAYOUT_AST;
 
 CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r);
 
-CSLAYOUT_AST *cslayout_parse_rule(char *rule, int *argc);
+int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp);
 void cslayout_destroy_ast(CSLAYOUT_AST *astp);
 
 #line 78 "CSLayoutParser.h" /* yacc.c:1915  */
@@ -97,6 +97,6 @@ typedef CSLAYOUT_AST * CSLAYOUTSTYPE;
 
 
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp, int *argc);
+int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
 
 #endif /* !YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED  */
