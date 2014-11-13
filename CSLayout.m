@@ -713,16 +713,16 @@ void cs_initialize_driver_if_needed(UIView *view) {
         CSLAYOUT_AST *ast = cslayout_parse_rule(expr, &argc);
 
         if (ast != NULL) {
-            NSMutableArray *views = nil;
+            NSMutableArray *args = nil;
 
             if (argc > 0) {
-                views = [[NSMutableArray alloc] init];
-                while (argc--) [views addObject:va_arg(argv, UIView *)];
+                args = [[NSMutableArray alloc] init];
+                while (argc--) [args addObject:va_arg(argv, id)];
             }
 
             NSMutableSet *keeper = [NSMutableSet set];
 
-            [self parseAst:ast withViews:views keeper:keeper];
+            [self parseAst:ast withArgs:args keeper:keeper];
 
             cslayout_destroy_ast(ast);
         } else {
@@ -733,11 +733,11 @@ void cs_initialize_driver_if_needed(UIView *view) {
     va_end(argv);
 }
 
-- (void)parseAst:(CSLAYOUT_AST *)ast withViews:(NSMutableArray *)views keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(CSLAYOUT_AST *)ast withArgs:(NSMutableArray *)args keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
-    [self parseAst:ast->l withViews:views keeper:keeper];
-    [self parseAst:ast->r withViews:views keeper:keeper];
+    [self parseAst:ast->l withArgs:args keeper:keeper];
+    [self parseAst:ast->r withArgs:args keeper:keeper];
 
     switch (ast->node_type) {
     case CSLAYOUT_TOKEN_ATTR: {
@@ -772,12 +772,20 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case CSLAYOUT_TOKEN_COORD: {
-        NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
-        CSCoord *coord = [[CSCoords coordsOfView:[views firstObject]] valueForKey:key];
+        CSCoord *coord = nil;
+
+        if (!strcmp(ast->value.coord, "n")) {
+            float value = [[args firstObject] floatValue];
+            coord = [CSCoord coordWithFloat:value];
+            [keeper addObject:coord];
+        } else {
+            NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
+            coord = [[CSCoords coordsOfView:[args firstObject]] valueForKey:key];
+        }
 
         ast->data = (__bridge void *)(coord);
 
-        [views removeObjectAtIndex:0];
+        [args removeObjectAtIndex:0];
     }
         break;
 
