@@ -56,14 +56,14 @@ static void *csContext = &csContext;
 
 NS_INLINE
 NSMutableSet *cs_observation_pool(NSObject *object) {
-    static const void *CSObservationPoolKey = &CSObservationPoolKey;
+    static const void *poolKey = &poolKey;
 
-    NSMutableSet *observationPool = objc_getAssociatedObject(object, CSObservationPoolKey);
+    NSMutableSet *observationPool = objc_getAssociatedObject(object, poolKey);
 
     if (!observationPool) {
         observationPool = [[NSMutableSet alloc] init];
 
-        objc_setAssociatedObject(object, CSObservationPoolKey, observationPool, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(object, poolKey, observationPool, OBJC_ASSOCIATION_RETAIN);
     }
 
     return observationPool;
@@ -77,20 +77,22 @@ void cs_hook_object_if_needed(NSObject *object) {
 
     __weak CSEigen *eigen = [CSEigen eigenForObject:object];
 
-    [eigen setMethod:deallocSel types:"v#:" block:^(void *object) {
-        for (CSObservation *observation in cs_observation_pool((__bridge id)object)) {
+    [eigen setMethod:deallocSel types:"v@:" block:^(void *object) {
+        for (CSObservation *observation in [cs_observation_pool((__bridge id)object) copy]) {
             [observation deregister];
         }
-
+        
         ((CS_IMP_V)[eigen superImp:deallocSel])((__bridge id)object, deallocSel);
     }];
+
+    objc_setAssociatedObject(object, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
 }
 
 
 @implementation CSObserver
 
 + (void)initialize {
-    deallocSel = NSSelectorFromString(@"dealloc");
+    deallocSel = sel_registerName("dealloc");
 }
 
 + (instancetype)observerForObject:(NSObject *)object {
@@ -202,7 +204,9 @@ void cs_hook_object_if_needed(NSObject *object) {
                         change:(NSDictionary *)change
                        context:(void *)context {
     if (context == csContext) {
-        self.block(self.object, self.target, change);
+        if (self.block) {
+            self.block(self.object, self.target, change);
+        }
     } else {
         [super observeValueForKeyPath:keyPath
                              ofObject:object
@@ -214,10 +218,10 @@ void cs_hook_object_if_needed(NSObject *object) {
 - (void)deregister {
     [cs_observation_pool(self.object) removeObject:self];
     [cs_observation_pool(self.target) removeObject:self];
-}
 
-- (void)dealloc {
     [self.target removeObserver:self forKeyPath:self.keyPath];
+
+    self.target = nil;
 }
 
 @end
