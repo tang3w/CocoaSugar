@@ -69,11 +69,7 @@
 
     va_end(argv);
 
-    if ([keyPaths count] < [self.objects count]) {
-        [NSException
-         raise:@"CSSyncTooFewKeyPathsError"
-         format:@"Too few key paths for objects"];
-    }
+    NSAssert([keyPaths count] >= [self.objects count], @"Too few key paths for objects");
 
     NSUInteger count = [self.objects count];
 
@@ -81,13 +77,10 @@
         NSObject *object1 = self.objects[count];
         NSObject *object2 = self.objects[count - 1];
 
-        CSObserver *observer1 = [CSObserver observerForObject:object1];
-        CSObserver *observer2 = [CSObserver observerForObject:object2];
-
         NSString *keyPath1 = keyPaths[count];
         NSString *keyPath2 = keyPaths[count - 1];
 
-        [observer1
+        [[CSObserver observerForObject:object1]
          addTarget:object2
          forKeyPath:keyPath2
          options:NSKeyValueObservingOptionNew
@@ -100,7 +93,7 @@
              }
          }];
 
-        [observer2
+        [[CSObserver observerForObject:object2]
          addTarget:object1
          forKeyPath:keyPath1
          options:NSKeyValueObservingOptionNew
