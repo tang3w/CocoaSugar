@@ -24,24 +24,22 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import "CSObserver.h"
-#import "CSEigen.h"
-
 #import <objc/runtime.h>
-
-typedef void (*vIMP)(id, SEL);
 
 
 @interface CSObserver ()
 
 @property (atomic, weak) NSObject *object;
 
+- (instancetype)initWithObject:(NSObject *)object;
+
 @end
 
 
 @interface CSObservation : NSObject
 
-@property (atomic, unsafe_unretained) NSObject *object;
-@property (atomic, unsafe_unretained) NSObject *target;
+@property (atomic, unsafe_unretained) id object;
+@property (atomic, unsafe_unretained) id target;
 @property (atomic, copy) NSString *keyPath;
 @property (atomic, assign) NSKeyValueObservingOptions options;
 @property (atomic, copy) CSObserverBlock block;
@@ -52,7 +50,8 @@ typedef void (*vIMP)(id, SEL);
 
 
 static SEL deallocSel = NULL;
-static void *csContext = &csContext;
+static NSMutableSet *swizzledClasses = nil;
+static void *cs_context = &cs_context;
 
 NS_INLINE
 NSMutableSet *cs_observation_pool(NSObject *object) {
@@ -71,21 +70,24 @@ NSMutableSet *cs_observation_pool(NSObject *object) {
 
 NS_INLINE
 void cs_hook_object_if_needed(NSObject *object) {
-    static const void *eigenKey = &eigenKey;
+    @synchronized (swizzledClasses) {
+        Class class = [object class];
 
-    if (objc_getAssociatedObject(object, eigenKey)) return;
+        if ([swizzledClasses containsObject:class]) return;
 
-    __weak CSEigen *eigen = [CSEigen eigenForObject:object];
+        IMP oldDeallocImp = class_getMethodImplementation(class, deallocSel);
+        IMP newDeallocImp = imp_implementationWithBlock(^(void *object) {
+            for (CSObservation *observation in [cs_observation_pool((__bridge id)object) copy]) {
+                [observation deregister];
+            }
 
-    [eigen setMethod:deallocSel types:"v@:" block:^(void *object) {
-        for (CSObservation *observation in [cs_observation_pool((__bridge id)object) copy]) {
-            [observation deregister];
-        }
-        
-        ((CS_IMP_V)[eigen superImp:deallocSel])((__bridge id)object, deallocSel);
-    }];
+            ((void(*)(void *, SEL))oldDeallocImp)(object, deallocSel);
+        });
 
-    objc_setAssociatedObject(object, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
+        class_replaceMethod(class, deallocSel, newDeallocImp, "v@:");
+
+        [swizzledClasses addObject:class];
+    }
 }
 
 
@@ -93,26 +95,33 @@ void cs_hook_object_if_needed(NSObject *object) {
 
 + (void)initialize {
     deallocSel = sel_registerName("dealloc");
+    swizzledClasses = [[NSMutableSet alloc] init];
 }
 
 + (instancetype)observerForObject:(NSObject *)object {
-    static const void *observerKey = &observerKey;
-
     CSObserver *observer = nil;
 
     if (object) {
+        static const void *observerKey = &observerKey;
+
         observer = objc_getAssociatedObject(object, observerKey);
 
         if (!observer) {
-            observer = [[CSObserver alloc] init];
-
-            observer.object = object;
+            observer = [[CSObserver alloc] initWithObject:object];
 
             objc_setAssociatedObject(object, observerKey, observer, OBJC_ASSOCIATION_RETAIN);
         }
     }
 
     return observer;
+}
+
+- (instancetype)initWithObject:(NSObject *)object {
+    self = [super init];
+
+    if (self) _object = object;
+
+    return self;
 }
 
 - (void)addTarget:(NSObject *)target
@@ -143,12 +152,12 @@ void cs_hook_object_if_needed(NSObject *object) {
             toObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [array count])]
                     forKeyPath:keyPath
                        options:options
-                       context:csContext];
+                       context:cs_context];
         } else {
             [target addObserver:observation
                      forKeyPath:keyPath
                         options:options
-                        context:csContext];
+                        context:cs_context];
         }
     }
 }
@@ -203,7 +212,7 @@ void cs_hook_object_if_needed(NSObject *object) {
                       ofObject:(id)object
                         change:(NSDictionary *)change
                        context:(void *)context {
-    if (context == csContext) {
+    if (context == cs_context) {
         if (self.block) {
             self.block(self.object, self.target, change);
         }
@@ -216,12 +225,16 @@ void cs_hook_object_if_needed(NSObject *object) {
 }
 
 - (void)deregister {
-    [cs_observation_pool(self.object) removeObject:self];
-    [cs_observation_pool(self.target) removeObject:self];
+    if ([_target isKindOfClass:[NSArray class]]) {
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_target count])];
 
-    [self.target removeObserver:self forKeyPath:self.keyPath];
+        [_target removeObserver:self fromObjectsAtIndexes:indexSet forKeyPath:_keyPath context:cs_context];
+    } else {
+        [_target removeObserver:self forKeyPath:_keyPath context:cs_context];
+    }
 
-    self.target = nil;
+    [cs_observation_pool(_target) removeObject:self], _target = nil;
+    [cs_observation_pool(_object) removeObject:self];
 }
 
 @end
