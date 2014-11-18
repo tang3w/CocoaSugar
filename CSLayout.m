@@ -740,7 +740,7 @@ void cs_initialize_driver_if_needed(UIView *view) {
         if (!result) {
             NSMutableSet *keeper = [NSMutableSet set];
 
-            [self parseAst:ast withArgv:argv keeper:keeper];
+            [self parseAst:ast withArgv:&argv keeper:keeper];
 
             cslayout_destroy_ast(ast);
         } else {
@@ -752,7 +752,7 @@ void cs_initialize_driver_if_needed(UIView *view) {
     va_end(argv);
 }
 
-- (void)parseAst:(CSLAYOUT_AST *)ast withArgv:(va_list)argv keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(CSLAYOUT_AST *)ast withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
     [self parseAst:ast->l withArgv:argv keeper:keeper];
@@ -794,11 +794,11 @@ void cs_initialize_driver_if_needed(UIView *view) {
         CSCoord *coord = nil;
 
         if (!strcmp(ast->value.coord, "f")) {
-            float value = va_arg(argv, double);
+            float value = va_arg(*argv, double);
             coord = [CSCoord coordWithFloat:value];
             [keeper addObject:coord];
         } else {
-            UIView *view = va_arg(argv, id);
+            UIView *view = va_arg(*argv, id);
             NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
             coord = [[CSCoords coordsOfView:view] valueForKey:key];
         }
