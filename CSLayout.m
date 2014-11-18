@@ -698,6 +698,10 @@ void cs_initialize_driver_if_needed(UIView *view) {
 }
 
 
+#define CS_COORD_NAME(coord) \
+    [NSString stringWithCString:(coord) encoding:NSASCIIStringEncoding]
+
+
 @implementation CSLayout
 
 + (void)initialize {
@@ -740,7 +744,7 @@ void cs_initialize_driver_if_needed(UIView *view) {
         if (!result) {
             NSMutableSet *keeper = [NSMutableSet set];
 
-            [self parseAst:ast withArgv:&argv keeper:keeper];
+            [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
 
             cslayout_destroy_ast(ast);
         } else {
@@ -752,16 +756,19 @@ void cs_initialize_driver_if_needed(UIView *view) {
     va_end(argv);
 }
 
-- (void)parseAst:(CSLAYOUT_AST *)ast withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(CSLAYOUT_AST *)ast parent:(CSLAYOUT_AST *)parent withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
-    [self parseAst:ast->l withArgv:argv keeper:keeper];
-    [self parseAst:ast->r withArgv:argv keeper:keeper];
+    [self parseAst:ast->l parent:ast withArgv:argv keeper:keeper];
+    [self parseAst:ast->r parent:ast withArgv:argv keeper:keeper];
 
     switch (ast->node_type) {
     case CSLAYOUT_TOKEN_ATTR: {
-        NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
-        CSCoord *coord = [self valueForKey:key];
+        if (parent != NULL &&
+            parent->node_type == '=' &&
+            parent->l == ast) break;
+
+        CSCoord *coord = [self valueForKey:CS_COORD_NAME(ast->value.coord)];
 
         if (!coord) {
             coord = [CSCoord coordWithFloat:0];
@@ -795,12 +802,14 @@ void cs_initialize_driver_if_needed(UIView *view) {
 
         if (!strcmp(ast->value.coord, "f")) {
             float value = va_arg(*argv, double);
+
             coord = [CSCoord coordWithFloat:value];
             [keeper addObject:coord];
         } else {
             UIView *view = va_arg(*argv, id);
-            NSString *key = [NSString stringWithCString:ast->value.coord encoding:NSASCIIStringEncoding];
-            coord = [[CSCoords coordsOfView:view] valueForKey:key];
+            CSCoords *coords = [CSCoords coordsOfView:view];
+
+            coord = [coords valueForKey:CS_COORD_NAME(ast->value.coord)];
         }
 
         ast->data = (__bridge void *)(coord);
@@ -856,9 +865,8 @@ void cs_initialize_driver_if_needed(UIView *view) {
 
     case '=': {
         CSCoord *coord = (__bridge CSCoord *)(ast->r->data);
-        NSString *key = [NSString stringWithCString:ast->l->value.coord encoding:NSASCIIStringEncoding];
 
-        [self setValue:coord forKey:key];
+        [self setValue:coord forKey:CS_COORD_NAME(ast->l->value.coord)];
 
         ast->data = (__bridge void *)(coord);
     }
