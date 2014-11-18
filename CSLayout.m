@@ -24,7 +24,6 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import "CSLayout.h"
-#import "CSEigen.h"
 #import "CSLayoutParser.h"
 
 #import <objc/runtime.h>
@@ -32,6 +31,8 @@
 @class CSLayoutRule;
 
 static const void *CSLayoutKey = &CSLayoutKey;
+static NSMutableSet *swizzledDriverClasses = nil;
+static NSMutableSet *swizzledLayoutClasses = nil;
 
 typedef float(^CSCoordBlock)(CSLayoutRule *);
 
@@ -642,44 +643,67 @@ do {                                        \
 
 NS_INLINE
 void cs_initialize_layout_if_needed(UIView *view) {
-    static const void *eigenKey = &eigenKey;
+    @synchronized (swizzledLayoutClasses) {
 
-    if (objc_getAssociatedObject(view, eigenKey)) return;
+    Class class = [view class];
 
-    __weak CSEigen *eigen = [CSEigen eigenForObject:view];
+    if ([swizzledLayoutClasses containsObject:class]) return;
 
-    objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
+    SEL name = @selector(didMoveToSuperview);
 
-    SEL selector = @selector(didMoveToSuperview);
+    IMP origImp = class_getMethodImplementation(class, name);
+    IMP overImp = imp_implementationWithBlock(^(UIView *view) {
+        ((void(*)(id, SEL))(origImp))(view, name);
 
-    [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
-        ((CS_IMP_V)[eigen superImp:selector])(view, selector);
+        CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
 
-        [[CSLayout layoutOfView:view] updateLayoutDriver];
-    }];
+        if (layout) [layout updateLayoutDriver];
+    });
+
+    class_replaceMethod(class, name, overImp, "v@:");
+    
+    [swizzledLayoutClasses addObject:class];
+
+    }
 }
 
 NS_INLINE
 void cs_initialize_driver_if_needed(UIView *view) {
-    static const void *eigenKey = &eigenKey;
+    static void *driverKey = &driverKey;
 
-    if (objc_getAssociatedObject(view, eigenKey)) return;
+    @synchronized (swizzledDriverClasses) {
 
-    __weak CSEigen *eigen = [CSEigen eigenForObject:view];
+    objc_setAssociatedObject(view, driverKey, @YES, OBJC_ASSOCIATION_RETAIN);
 
-    objc_setAssociatedObject(view, eigenKey, eigen, OBJC_ASSOCIATION_RETAIN);
+    Class class = [view class];
 
-    SEL selector = @selector(layoutSubviews);
+    if ([swizzledDriverClasses containsObject:class]) return;
 
-    [eigen setMethod:selector types:"v@:" block:^(UIView *view) {
-        ((CS_IMP_V)[eigen superImp:selector])(view, selector);
+    SEL name = @selector(layoutSubviews);
 
-        [[CSLayoutSolver layoutSolverOfView:(view)] solve];
-    }];
+    IMP origImp = class_getMethodImplementation(class, name);
+    IMP overImp = imp_implementationWithBlock(^(UIView *view) {
+        ((void(*)(id, SEL))(origImp))(view, name);
+
+        if (objc_getAssociatedObject(view, driverKey)) {
+            [[CSLayoutSolver layoutSolverOfView:(view)] solve];
+        }
+    });
+
+    class_replaceMethod(class, name, overImp, "v@:");
+
+    [swizzledDriverClasses addObject:class];
+
+    }
 }
 
 
 @implementation CSLayout
+
++ (void)initialize {
+    swizzledDriverClasses = [[NSMutableSet alloc] init];
+    swizzledLayoutClasses = [[NSMutableSet alloc] init];
+}
 
 + (instancetype)layoutOfView:(UIView *)view {
     if (![view isKindOfClass:[UIView class]]) return nil;
