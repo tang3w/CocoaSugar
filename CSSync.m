@@ -56,6 +56,41 @@
     return sync;
 }
 
+- (void)syncObj1:(NSObject *)obj1
+            obj2:(NSObject *)obj2
+        keyPath1:(NSString *)keyPath1
+        keyPath2:(NSString *)keyPath2
+{
+    CSObserver *observer1 = [CSObserver observerForObject:obj1];
+    CSObserver *observer2 = [CSObserver observerForObject:obj2];
+
+    [observer1
+     addTarget:obj2
+     forKeyPath:keyPath2
+     options:NSKeyValueObservingOptionNew
+     block:^(id obj1, id obj2, NSDictionary *change) {
+         id val1 = [obj1 valueForKeyPath:keyPath1];
+         id val2 = change[NSKeyValueChangeNewKey];
+
+         if (val1 != val2 && ![val1 isEqual:val2]) {
+             [obj1 setValue:val2 forKeyPath:keyPath1];
+         }
+     }];
+
+    [observer2
+     addTarget:obj1
+     forKeyPath:keyPath1
+     options:NSKeyValueObservingOptionNew
+     block:^(id obj2, id obj1, NSDictionary *change) {
+         id val2 = [obj2 valueForKeyPath:keyPath2];
+         id val1 = change[NSKeyValueChangeNewKey];
+
+         if (val2 != val1 && ![val2 isEqual:val1]) {
+             [obj2 setValue:val1 forKeyPath:keyPath2];
+         }
+     }];
+}
+
 - (void)addKeyPaths:(NSString *)firstKeyPath, ... {
     va_list argv;
     va_start(argv, firstKeyPath);
@@ -74,37 +109,10 @@
     NSUInteger count = [self.objects count];
 
     while (--count) {
-        NSObject *object1 = self.objects[count];
-        NSObject *object2 = self.objects[count - 1];
-
-        NSString *keyPath1 = keyPaths[count];
-        NSString *keyPath2 = keyPaths[count - 1];
-
-        [[CSObserver observerForObject:object1]
-         addTarget:object2
-         forKeyPath:keyPath2
-         options:NSKeyValueObservingOptionNew
-         block:^(id object1, id object2, NSDictionary *change) {
-             id value1 = [object1 valueForKeyPath:keyPath1];
-             id value2 = change[NSKeyValueChangeNewKey];
-
-             if (value1 != value2 && ![value1 isEqual:value2]) {
-                 [object1 setValue:value2 forKeyPath:keyPath1];
-             }
-         }];
-
-        [[CSObserver observerForObject:object2]
-         addTarget:object1
-         forKeyPath:keyPath1
-         options:NSKeyValueObservingOptionNew
-         block:^(id object2, id object1, NSDictionary *change) {
-             id value2 = [object2 valueForKeyPath:keyPath2];
-             id value1 = change[NSKeyValueChangeNewKey];
-
-             if (value2 != value1 && ![value2 isEqual:value1]) {
-                 [object2 setValue:value1 forKeyPath:keyPath2];
-             }
-         }];
+        [self syncObj1:self.objects[count]
+                  obj2:self.objects[count-1]
+              keyPath1:keyPaths[count]
+              keyPath2:keyPaths[count-1]];
     }
 }
 
