@@ -733,24 +733,33 @@ void cs_initialize_driver_if_needed(UIView *view) {
     va_list argv;
     va_start(argv, format);
 
+    [self addRule:format args:argv];
+
+    va_end(argv);
+}
+
+- (void)addRule:(NSString *)format args:(va_list)args {
+    va_list argv;
+    va_copy(argv, args);
+
     NSArray *subRules = [format componentsSeparatedByString:@","];
 
     for (NSString *subRule in subRules) {
         CSLAYOUT_AST *ast = NULL;
 
         char *expr = (char *)[subRule cStringUsingEncoding:NSASCIIStringEncoding];
+
         int result = cslayout_parse_rule(expr, &ast);
 
-        if (!result) {
-            NSMutableSet *keeper = [NSMutableSet set];
-
-            [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
-
-            cslayout_destroy_ast(ast);
-        } else {
-            [NSException raise:@"CSLayoutRuleSyntaxError"
-                        format:@"Layout can not be solved because of rule syntax error"];
+        if (result) {
+            NSAssert(result != 1, @"Invalid layout rule"); break;
         }
+
+        NSMutableSet *keeper = [NSMutableSet set];
+
+        [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
+
+        cslayout_destroy_ast(ast);
     }
 
     va_end(argv);

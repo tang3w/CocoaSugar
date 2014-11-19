@@ -472,10 +472,8 @@ static yyconst flex_int16_t yy_chk[123] =
 #line 2 "CSLayoutLex.l"
 #include <stdio.h>
 #include "CSLayoutParser.h"
-
-void lex_error(char *text);
 #define YY_NO_INPUT 1
-#line 479 "CSLayoutLex.c"
+#line 477 "CSLayoutLex.c"
 
 #define INITIAL 0
 
@@ -706,10 +704,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 25 "CSLayoutLex.l"
+#line 23 "CSLayoutLex.l"
 
 
-#line 713 "CSLayoutLex.c"
+#line 711 "CSLayoutLex.c"
 
     yylval = yylval_param;
 
@@ -797,47 +795,47 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 27 "CSLayoutLex.l"
+#line 25 "CSLayoutLex.l"
 
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "CSLayoutLex.l"
+#line 27 "CSLayoutLex.l"
 { return '='; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "CSLayoutLex.l"
+#line 28 "CSLayoutLex.l"
 { return '+'; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "CSLayoutLex.l"
+#line 29 "CSLayoutLex.l"
 { return '-'; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 32 "CSLayoutLex.l"
+#line 30 "CSLayoutLex.l"
 { return '*'; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 33 "CSLayoutLex.l"
+#line 31 "CSLayoutLex.l"
 { return '/'; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 34 "CSLayoutLex.l"
+#line 32 "CSLayoutLex.l"
 { return '('; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 35 "CSLayoutLex.l"
+#line 33 "CSLayoutLex.l"
 { return ')'; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "CSLayoutLex.l"
+#line 35 "CSLayoutLex.l"
 {
                  CSLAYOUT_AST *ast = *yylval = cslayout_create_ast(CSLAYOUT_TOKEN_ATTR, NULL, NULL);
 
@@ -849,7 +847,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 46 "CSLayoutLex.l"
+#line 44 "CSLayoutLex.l"
 {
                  CSLAYOUT_AST *ast = *yylval = cslayout_create_ast(CSLAYOUT_TOKEN_NUMBER, NULL, NULL);
 
@@ -860,7 +858,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 54 "CSLayoutLex.l"
+#line 52 "CSLayoutLex.l"
 {
                  CSLAYOUT_AST *ast = *yylval = cslayout_create_ast(CSLAYOUT_TOKEN_PERCENTAGE, NULL, NULL);
 
@@ -871,7 +869,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 62 "CSLayoutLex.l"
+#line 60 "CSLayoutLex.l"
 {
                  CSLAYOUT_AST *ast = *yylval = cslayout_create_ast(CSLAYOUT_TOKEN_COORD, NULL, NULL);
 
@@ -883,15 +881,19 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 71 "CSLayoutLex.l"
-{ lex_error(yytext); }
+#line 69 "CSLayoutLex.l"
+{
+                 fprintf(stderr, "Unrecognized text %s\n", yytext);
+
+                 *yylval = NULL;
+             }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 73 "CSLayoutLex.l"
+#line 75 "CSLayoutLex.l"
 ECHO;
 	YY_BREAK
-#line 895 "CSLayoutLex.c"
+#line 897 "CSLayoutLex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2019,11 +2021,7 @@ void cslayoutfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 73 "CSLayoutLex.l"
+#line 75 "CSLayoutLex.l"
 
 
-
-void lex_error(char *text) {
-    fprintf(stderr, "Unrecognized text %s\n", text);
-}
 

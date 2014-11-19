@@ -32,6 +32,7 @@
 + (instancetype)layoutOfView:(UIView *)view;
 
 - (void)addRule:(NSString *)format, ...;
+- (void)addRule:(NSString *)format args:(va_list)args;
 
 @end
 
