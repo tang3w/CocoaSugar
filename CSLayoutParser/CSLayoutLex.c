@@ -883,17 +883,15 @@ case 13:
 YY_RULE_SETUP
 #line 69 "CSLayoutLex.l"
 {
-                 fprintf(stderr, "Unrecognized text %s\n", yytext);
-
-                 *yylval = NULL;
+                 fprintf(stderr, "CSLayout: unrecognized text %s\n", yytext);
              }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 75 "CSLayoutLex.l"
+#line 73 "CSLayoutLex.l"
 ECHO;
 	YY_BREAK
-#line 897 "CSLayoutLex.c"
+#line 895 "CSLayoutLex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2021,7 +2019,7 @@ void cslayoutfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 75 "CSLayoutLex.l"
+#line 73 "CSLayoutLex.l"
 
 
 

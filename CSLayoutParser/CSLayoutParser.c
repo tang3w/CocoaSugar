@@ -75,7 +75,7 @@
 #include "CSLayoutParser.h"
 #include "CSLayoutLex.h"
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *s);
+void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *msg);
 int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp);
 
 #line 82 "CSLayoutParser.c" /* yacc.c:339  */
@@ -411,18 +411,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  12
+#define YYFINAL  13
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   24
+#define YYLAST   40
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  15
+#define YYNRULES  16
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  24
+#define YYNSTATES  25
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -469,8 +469,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    55,    55,    56,    57,    59,    60,    61,    63,    64,
-      65,    67,    68,    69,    70,    71
+       0,    55,    55,    56,    57,    58,    60,    61,    62,    64,
+      65,    66,    68,    69,    70,    71,    72
 };
 #endif
 
@@ -496,12 +496,12 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -6
+#define YYPACT_NINF -10
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-6)))
+  (!!((Yystate) == (-10)))
 
-#define YYTABLE_NINF -1
+#define YYTABLE_NINF -3
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -510,9 +510,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,     3,    -6,    -6,    -6,    -3,    18,     4,     7,    -6,
-      -3,    -5,    -6,     1,     1,     1,     1,    -6,    -6,    -6,
-       7,     7,    -6,    -6
+      14,   -10,    -9,   -10,   -10,   -10,    24,    11,    15,    22,
+     -10,     0,     8,   -10,     4,     4,     4,     4,   -10,   -10,
+     -10,    22,    22,   -10,   -10
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -520,61 +520,65 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,    11,    12,    13,    14,     2,     0,     4,     7,    10,
-       2,     0,     1,     0,     0,     0,     0,     3,    15,    11,
-       5,     6,     8,     9
+       0,     3,    12,    13,    14,    15,     0,     0,     5,     8,
+      11,     0,     0,     1,     0,     0,     0,     0,     4,    16,
+      12,     6,     7,     9,    10
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -6,     5,    -6,     6,     8
+     -10,    27,   -10,    20,    23
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,     8,     9
+      -1,     7,     8,     9,    10
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_uint8 yytable[] =
+static const yytype_int8 yytable[] =
 {
-       1,     2,     3,     4,    19,     2,     3,     4,    18,     5,
-      11,    13,    14,     5,    10,    17,    15,    16,    12,    20,
-      21,     0,     0,    22,    23
+      -2,     1,    11,     2,     3,     4,     5,    20,     3,     4,
+       5,    13,     6,    -2,    -2,     1,     6,     2,     3,     4,
+       5,    19,    14,    15,     0,     1,     6,     2,     3,     4,
+       5,    16,    17,    12,    21,    22,     6,    -2,    18,    23,
+      24
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     6,     3,     4,     5,     6,    13,    12,
-       5,     7,     8,    12,    11,    10,     9,    10,     0,    13,
-      14,    -1,    -1,    15,    16
+       0,     1,    11,     3,     4,     5,     6,     3,     4,     5,
+       6,     0,    12,    13,     0,     1,    12,     3,     4,     5,
+       6,    13,     7,     8,    -1,     1,    12,     3,     4,     5,
+       6,     9,    10,     6,    14,    15,    12,    13,    11,    16,
+      17
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     5,     6,    12,    15,    16,    17,    18,
-      11,    15,     0,     7,     8,     9,    10,    15,    13,     3,
-      17,    17,    18,    18
+       0,     1,     3,     4,     5,     6,    12,    15,    16,    17,
+      18,    11,    15,     0,     7,     8,     9,    10,    15,    13,
+       3,    17,    17,    18,    18
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    14,    15,    15,    15,    16,    16,    16,    17,    17,
-      17,    18,    18,    18,    18,    18
+       0,    14,    15,    15,    15,    15,    16,    16,    16,    17,
+      17,    17,    18,    18,    18,    18,    18
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     3,     1,     3,     3,     1,     3,     3,
-       1,     1,     1,     1,     1,     3
+       0,     2,     0,     1,     3,     1,     3,     3,     1,     3,
+       3,     1,     1,     1,     1,     1,     3
 };
 
 
@@ -1260,84 +1264,90 @@ yyreduce:
     {
         case 3:
 #line 56 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
-#line 1265 "CSLayoutParser.c" /* yacc.c:1661  */
+    { cslayout_destroy_ast(*astpp); *astpp = NULL; YYABORT; }
+#line 1269 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 4:
 #line 57 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = (yyvsp[0]); }
-#line 1271 "CSLayoutParser.c" /* yacc.c:1661  */
+    { *astpp = (yyval) = cslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
+#line 1275 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 59 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
-#line 1277 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 58 "CSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1281 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 6:
 #line 60 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
-#line 1283 "CSLayoutParser.c" /* yacc.c:1661  */
+    { *astpp = (yyval) = cslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
+#line 1287 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 7:
 #line 61 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = (yyvsp[0]); }
-#line 1289 "CSLayoutParser.c" /* yacc.c:1661  */
+    { *astpp = (yyval) = cslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
+#line 1293 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 63 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
-#line 1295 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 62 "CSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1299 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 9:
 #line 64 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
-#line 1301 "CSLayoutParser.c" /* yacc.c:1661  */
+    { *astpp = (yyval) = cslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
+#line 1305 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 10:
 #line 65 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = (yyvsp[0]); }
-#line 1307 "CSLayoutParser.c" /* yacc.c:1661  */
+    { *astpp = (yyval) = cslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
+#line 1311 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 67 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 66 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1313 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1317 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 12:
 #line 68 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1319 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1323 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 13:
 #line 69 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1325 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1329 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 14:
 #line 70 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1331 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1335 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 15:
 #line 71 "CSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1341 "CSLayoutParser.c" /* yacc.c:1661  */
+    break;
+
+  case 16:
+#line 72 "CSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[-1]); }
-#line 1337 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1347 "CSLayoutParser.c" /* yacc.c:1661  */
     break;
 
 
-#line 1341 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1351 "CSLayoutParser.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1559,11 +1569,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 74 "CSLayoutParser.y" /* yacc.c:1906  */
+#line 75 "CSLayoutParser.y" /* yacc.c:1906  */
 
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *s) {
-  fprintf(stderr, "%s\n", s);
+void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *msg) {
+  fprintf(stderr, "CSLayout: %s\n", msg);
 }
 
 int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
