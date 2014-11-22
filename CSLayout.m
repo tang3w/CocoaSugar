@@ -1162,8 +1162,8 @@ do {                                                 \
 @end
 
 
-#define CS_VIEW_TOP    (view.frame.origin.y)
-#define CS_VIEW_LEFT   (view.frame.origin.x)
+#define CS_VIEW_TOP    ([view convertRect:view.bounds toView:rule.view.superview].origin.y)
+#define CS_VIEW_LEFT   ([view convertRect:view.bounds toView:rule.view.superview].origin.x)
 #define CS_VIEW_WIDTH  (view.bounds.size.width)
 #define CS_VIEW_HEIGHT (view.bounds.size.height)
 
