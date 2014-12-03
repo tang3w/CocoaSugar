@@ -78,13 +78,13 @@ It is worth mentioning that, format specifier also create a dependency between t
 
 You can apply arithmetic operator between constraint values. Like other languages, SLL supports 5 basic arithmetic operators:
 
-Operator name | Priority | Association | Code examples
---------------|----------|-------------|--------------
-`=`           | 1        | right       | `tt = 20` `ct = 50%`
-`+`           | 2        | left        | `10 + 20` `50% + 10` `%w + 5`
-`-`           | 2        | left        | `20 - 10` `50% - 10` `%h - 5`
-`*`           | 3        | left        | `50 * 2` `80% * 0.5` `%h * 2`
-`/`           | 3        | left        | `100 / 2` `100% / 2` `%h / 2`
+Operator name | Priority | Associativity | Code examples
+--------------|----------|---------------|--------------
+`=`           | 1        | right         | `tt = 20` `ct = 50%`
+`+`           | 2        | left          | `10 + 20` `50% + 10` `%w + 5`
+`-`           | 2        | left          | `20 - 10` `50% - 10` `%h - 5`
+`*`           | 3        | left          | `50 * 2` `80% * 0.5` `%h * 2`
+`/`           | 3        | left          | `100 / 2` `100% / 2` `%h / 2`
 
 You can also use `()` to group sub-expression to change the evaluation order of expression.
 
