@@ -1,6 +1,6 @@
-// CSSync.h
+// COSLayout.h
 //
-// Copyright (c) 2014 Tang Tianyong
+// Copyright (c) 2014 Tianyong Tang
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -24,12 +24,20 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 
-@interface CSSync : NSObject
+@interface COSLayout : NSObject
 
-+ (instancetype)syncOfObjects:(NSObject *)firstObject, ... NS_REQUIRES_NIL_TERMINATION;
++ (instancetype)layoutOfView:(UIView *)view;
 
-- (void)addKeyPaths:(NSString *)firstKeyPath, ... NS_REQUIRES_NIL_TERMINATION;
+- (void)addRule:(NSString *)format, ...;
+- (void)addRule:(NSString *)format args:(va_list)args;
 
 @end
+
+
+NS_INLINE
+COSLayout *COSLayoutMake(UIView *view) {
+    return [COSLayout layoutOfView:view];
+}

@@ -1,4 +1,4 @@
-// CSLayout.m
+// COSLayout.m
 //
 // Copyright (c) 2014 Tianyong Tang
 //
@@ -23,99 +23,99 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#import "CSLayout.h"
-#import "CSLayoutParser.h"
+#import "COSLayout.h"
+#import "COSLayoutParser.h"
 
 #import <objc/runtime.h>
 
-@class CSLayoutRule;
+@class COSLayoutRule;
 
-static const void *CSLayoutKey = &CSLayoutKey;
+static const void *COSLayoutKey = &COSLayoutKey;
 static NSMutableSet *swizzledDriverClasses = nil;
 static NSMutableSet *swizzledLayoutClasses = nil;
 
-typedef float(^CSCoordBlock)(CSLayoutRule *);
+typedef float(^COSCoordBlock)(COSLayoutRule *);
 
 
-@interface CSCoord : NSObject
+@interface COSCoord : NSObject
 
 + (instancetype)coordWithFloat:(float)value;
 + (instancetype)coordWithPercentage:(float)percentage;
 
 @property (nonatomic, strong) NSMutableSet *dependencies;
-@property (nonatomic, copy) CSCoordBlock block;
+@property (nonatomic, copy) COSCoordBlock block;
 
-- (instancetype)add:(CSCoord *)other;
-- (instancetype)sub:(CSCoord *)other;
-- (instancetype)mul:(CSCoord *)other;
-- (instancetype)div:(CSCoord *)other;
+- (instancetype)add:(COSCoord *)other;
+- (instancetype)sub:(COSCoord *)other;
+- (instancetype)mul:(COSCoord *)other;
+- (instancetype)div:(COSCoord *)other;
 
 @end
 
 
-typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
+typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
 
 
-@interface CSLayoutRule : NSObject
+@interface COSLayoutRule : NSObject
 
-+ (CSLayoutRule *)layoutRuleWithView:(UIView *)view
++ (COSLayoutRule *)layoutRuleWithView:(UIView *)view
     name:(NSString *)name
-    coord:(CSCoord *)coord
-    dir:(CSLayoutDir)dir;
+    coord:(COSCoord *)coord
+    dir:(COSLayoutDir)dir;
 
 @property (nonatomic, weak) UIView *view;
 @property (nonatomic, copy) NSString *name;
-@property (nonatomic, strong) CSCoord *coord;
-@property (nonatomic, assign) CSLayoutDir dir;
+@property (nonatomic, strong) COSCoord *coord;
+@property (nonatomic, assign) COSLayoutDir dir;
 
 @end
 
 
-@interface CSCoords : NSObject
+@interface COSCoords : NSObject
 
 + (instancetype)coordsOfView:(UIView *)view;
 
 @end
 
 
-@interface CSLayoutRuleHub : NSObject
+@interface COSLayoutRuleHub : NSObject
 
 @property (nonatomic, readonly) NSMutableArray *vRules;
 @property (nonatomic, readonly) NSMutableArray *hRules;
 
-- (void)vAddRule:(CSLayoutRule *)rule;
-- (void)hAddRule:(CSLayoutRule *)rule;
+- (void)vAddRule:(COSLayoutRule *)rule;
+- (void)hAddRule:(COSLayoutRule *)rule;
 
 @end
 
 
-@interface CSLayout ()
+@interface COSLayout ()
 
 @property (nonatomic, weak) UIView *view;
 
-@property (nonatomic, strong) CSLayoutRuleHub *ruleHub;
+@property (nonatomic, strong) COSLayoutRuleHub *ruleHub;
 @property (nonatomic, strong) NSMutableDictionary *ruleMap;
 
-@property (nonatomic, strong) CSCoord *minw;
-@property (nonatomic, strong) CSCoord *maxw;
+@property (nonatomic, strong) COSCoord *minw;
+@property (nonatomic, strong) COSCoord *maxw;
 
-@property (nonatomic, strong) CSCoord *minh;
-@property (nonatomic, strong) CSCoord *maxh;
+@property (nonatomic, strong) COSCoord *minh;
+@property (nonatomic, strong) COSCoord *maxh;
 
-@property (nonatomic, strong) CSCoord *tt;
-@property (nonatomic, strong) CSCoord *tb;
+@property (nonatomic, strong) COSCoord *tt;
+@property (nonatomic, strong) COSCoord *tb;
 
-@property (nonatomic, strong) CSCoord *ll;
-@property (nonatomic, strong) CSCoord *lr;
+@property (nonatomic, strong) COSCoord *ll;
+@property (nonatomic, strong) COSCoord *lr;
 
-@property (nonatomic, strong) CSCoord *bb;
-@property (nonatomic, strong) CSCoord *bt;
+@property (nonatomic, strong) COSCoord *bb;
+@property (nonatomic, strong) COSCoord *bt;
 
-@property (nonatomic, strong) CSCoord *rr;
-@property (nonatomic, strong) CSCoord *rl;
+@property (nonatomic, strong) COSCoord *rr;
+@property (nonatomic, strong) COSCoord *rl;
 
-@property (nonatomic, strong) CSCoord *ct;
-@property (nonatomic, strong) CSCoord *cl;
+@property (nonatomic, strong) COSCoord *ct;
+@property (nonatomic, strong) COSCoord *cl;
 
 @property (nonatomic, assign) CGRect frame;
 
@@ -128,7 +128,7 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 @end
 
 
-@interface CSLayoutRulesSolver : NSObject
+@interface COSLayoutRulesSolver : NSObject
 
 @property (nonatomic, weak) UIView *view;
 
@@ -159,14 +159,14 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 @end
 
 
-@implementation CSLayoutRule
+@implementation COSLayoutRule
 
-+ (CSLayoutRule *)layoutRuleWithView:(UIView *)view
++ (COSLayoutRule *)layoutRuleWithView:(UIView *)view
     name:(NSString *)name
-    coord:(CSCoord *)coord
-    dir:(CSLayoutDir)dir
+    coord:(COSCoord *)coord
+    dir:(COSLayoutDir)dir
 {
-    CSLayoutRule *rule = [[CSLayoutRule alloc] init];
+    COSLayoutRule *rule = [[COSLayoutRule alloc] init];
 
     rule.view = view;
     rule.name = name;
@@ -179,7 +179,7 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 @end
 
 
-@implementation CSLayoutRuleHub
+@implementation COSLayoutRuleHub
 
 @synthesize vRules = _vRules;
 @synthesize hRules = _hRules;
@@ -192,7 +192,7 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
     return _hRules ?: (_hRules = [[NSMutableArray alloc] init]);
 }
 
-- (void)vAddRule:(CSLayoutRule *)rule {
+- (void)vAddRule:(COSLayoutRule *)rule {
     NSMutableArray *vRules = [self vRules];
 
     [vRules filterUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name != %@", rule.name]];
@@ -206,7 +206,7 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
     }
 }
 
-- (void)hAddRule:(CSLayoutRule *)rule {
+- (void)hAddRule:(COSLayoutRule *)rule {
     NSMutableArray *hRules = [self hRules];
 
     [hRules filterUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name != %@", rule.name]];
@@ -223,87 +223,87 @@ typedef enum { CSLayoutDirv, CSLayoutDirh } CSLayoutDir;
 @end
 
 
-#define CS_FRAME_WIDTH  (frame.size.width)
-#define CS_FRAME_HEIGHT (frame.size.height)
+#define COS_FRAME_WIDTH  (frame.size.width)
+#define COS_FRAME_HEIGHT (frame.size.height)
 
-#define CS_SUPERVIEW_WIDTH  (view.superview.bounds.size.width)
-#define CS_SUPERVIEW_HEIGHT (view.superview.bounds.size.height)
+#define COS_SUPERVIEW_WIDTH  (view.superview.bounds.size.width)
+#define COS_SUPERVIEW_HEIGHT (view.superview.bounds.size.height)
 
-#define CSLAYOUT_FRAME(view) \
-    ([objc_getAssociatedObject(view, CSLayoutKey) frame])
+#define COSLAYOUT_FRAME(view) \
+    ([objc_getAssociatedObject(view, COSLayoutKey) frame])
 
-#define CSLAYOUT_SOLVE_SINGLE_H(var, left)   \
+#define COSLAYOUT_SOLVE_SINGLE_H(var, left)   \
 do {                                         \
-    CSLayoutRule *rule = rules[0];           \
+    COSLayoutRule *rule = rules[0];           \
     float var = [[rule coord] block](rule);  \
     UIView *view = _view;                    \
-    CGRect frame = CSLAYOUT_FRAME(view);     \
+    CGRect frame = COSLAYOUT_FRAME(view);     \
     frame.origin.x = (left);                 \
     return frame;                            \
 } while (0)
 
-#define CSLAYOUT_SOLVE_SINGLE_V(var, top)    \
+#define COSLAYOUT_SOLVE_SINGLE_V(var, top)    \
 do {                                         \
-    CSLayoutRule *rule = rules[0];           \
+    COSLayoutRule *rule = rules[0];           \
     float var = [[rule coord] block](rule);  \
     UIView *view = _view;                    \
-    CGRect frame = CSLAYOUT_FRAME(view);     \
+    CGRect frame = COSLAYOUT_FRAME(view);     \
     frame.origin.y = (top);                  \
     return frame;                            \
 } while (0)
 
-#define CSLAYOUT_SOLVE_DOUBLE_H(var1, var2, width_, left)  \
+#define COSLAYOUT_SOLVE_DOUBLE_H(var1, var2, width_, left)  \
 do {                                                       \
-    CSLayoutRule *rule0 = rules[0];                        \
-    CSLayoutRule *rule1 = rules[1];                        \
+    COSLayoutRule *rule0 = rules[0];                        \
+    COSLayoutRule *rule1 = rules[1];                        \
     float var1 = [[rule0 coord] block](rule0);             \
     float var2 = [[rule1 coord] block](rule1);             \
     UIView *view = _view;                                  \
-    CGRect frame = CSLAYOUT_FRAME(view);                   \
+    CGRect frame = COSLAYOUT_FRAME(view);                   \
     frame.size.width = [self calcWidth:(width_)];          \
     frame.origin.x = (left);                               \
     return frame;                                          \
 } while (0)
 
-#define CSLAYOUT_SOLVE_DOUBLE_V(var1, var2, height_, top)  \
+#define COSLAYOUT_SOLVE_DOUBLE_V(var1, var2, height_, top)  \
 do {                                                       \
-    CSLayoutRule *rule0 = rules[0];                        \
-    CSLayoutRule *rule1 = rules[1];                        \
+    COSLayoutRule *rule0 = rules[0];                        \
+    COSLayoutRule *rule1 = rules[1];                        \
     float var1 = [[rule0 coord] block](rule0);             \
     float var2 = [[rule1 coord] block](rule1);             \
     UIView *view = _view;                                  \
-    CGRect frame = CSLAYOUT_FRAME(view);                   \
+    CGRect frame = COSLAYOUT_FRAME(view);                   \
     frame.size.height = [self calcHeight:(height_)];       \
     frame.origin.y = (top);                                \
     return frame;                                          \
 } while (0)
 
-#define CS_MM_RAW_VALUE(layout, var)             \
+#define COS_MM_RAW_VALUE(layout, var)             \
 ({                                               \
-    CSLayoutRule *rule = layout.ruleMap[@#var];  \
+    COSLayoutRule *rule = layout.ruleMap[@#var];  \
                                                  \
     rule.coord ?                                 \
     rule.coord.block(rule) :                     \
     NAN;                                         \
 })
 
-#define CS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
+#define COS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
 
 
-@implementation CSLayoutRulesSolver
+@implementation COSLayoutRulesSolver
 
 - (CGFloat)calcWidth:(CGFloat)width {
-    CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
+    COSLayout *layout = objc_getAssociatedObject(_view, COSLayoutKey);
 
-    CGFloat minw = CS_MM_RAW_VALUE(layout, minw);
+    CGFloat minw = COS_MM_RAW_VALUE(layout, minw);
 
-    if (CS_VALID_DIM(minw) && width < minw) {
+    if (COS_VALID_DIM(minw) && width < minw) {
         width = minw;
     }
 
-    CGFloat maxw = CS_MM_RAW_VALUE(layout, maxw);
+    CGFloat maxw = COS_MM_RAW_VALUE(layout, maxw);
 
-    if (CS_VALID_DIM(maxw) && width > maxw) {
+    if (COS_VALID_DIM(maxw) && width > maxw) {
         width = maxw;
     }
 
@@ -311,17 +311,17 @@ do {                                                       \
 }
 
 - (CGFloat)calcHeight:(CGFloat)height {
-    CSLayout *layout = objc_getAssociatedObject(_view, CSLayoutKey);
+    COSLayout *layout = objc_getAssociatedObject(_view, COSLayoutKey);
 
-    CGFloat minh = CS_MM_RAW_VALUE(layout, minh);
+    CGFloat minh = COS_MM_RAW_VALUE(layout, minh);
 
-    if (CS_VALID_DIM(minh) && height < minh) {
+    if (COS_VALID_DIM(minh) && height < minh) {
         height = minh;
     }
 
-    CGFloat maxh = CS_MM_RAW_VALUE(layout, maxh);
+    CGFloat maxh = COS_MM_RAW_VALUE(layout, maxh);
 
-    if (CS_VALID_DIM(maxh) && height > maxh) {
+    if (COS_VALID_DIM(maxh) && height > maxh) {
         height = maxh;
     }
 
@@ -329,107 +329,107 @@ do {                                                       \
 }
 
 - (CGRect)solveTt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_V(top, top);
+    COSLAYOUT_SOLVE_SINGLE_V(top, top);
 }
 
 - (CGRect)solveTtCt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(top, axisY, (axisY - top) * 2, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(top, axisY, (axisY - top) * 2, top);
 }
 
 - (CGRect)solveTtBt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(top, bottom, bottom - top, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(top, bottom, bottom - top, top);
 }
 
 - (CGRect)solveLl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_H(left, left);
+    COSLAYOUT_SOLVE_SINGLE_H(left, left);
 }
 
 - (CGRect)solveLlCl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(left, axisX, (axisX - left) * 2, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(left, axisX, (axisX - left) * 2, left);
 }
 
 - (CGRect)solveLlRl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(left, right, right - left, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(left, right, right - left, left);
 }
 
 - (CGRect)solveBt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_V(bottom, bottom - CS_FRAME_HEIGHT);
+    COSLAYOUT_SOLVE_SINGLE_V(bottom, bottom - COS_FRAME_HEIGHT);
 }
 
 - (CGRect)solveBtCt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(bottom, axisY, (bottom - axisY) * 2, axisY - CS_FRAME_HEIGHT / 2);
+    COSLAYOUT_SOLVE_DOUBLE_V(bottom, axisY, (bottom - axisY) * 2, axisY - COS_FRAME_HEIGHT / 2);
 }
 
 - (CGRect)solveBtTt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(bottom, top, bottom - top, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(bottom, top, bottom - top, top);
 }
 
 - (CGRect)solveRl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_H(right, right - CS_FRAME_WIDTH);
+    COSLAYOUT_SOLVE_SINGLE_H(right, right - COS_FRAME_WIDTH);
 }
 
 - (CGRect)solveRlCl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(right, axisX, (right - axisX) * 2, axisX - CS_FRAME_WIDTH / 2);
+    COSLAYOUT_SOLVE_DOUBLE_H(right, axisX, (right - axisX) * 2, axisX - COS_FRAME_WIDTH / 2);
 }
 
 - (CGRect)solveRlLl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(right, left, right - left, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(right, left, right - left, left);
 }
 
 - (CGRect)solveCt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_V(axisY, axisY - CS_FRAME_HEIGHT / 2);
+    COSLAYOUT_SOLVE_SINGLE_V(axisY, axisY - COS_FRAME_HEIGHT / 2);
 }
 
 - (CGRect)solveCtTt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(axisY, top, (axisY - top) * 2, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(axisY, top, (axisY - top) * 2, top);
 }
 
 - (CGRect)solveCtBt:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_V(axisY, bottom, (bottom - axisY) * 2, bottom - CS_FRAME_HEIGHT);
+    COSLAYOUT_SOLVE_DOUBLE_V(axisY, bottom, (bottom - axisY) * 2, bottom - COS_FRAME_HEIGHT);
 }
 
 - (CGRect)solveCl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_SINGLE_H(axisX, axisX - CS_FRAME_WIDTH / 2);
+    COSLAYOUT_SOLVE_SINGLE_H(axisX, axisX - COS_FRAME_WIDTH / 2);
 }
 
 - (CGRect)solveClLl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(axisX, left, (axisX - left) * 2, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(axisX, left, (axisX - left) * 2, left);
 }
 
 - (CGRect)solveClRl:(NSArray *)rules {
-    CSLAYOUT_SOLVE_DOUBLE_H(axisX, right, (right - axisX) * 2, right - CS_FRAME_WIDTH);
+    COSLAYOUT_SOLVE_DOUBLE_H(axisX, right, (right - axisX) * 2, right - COS_FRAME_WIDTH);
 }
 
 @end
 
 
-enum CSLayoutVisitStat {
-    CSLayoutVisitStatUnvisited,
-    CSLayoutVisitStatVisiting,
-    CSLayoutVisitStatVisited
+enum COSLayoutVisitStat {
+    COSLayoutVisitStatUnvisited,
+    COSLayoutVisitStatVisiting,
+    COSLayoutVisitStatVisited
 };
 
-typedef enum CSLayoutVisitStat CSLayoutVisitStat;
+typedef enum COSLayoutVisitStat COSLayoutVisitStat;
 
-static const void *CSVisitKey = &CSVisitKey;
+static const void *COSVisitKey = &COSVisitKey;
 
 NS_INLINE
-void CSMakeViewUnvisited(UIView *view) {
-    objc_setAssociatedObject(view, CSVisitKey, nil, OBJC_ASSOCIATION_RETAIN);
+void COSMakeViewUnvisited(UIView *view) {
+    objc_setAssociatedObject(view, COSVisitKey, nil, OBJC_ASSOCIATION_RETAIN);
 }
 
 NS_INLINE
-void CSMakeViewVisiting(UIView *view) {
-    objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisiting), OBJC_ASSOCIATION_RETAIN);
+void COSMakeViewVisiting(UIView *view) {
+    objc_setAssociatedObject(view, COSVisitKey, @(COSLayoutVisitStatVisiting), OBJC_ASSOCIATION_RETAIN);
 }
 
 NS_INLINE
-void CSMakeViewVisited(UIView *view) {
-    objc_setAssociatedObject(view, CSVisitKey, @(CSLayoutVisitStatVisited), OBJC_ASSOCIATION_RETAIN);
+void COSMakeViewVisited(UIView *view) {
+    objc_setAssociatedObject(view, COSVisitKey, @(COSLayoutVisitStatVisited), OBJC_ASSOCIATION_RETAIN);
 }
 
 
-@interface CSLayoutParser : NSObject
+@interface COSLayoutIterator : NSObject
 
 @property (nonatomic, strong) NSSet *layouts;
 
@@ -440,7 +440,7 @@ void CSMakeViewVisited(UIView *view) {
 @end
 
 
-@implementation CSLayoutParser {
+@implementation COSLayoutIterator {
     NSMutableSet *_viewSet;
     NSMutableArray *_viewTopo;
 }
@@ -461,23 +461,23 @@ void CSMakeViewVisited(UIView *view) {
 }
 
 - (void)makeViewSet {
-    for (CSLayout *layout in _layouts) {
+    for (COSLayout *layout in _layouts) {
         [self makeViewSetVisit:layout.view];
     }
 }
 
 - (void)makeViewSetVisit:(UIView *)view {
-    CSMakeViewVisiting(view);
+    COSMakeViewVisiting(view);
 
-    CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+    COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
     for (UIView *adjView in [layout dependencies]) {
-        NSNumber *stat = objc_getAssociatedObject(adjView, CSVisitKey);
-        CSLayoutVisitStat istat = stat ? [stat intValue] : CSLayoutVisitStatUnvisited;
+        NSNumber *stat = objc_getAssociatedObject(adjView, COSVisitKey);
+        COSLayoutVisitStat istat = stat ? [stat intValue] : COSLayoutVisitStatUnvisited;
 
-        if (istat == CSLayoutVisitStatUnvisited) {
+        if (istat == COSLayoutVisitStatUnvisited) {
             [self makeViewSetVisit:adjView];
-        } else if (istat == CSLayoutVisitStatVisiting) {
+        } else if (istat == COSLayoutVisitStatVisiting) {
             [self cleanVisitFlag];
             [self cycleError];
         }
@@ -485,31 +485,31 @@ void CSMakeViewVisited(UIView *view) {
 
     [[self viewSet] addObject:view];
 
-    CSMakeViewVisited(view);
+    COSMakeViewVisited(view);
 }
 
 - (void)makeViewTopo {
     for (UIView *view in [self viewSet]) {
-        NSNumber *stat = objc_getAssociatedObject(view, CSVisitKey);
-        CSLayoutVisitStat istat = stat ? [stat intValue] : CSLayoutVisitStatUnvisited;
-        if (istat == CSLayoutVisitStatUnvisited) {
+        NSNumber *stat = objc_getAssociatedObject(view, COSVisitKey);
+        COSLayoutVisitStat istat = stat ? [stat intValue] : COSLayoutVisitStatUnvisited;
+        if (istat == COSLayoutVisitStatUnvisited) {
             [self makeViewTopoVisit:view];
         }
     }
 }
 
 - (void)makeViewTopoVisit:(UIView *)view {
-    CSMakeViewVisiting(view);
+    COSMakeViewVisiting(view);
 
-    CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+    COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
     for (UIView *adjView in [layout dependencies]) {
-        NSNumber *stat = objc_getAssociatedObject(adjView, CSVisitKey);
-        CSLayoutVisitStat istat = stat ? [stat intValue] : CSLayoutVisitStatUnvisited;
+        NSNumber *stat = objc_getAssociatedObject(adjView, COSVisitKey);
+        COSLayoutVisitStat istat = stat ? [stat intValue] : COSLayoutVisitStatUnvisited;
 
-        if (istat == CSLayoutVisitStatUnvisited) {
+        if (istat == COSLayoutVisitStatUnvisited) {
             [self makeViewTopoVisit:adjView];
-        } else if (istat == CSLayoutVisitStatVisiting) {
+        } else if (istat == COSLayoutVisitStatVisiting) {
             [self cleanVisitFlag];
             [self cycleError];
         }
@@ -517,27 +517,27 @@ void CSMakeViewVisited(UIView *view) {
 
     [[self viewTopo] addObject:view];
 
-    CSMakeViewVisited(view);
+    COSMakeViewVisited(view);
 }
 
 - (void)cleanVisitFlag {
     for (UIView *view in [self viewSet]) {
-        CSMakeViewUnvisited(view);
+        COSMakeViewUnvisited(view);
     }
 
     for (UIView *view in [self viewTopo]) {
-        CSMakeViewUnvisited(view);
+        COSMakeViewUnvisited(view);
     }
 }
 
 - (void)cycleError {
-    [NSException raise:@"CSLayoutCycleException" format:@"Layout can not be solved because of cycle"];
+    [NSException raise:@"COSLayoutCycleException" format:@"Layout can not be solved because of cycle"];
 }
 
 @end
 
 
-@interface CSLayoutSolver : NSObject
+@interface COSLayoutSolver : NSObject
 
 + (instancetype)layoutSolverOfView:(UIView *)view;
 
@@ -548,15 +548,15 @@ void CSMakeViewVisited(UIView *view) {
 @end
 
 
-@implementation CSLayoutSolver
+@implementation COSLayoutSolver
 
 + (instancetype)layoutSolverOfView:(UIView *)view {
     static const void *layoutSolverKey = &layoutSolverKey;
 
-    CSLayoutSolver *solver = objc_getAssociatedObject(view, layoutSolverKey);
+    COSLayoutSolver *solver = objc_getAssociatedObject(view, layoutSolverKey);
 
     if (!solver) {
-        solver = [[CSLayoutSolver alloc] init];
+        solver = [[COSLayoutSolver alloc] init];
 
         solver.view = view;
 
@@ -572,14 +572,14 @@ void CSMakeViewVisited(UIView *view) {
     NSMutableSet *layouts = [[NSMutableSet alloc] init];
 
     for (UIView *subview in subviews) {
-        CSLayout *layout = objc_getAssociatedObject(subview, CSLayoutKey);
+        COSLayout *layout = objc_getAssociatedObject(subview, COSLayoutKey);
 
         if (layout) {
             [layouts addObject:layout];
         }
     }
 
-    CSLayoutParser *parser = [[CSLayoutParser alloc] init];
+    COSLayoutIterator *parser = [[COSLayoutIterator alloc] init];
 
     parser.layouts = layouts;
 
@@ -588,7 +588,7 @@ void CSMakeViewVisited(UIView *view) {
     for (UIView *view in [parser viewTopo]) {
         if (view == _view) continue;
 
-        CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+        COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
         [layout startLayout];
     }
@@ -597,14 +597,14 @@ void CSMakeViewVisited(UIView *view) {
 @end
 
 
-#define CSCOORD_MAKE(dependencies_, expr)       \
+#define COSCOORD_MAKE(dependencies_, expr)       \
 ({                                              \
     __weak UIView *__view = _view;              \
                                                 \
-    CSCoord *coord = [[CSCoord alloc] init];    \
+    COSCoord *coord = [[COSCoord alloc] init];    \
                                                 \
     coord.dependencies = (dependencies_);       \
-    coord.block = ^float(CSLayoutRule *rule) {  \
+    coord.block = ^float(COSLayoutRule *rule) {  \
         UIView *view = __view;                  \
                                                 \
         return (expr);                          \
@@ -613,36 +613,36 @@ void CSMakeViewVisited(UIView *view) {
     coord;                                      \
 })
 
-#define CSLAYOUT_ADD_RULE(var, dir_)        \
+#define COSLAYOUT_ADD_RULE(var, dir_)        \
 do {                                        \
     _##var = (var);                         \
     NSString *name = @#var;                 \
                                             \
-    CSLayoutRule *rule =                    \
-    [CSLayoutRule layoutRuleWithView:_view  \
+    COSLayoutRule *rule =                    \
+    [COSLayoutRule layoutRuleWithView:_view  \
         name:name                           \
         coord:_##var                        \
-        dir:CSLayoutDir##dir_];             \
+        dir:COSLayoutDir##dir_];             \
                                             \
     [self.ruleHub dir_##AddRule:rule];      \
 } while (0)
 
-#define CSLAYOUT_ADD_RULE_MAP(var, dir_)    \
+#define COSLAYOUT_ADD_RULE_MAP(var, dir_)    \
 do {                                        \
     _##var = (var);                         \
     NSString *name = @#var;                 \
                                             \
-    CSLayoutRule *rule =                    \
-    [CSLayoutRule layoutRuleWithView:_view  \
+    COSLayoutRule *rule =                    \
+    [COSLayoutRule layoutRuleWithView:_view  \
         name:name                           \
         coord:_##var                        \
-        dir:CSLayoutDir##dir_];             \
+        dir:COSLayoutDir##dir_];             \
                                             \
     self.ruleMap[name] = rule;              \
 } while (0)
 
 NS_INLINE
-void cs_initialize_layout_if_needed(UIView *view) {
+void cos_initialize_layout_if_needed(UIView *view) {
     @synchronized (swizzledLayoutClasses) {
 
     Class class = [view class];
@@ -655,7 +655,7 @@ void cs_initialize_layout_if_needed(UIView *view) {
     IMP overImp = imp_implementationWithBlock(^(UIView *view) {
         ((void(*)(id, SEL))(origImp))(view, name);
 
-        CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+        COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
         if (layout) [layout updateLayoutDriver];
     });
@@ -668,7 +668,7 @@ void cs_initialize_layout_if_needed(UIView *view) {
 }
 
 NS_INLINE
-void cs_initialize_driver_if_needed(UIView *view) {
+void cos_initialize_driver_if_needed(UIView *view) {
     static void *driverKey = &driverKey;
 
     @synchronized (swizzledDriverClasses) {
@@ -686,7 +686,7 @@ void cs_initialize_driver_if_needed(UIView *view) {
         ((void(*)(id, SEL))(origImp))(view, name);
 
         if (objc_getAssociatedObject(view, driverKey)) {
-            [[CSLayoutSolver layoutSolverOfView:(view)] solve];
+            [[COSLayoutSolver layoutSolverOfView:(view)] solve];
         }
     });
 
@@ -698,11 +698,11 @@ void cs_initialize_driver_if_needed(UIView *view) {
 }
 
 
-#define CS_COORD_NAME(coord) \
+#define COS_COORD_NAME(coord) \
     [NSString stringWithCString:(coord) encoding:NSASCIIStringEncoding]
 
 
-@implementation CSLayout
+@implementation COSLayout
 
 + (void)initialize {
     swizzledDriverClasses = [[NSMutableSet alloc] init];
@@ -712,16 +712,16 @@ void cs_initialize_driver_if_needed(UIView *view) {
 + (instancetype)layoutOfView:(UIView *)view {
     if (![view isKindOfClass:[UIView class]]) return nil;
 
-    CSLayout *layout = objc_getAssociatedObject(view, CSLayoutKey);
+    COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
     if (!layout) {
-        layout = [[CSLayout alloc] init];
+        layout = [[COSLayout alloc] init];
 
         layout.view = view;
 
-        objc_setAssociatedObject(view, CSLayoutKey, layout, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(view, COSLayoutKey, layout, OBJC_ASSOCIATION_RETAIN);
 
-        cs_initialize_layout_if_needed(view);
+        cos_initialize_layout_if_needed(view);
 
         [layout updateLayoutDriver];
     }
@@ -745,11 +745,11 @@ void cs_initialize_driver_if_needed(UIView *view) {
     NSArray *subRules = [format componentsSeparatedByString:@","];
 
     for (NSString *subRule in subRules) {
-        CSLAYOUT_AST *ast = NULL;
+        COSLAYOUT_AST *ast = NULL;
 
         char *expr = (char *)[subRule cStringUsingEncoding:NSASCIIStringEncoding];
 
-        int result = cslayout_parse_rule(expr, &ast);
+        int result = coslayout_parse_rule(expr, &ast);
 
         if (result) {
             NSAssert(result != 1, @"Invalid layout rule"); break;
@@ -759,28 +759,28 @@ void cs_initialize_driver_if_needed(UIView *view) {
 
         [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
 
-        cslayout_destroy_ast(ast);
+        coslayout_destroy_ast(ast);
     }
 
     va_end(argv);
 }
 
-- (void)parseAst:(CSLAYOUT_AST *)ast parent:(CSLAYOUT_AST *)parent withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
     [self parseAst:ast->l parent:ast withArgv:argv keeper:keeper];
     [self parseAst:ast->r parent:ast withArgv:argv keeper:keeper];
 
     switch (ast->node_type) {
-    case CSLAYOUT_TOKEN_ATTR: {
+    case COSLAYOUT_TOKEN_ATTR: {
         if (parent != NULL &&
             parent->node_type == '=' &&
             parent->l == ast) break;
 
-        CSCoord *coord = [self valueForKey:CS_COORD_NAME(ast->value.coord)];
+        COSCoord *coord = [self valueForKey:COS_COORD_NAME(ast->value.coord)];
 
         if (!coord) {
-            coord = [CSCoord coordWithFloat:0];
+            coord = [COSCoord coordWithFloat:0];
             [keeper addObject:coord];
         }
 
@@ -788,8 +788,8 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
         break;
 
-    case CSLAYOUT_TOKEN_NUMBER: {
-        CSCoord *coord = [CSCoord coordWithFloat:ast->value.number];
+    case COSLAYOUT_TOKEN_NUMBER: {
+        COSCoord *coord = [COSCoord coordWithFloat:ast->value.number];
 
         ast->data = (__bridge void *)(coord);
 
@@ -797,8 +797,8 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
         break;
 
-    case CSLAYOUT_TOKEN_PERCENTAGE: {
-        CSCoord *coord = [CSCoord coordWithPercentage:ast->value.percentage];
+    case COSLAYOUT_TOKEN_PERCENTAGE: {
+        COSCoord *coord = [COSCoord coordWithPercentage:ast->value.percentage];
 
         ast->data = (__bridge void *)(coord);
 
@@ -806,19 +806,19 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
         break;
 
-    case CSLAYOUT_TOKEN_COORD: {
-        CSCoord *coord = nil;
+    case COSLAYOUT_TOKEN_COORD: {
+        COSCoord *coord = nil;
 
         if (!strcmp(ast->value.coord, "f")) {
             float value = va_arg(*argv, double);
 
-            coord = [CSCoord coordWithFloat:value];
+            coord = [COSCoord coordWithFloat:value];
             [keeper addObject:coord];
         } else {
             UIView *view = va_arg(*argv, id);
-            CSCoords *coords = [CSCoords coordsOfView:view];
+            COSCoords *coords = [COSCoords coordsOfView:view];
 
-            coord = [coords valueForKey:CS_COORD_NAME(ast->value.coord)];
+            coord = [coords valueForKey:COS_COORD_NAME(ast->value.coord)];
         }
 
         ast->data = (__bridge void *)(coord);
@@ -826,10 +826,10 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case '+': {
-        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
-        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+        COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
+        COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
 
-        CSCoord *coord = [coord1 add:coord2];
+        COSCoord *coord = [coord1 add:coord2];
 
         ast->data = (__bridge void *)(coord);
 
@@ -838,10 +838,10 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case '-': {
-        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
-        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+        COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
+        COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
 
-        CSCoord *coord = [coord1 sub:coord2];
+        COSCoord *coord = [coord1 sub:coord2];
 
         ast->data = (__bridge void *)(coord);
 
@@ -850,10 +850,10 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case '*': {
-        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
-        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+        COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
+        COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
 
-        CSCoord *coord = [coord1 mul:coord2];
+        COSCoord *coord = [coord1 mul:coord2];
 
         ast->data = (__bridge void *)(coord);
 
@@ -861,10 +861,10 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
         break;
     case '/': {
-        CSCoord *coord1 = (__bridge CSCoord *)(ast->l->data);
-        CSCoord *coord2 = (__bridge CSCoord *)(ast->r->data);
+        COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
+        COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
 
-        CSCoord *coord = [coord1 div:coord2];
+        COSCoord *coord = [coord1 div:coord2];
 
         ast->data = (__bridge void *)(coord);
 
@@ -873,9 +873,9 @@ void cs_initialize_driver_if_needed(UIView *view) {
         break;
 
     case '=': {
-        CSCoord *coord = (__bridge CSCoord *)(ast->r->data);
+        COSCoord *coord = (__bridge COSCoord *)(ast->r->data);
 
-        [self setValue:coord forKey:CS_COORD_NAME(ast->l->value.coord)];
+        [self setValue:coord forKey:COS_COORD_NAME(ast->l->value.coord)];
 
         ast->data = (__bridge void *)(coord);
     }
@@ -888,22 +888,22 @@ void cs_initialize_driver_if_needed(UIView *view) {
 
 - (void)updateLayoutDriver {
     if (_view.superview) {
-        cs_initialize_driver_if_needed(_view.superview);
+        cos_initialize_driver_if_needed(_view.superview);
     }
 }
 
 - (NSSet *)dependencies {
     NSMutableSet *set = [[NSMutableSet alloc] init];
 
-    for (CSLayoutRule *rule in _ruleHub.vRules) {
+    for (COSLayoutRule *rule in _ruleHub.vRules) {
         [set unionSet:rule.coord.dependencies];
     }
 
-    for (CSLayoutRule *rule in _ruleHub.hRules) {
+    for (COSLayoutRule *rule in _ruleHub.hRules) {
         [set unionSet:rule.coord.dependencies];
     }
 
-    for (CSLayoutRule *rule in [_ruleMap allValues]) {
+    for (COSLayoutRule *rule in [_ruleMap allValues]) {
         [set unionSet:rule.coord.dependencies];
     }
 
@@ -916,13 +916,13 @@ void cs_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)solveRules:(NSArray *)rules {
-    CSLayoutRulesSolver *solver = [[CSLayoutRulesSolver alloc] init];
+    COSLayoutRulesSolver *solver = [[COSLayoutRulesSolver alloc] init];
 
     solver.view = _view;
 
     NSMutableString *selStr = [NSMutableString stringWithString:@"solve"];
 
-    for (CSLayoutRule *rule in rules) {
+    for (COSLayoutRule *rule in rules) {
         [selStr appendString:[rule.name capitalizedString]];
     }
 
@@ -939,27 +939,27 @@ void cs_initialize_driver_if_needed(UIView *view) {
 - (void)checkBounds {
     CGSize size = _frame.size;
 
-    CGFloat minw = CS_MM_RAW_VALUE(self, minw);
+    CGFloat minw = COS_MM_RAW_VALUE(self, minw);
 
-    if (CS_VALID_DIM(minw) && size.width < minw) {
+    if (COS_VALID_DIM(minw) && size.width < minw) {
         size.width = minw;
     }
 
-    CGFloat maxw = CS_MM_RAW_VALUE(self, maxw);
+    CGFloat maxw = COS_MM_RAW_VALUE(self, maxw);
 
-    if (CS_VALID_DIM(maxw) && size.width > maxw) {
+    if (COS_VALID_DIM(maxw) && size.width > maxw) {
         size.width = maxw;
     }
 
-    CGFloat minh = CS_MM_RAW_VALUE(self, minh);
+    CGFloat minh = COS_MM_RAW_VALUE(self, minh);
 
-    if (CS_VALID_DIM(minh) && size.height < minh) {
+    if (COS_VALID_DIM(minh) && size.height < minh) {
         size.height = minh;
     }
 
-    CGFloat maxh = CS_MM_RAW_VALUE(self, maxh);
+    CGFloat maxh = COS_MM_RAW_VALUE(self, maxh);
 
-    if (CS_VALID_DIM(maxh) && size.height > maxh) {
+    if (COS_VALID_DIM(maxh) && size.height > maxh) {
         size.height = maxh;
     }
 
@@ -986,80 +986,80 @@ void cs_initialize_driver_if_needed(UIView *view) {
     }
 }
 
-- (void)setMinw:(CSCoord *)minw {
-    CSLAYOUT_ADD_RULE_MAP(minw, h);
+- (void)setMinw:(COSCoord *)minw {
+    COSLAYOUT_ADD_RULE_MAP(minw, h);
 }
 
-- (void)setMaxw:(CSCoord *)maxw {
-    CSLAYOUT_ADD_RULE_MAP(maxw, h);
+- (void)setMaxw:(COSCoord *)maxw {
+    COSLAYOUT_ADD_RULE_MAP(maxw, h);
 }
 
-- (void)setMinh:(CSCoord *)minh {
-    CSLAYOUT_ADD_RULE_MAP(minh, v);
+- (void)setMinh:(COSCoord *)minh {
+    COSLAYOUT_ADD_RULE_MAP(minh, v);
 }
 
-- (void)setMaxh:(CSCoord *)maxh {
-    CSLAYOUT_ADD_RULE_MAP(maxh, v);
+- (void)setMaxh:(COSCoord *)maxh {
+    COSLAYOUT_ADD_RULE_MAP(maxh, v);
 }
 
-- (void)setTt:(CSCoord *)tt {
-    CSLAYOUT_ADD_RULE(tt, v);
+- (void)setTt:(COSCoord *)tt {
+    COSLAYOUT_ADD_RULE(tt, v);
 }
 
-- (void)setTb:(CSCoord *)tb {
+- (void)setTb:(COSCoord *)tb {
     _tb = tb;
 
-    CSCoord *tt = tb ? CSCOORD_MAKE(tb.dependencies, CS_SUPERVIEW_HEIGHT - tb.block(rule)) : nil;
+    COSCoord *tt = tb ? COSCOORD_MAKE(tb.dependencies, COS_SUPERVIEW_HEIGHT - tb.block(rule)) : nil;
 
     [self setTt:tt];
 }
 
-- (void)setLl:(CSCoord *)ll {
-    CSLAYOUT_ADD_RULE(ll, h);
+- (void)setLl:(COSCoord *)ll {
+    COSLAYOUT_ADD_RULE(ll, h);
 }
 
-- (void)setLr:(CSCoord *)lr {
+- (void)setLr:(COSCoord *)lr {
     _lr = lr;
 
-    CSCoord *ll = lr ? CSCOORD_MAKE(lr.dependencies, CS_SUPERVIEW_WIDTH - lr.block(rule)) : nil;
+    COSCoord *ll = lr ? COSCOORD_MAKE(lr.dependencies, COS_SUPERVIEW_WIDTH - lr.block(rule)) : nil;
 
     [self setLl:ll];
 }
 
-- (void)setBb:(CSCoord *)bb {
+- (void)setBb:(COSCoord *)bb {
     _bb = bb;
 
-    CSCoord *bt = bb ? CSCOORD_MAKE(bb.dependencies, CS_SUPERVIEW_HEIGHT - bb.block(rule)) : nil;
+    COSCoord *bt = bb ? COSCOORD_MAKE(bb.dependencies, COS_SUPERVIEW_HEIGHT - bb.block(rule)) : nil;
 
     [self setBt:bt];
 }
 
-- (void)setBt:(CSCoord *)bt {
-    CSLAYOUT_ADD_RULE(bt, v);
+- (void)setBt:(COSCoord *)bt {
+    COSLAYOUT_ADD_RULE(bt, v);
 }
 
-- (void)setRr:(CSCoord *)rr {
+- (void)setRr:(COSCoord *)rr {
     _rr = rr;
 
-    CSCoord *rl = rr ? CSCOORD_MAKE(rr.dependencies, CS_SUPERVIEW_WIDTH - rr.block(rule)) : nil;
+    COSCoord *rl = rr ? COSCOORD_MAKE(rr.dependencies, COS_SUPERVIEW_WIDTH - rr.block(rule)) : nil;
 
     [self setRl:rl];
 }
 
-- (void)setRl:(CSCoord *)rl {
-    CSLAYOUT_ADD_RULE(rl, h);
+- (void)setRl:(COSCoord *)rl {
+    COSLAYOUT_ADD_RULE(rl, h);
 }
 
-- (void)setCt:(CSCoord *)ct {
-    CSLAYOUT_ADD_RULE(ct, v);
+- (void)setCt:(COSCoord *)ct {
+    COSLAYOUT_ADD_RULE(ct, v);
 }
 
-- (void)setCl:(CSCoord *)cl {
-    CSLAYOUT_ADD_RULE(cl, h);
+- (void)setCl:(COSCoord *)cl {
+    COSLAYOUT_ADD_RULE(cl, h);
 }
 
-- (CSLayoutRuleHub *)ruleHub {
-    return (_ruleHub ?: (_ruleHub = [[CSLayoutRuleHub alloc] init]));
+- (COSLayoutRuleHub *)ruleHub {
+    return (_ruleHub ?: (_ruleHub = [[COSLayoutRuleHub alloc] init]));
 }
 
 - (NSMutableDictionary *)ruleMap {
@@ -1069,15 +1069,15 @@ void cs_initialize_driver_if_needed(UIView *view) {
 @end
 
 
-#define CSCOORD_CALC(expr)                           \
+#define COSCOORD_CALC(expr)                           \
 do {                                                 \
-    CSCoord *coord = [[CSCoord alloc] init];         \
+    COSCoord *coord = [[COSCoord alloc] init];         \
     NSMutableSet *dependencies = self.dependencies;  \
                                                      \
     [dependencies unionSet:other.dependencies];      \
                                                      \
     coord.dependencies = dependencies;               \
-    coord.block = ^float(CSLayoutRule *rule) {       \
+    coord.block = ^float(COSLayoutRule *rule) {       \
         return (expr);                               \
     };                                               \
                                                      \
@@ -1085,13 +1085,13 @@ do {                                                 \
 } while (0);
 
 
-@implementation CSCoord
+@implementation COSCoord
 
 + (instancetype)coordWithFloat:(float)value {
-    CSCoord *coord = [[CSCoord alloc] init];
+    COSCoord *coord = [[COSCoord alloc] init];
 
     coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
-    coord.block = ^float(CSLayoutRule *rule) {
+    coord.block = ^float(COSLayoutRule *rule) {
         return value;
     };
 
@@ -1099,14 +1099,14 @@ do {                                                 \
 }
 
 + (instancetype)coordWithPercentage:(float)percentage {
-    CSCoord *coord = [[CSCoord alloc] init];
+    COSCoord *coord = [[COSCoord alloc] init];
 
     percentage /= 100.0f;
 
     coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
-    coord.block = ^float(CSLayoutRule *rule) {
+    coord.block = ^float(COSLayoutRule *rule) {
         UIView *view = rule.view;
-        CGFloat size = (rule.dir == CSLayoutDirv ? CS_SUPERVIEW_HEIGHT : CS_SUPERVIEW_WIDTH);
+        CGFloat size = (rule.dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
 
         return size * percentage;
     };
@@ -1114,20 +1114,20 @@ do {                                                 \
     return coord;
 }
 
-- (instancetype)add:(CSCoord *)other {
-    CSCOORD_CALC(self.block(rule) + other.block(rule));
+- (instancetype)add:(COSCoord *)other {
+    COSCOORD_CALC(self.block(rule) + other.block(rule));
 }
 
-- (instancetype)sub:(CSCoord *)other {
-    CSCOORD_CALC(self.block(rule) - other.block(rule));
+- (instancetype)sub:(COSCoord *)other {
+    COSCOORD_CALC(self.block(rule) - other.block(rule));
 }
 
-- (instancetype)mul:(CSCoord *)other {
-    CSCOORD_CALC(self.block(rule) * other.block(rule));
+- (instancetype)mul:(COSCoord *)other {
+    COSCOORD_CALC(self.block(rule) * other.block(rule));
 }
 
-- (instancetype)div:(CSCoord *)other {
-    CSCOORD_CALC(self.block(rule) / other.block(rule));
+- (instancetype)div:(COSCoord *)other {
+    COSCOORD_CALC(self.block(rule) / other.block(rule));
 }
 
 - (NSMutableSet *)dependencies {
@@ -1137,50 +1137,50 @@ do {                                                 \
 @end
 
 
-@interface CSCoords ()
+@interface COSCoords ()
 
 @property (nonatomic, weak) UIView *view;
 
-@property (nonatomic, strong) CSCoord *w;
-@property (nonatomic, strong) CSCoord *h;
+@property (nonatomic, strong) COSCoord *w;
+@property (nonatomic, strong) COSCoord *h;
 
-@property (nonatomic, strong) CSCoord *tt;
-@property (nonatomic, strong) CSCoord *tb;
+@property (nonatomic, strong) COSCoord *tt;
+@property (nonatomic, strong) COSCoord *tb;
 
-@property (nonatomic, strong) CSCoord *ll;
-@property (nonatomic, strong) CSCoord *lr;
+@property (nonatomic, strong) COSCoord *ll;
+@property (nonatomic, strong) COSCoord *lr;
 
-@property (nonatomic, strong) CSCoord *bb;
-@property (nonatomic, strong) CSCoord *bt;
+@property (nonatomic, strong) COSCoord *bb;
+@property (nonatomic, strong) COSCoord *bt;
 
-@property (nonatomic, strong) CSCoord *rr;
-@property (nonatomic, strong) CSCoord *rl;
+@property (nonatomic, strong) COSCoord *rr;
+@property (nonatomic, strong) COSCoord *rl;
 
-@property (nonatomic, strong) CSCoord *ct;
-@property (nonatomic, strong) CSCoord *cl;
+@property (nonatomic, strong) COSCoord *ct;
+@property (nonatomic, strong) COSCoord *cl;
 
 @end
 
 
-#define CS_VIEW_TOP    ([view convertRect:view.bounds toView:rule.view.superview].origin.y)
-#define CS_VIEW_LEFT   ([view convertRect:view.bounds toView:rule.view.superview].origin.x)
-#define CS_VIEW_WIDTH  (view.bounds.size.width)
-#define CS_VIEW_HEIGHT (view.bounds.size.height)
+#define COS_VIEW_TOP    ([view convertRect:view.bounds toView:rule.view.superview].origin.y)
+#define COS_VIEW_LEFT   ([view convertRect:view.bounds toView:rule.view.superview].origin.x)
+#define COS_VIEW_WIDTH  (view.bounds.size.width)
+#define COS_VIEW_HEIGHT (view.bounds.size.height)
 
 #define LAZY_LOAD_COORD(ivar, expr) \
-    (ivar ?: (ivar = CSCOORD_MAKE([NSMutableSet setWithObject:_view], expr)))
+    (ivar ?: (ivar = COSCOORD_MAKE([NSMutableSet setWithObject:_view], expr)))
 
 
-@implementation CSCoords
+@implementation COSCoords
 
 + (instancetype)coordsOfView:(UIView *)view {
     static const void *coordsKey = &coordsKey;
 
     if ([view isKindOfClass:[UIView class]]) {
-        CSCoords *coords = objc_getAssociatedObject(view, coordsKey);
+        COSCoords *coords = objc_getAssociatedObject(view, coordsKey);
 
         if (!coords) {
-            coords = [[CSCoords alloc] init];
+            coords = [[COSCoords alloc] init];
 
             coords.view = view;
 
@@ -1193,52 +1193,52 @@ do {                                                 \
     return nil;
 }
 
-- (CSCoord *)tt {
-    return LAZY_LOAD_COORD(_tt, CS_VIEW_TOP);
+- (COSCoord *)tt {
+    return LAZY_LOAD_COORD(_tt, COS_VIEW_TOP);
 }
 
-- (CSCoord *)tb {
-    return LAZY_LOAD_COORD(_tb, CS_SUPERVIEW_HEIGHT - CS_VIEW_TOP);
+- (COSCoord *)tb {
+    return LAZY_LOAD_COORD(_tb, COS_SUPERVIEW_HEIGHT - COS_VIEW_TOP);
 }
 
-- (CSCoord *)ll {
-    return LAZY_LOAD_COORD(_ll, CS_VIEW_LEFT);
+- (COSCoord *)ll {
+    return LAZY_LOAD_COORD(_ll, COS_VIEW_LEFT);
 }
 
-- (CSCoord *)lr {
-    return LAZY_LOAD_COORD(_lr, CS_SUPERVIEW_WIDTH - CS_VIEW_LEFT);
+- (COSCoord *)lr {
+    return LAZY_LOAD_COORD(_lr, COS_SUPERVIEW_WIDTH - COS_VIEW_LEFT);
 }
 
-- (CSCoord *)bb {
-    return LAZY_LOAD_COORD(_bb, CS_SUPERVIEW_HEIGHT - CS_VIEW_TOP - CS_VIEW_HEIGHT);
+- (COSCoord *)bb {
+    return LAZY_LOAD_COORD(_bb, COS_SUPERVIEW_HEIGHT - COS_VIEW_TOP - COS_VIEW_HEIGHT);
 }
 
-- (CSCoord *)bt {
-    return LAZY_LOAD_COORD(_bt, CS_VIEW_TOP + CS_VIEW_HEIGHT);
+- (COSCoord *)bt {
+    return LAZY_LOAD_COORD(_bt, COS_VIEW_TOP + COS_VIEW_HEIGHT);
 }
 
-- (CSCoord *)rr {
-    return LAZY_LOAD_COORD(_rr, CS_SUPERVIEW_WIDTH - CS_VIEW_LEFT - CS_VIEW_WIDTH);
+- (COSCoord *)rr {
+    return LAZY_LOAD_COORD(_rr, COS_SUPERVIEW_WIDTH - COS_VIEW_LEFT - COS_VIEW_WIDTH);
 }
 
-- (CSCoord *)rl {
-    return LAZY_LOAD_COORD(_rl, CS_VIEW_LEFT + CS_VIEW_WIDTH);
+- (COSCoord *)rl {
+    return LAZY_LOAD_COORD(_rl, COS_VIEW_LEFT + COS_VIEW_WIDTH);
 }
 
-- (CSCoord *)ct {
-    return LAZY_LOAD_COORD(_ct, CS_VIEW_TOP + CS_VIEW_HEIGHT / 2);
+- (COSCoord *)ct {
+    return LAZY_LOAD_COORD(_ct, COS_VIEW_TOP + COS_VIEW_HEIGHT / 2);
 }
 
-- (CSCoord *)cl {
-    return LAZY_LOAD_COORD(_cl, CS_VIEW_LEFT + CS_VIEW_WIDTH / 2);
+- (COSCoord *)cl {
+    return LAZY_LOAD_COORD(_cl, COS_VIEW_LEFT + COS_VIEW_WIDTH / 2);
 }
 
-- (CSCoord *)w {
-    return LAZY_LOAD_COORD(_w, CS_VIEW_WIDTH);
+- (COSCoord *)w {
+    return LAZY_LOAD_COORD(_w, COS_VIEW_WIDTH);
 }
 
-- (CSCoord *)h {
-    return LAZY_LOAD_COORD(_h, CS_VIEW_HEIGHT);
+- (COSCoord *)h {
+    return LAZY_LOAD_COORD(_h, COS_VIEW_HEIGHT);
 }
 
 @end

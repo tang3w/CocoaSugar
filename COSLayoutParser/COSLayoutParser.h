@@ -30,35 +30,35 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED
-# define YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED
+#ifndef YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED
+# define YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED
 /* Debug traces.  */
-#ifndef CSLAYOUTDEBUG
+#ifndef COSLAYOUTDEBUG
 # if defined YYDEBUG
 #if YYDEBUG
-#   define CSLAYOUTDEBUG 1
+#   define COSLAYOUTDEBUG 1
 #  else
-#   define CSLAYOUTDEBUG 0
+#   define COSLAYOUTDEBUG 0
 #  endif
 # else /* ! defined YYDEBUG */
-#  define CSLAYOUTDEBUG 0
+#  define COSLAYOUTDEBUG 0
 # endif /* ! defined YYDEBUG */
-#endif  /* ! defined CSLAYOUTDEBUG */
-#if CSLAYOUTDEBUG
-extern int cslayoutdebug;
+#endif  /* ! defined COSLAYOUTDEBUG */
+#if COSLAYOUTDEBUG
+extern int coslayoutdebug;
 #endif
 /* "%code requires" blocks.  */
-#line 18 "CSLayoutParser.y" /* yacc.c:1915  */
+#line 18 "COSLayoutParser.y" /* yacc.c:1915  */
 
-#define YYSTYPE CSLAYOUTSTYPE
+#define YYSTYPE COSLAYOUTSTYPE
 
-#define YY_DECL int cslayoutlex \
-    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp)
+#define YY_DECL int coslayoutlex \
+    (YYSTYPE *yylval_param, yyscan_t yyscanner, COSLAYOUT_AST **astpp)
 
-struct CSLAYOUT_AST {
+struct COSLAYOUT_AST {
     int node_type;
-    struct CSLAYOUT_AST *l;
-    struct CSLAYOUT_AST *r;
+    struct COSLAYOUT_AST *l;
+    struct COSLAYOUT_AST *r;
     union {
         float number;
         float percentage;
@@ -67,36 +67,36 @@ struct CSLAYOUT_AST {
     void *data;
 };
 
-typedef struct CSLAYOUT_AST CSLAYOUT_AST;
+typedef struct COSLAYOUT_AST COSLAYOUT_AST;
 
-CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r);
+COSLAYOUT_AST *coslayout_create_ast(int type, COSLAYOUT_AST *l, COSLAYOUT_AST *r);
 
-int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp);
-void cslayout_destroy_ast(CSLAYOUT_AST *astp);
+int coslayout_parse_rule(char *rule, COSLAYOUT_AST **astpp);
+void coslayout_destroy_ast(COSLAYOUT_AST *astp);
 
-#line 78 "CSLayoutParser.h" /* yacc.c:1915  */
+#line 78 "COSLayoutParser.h" /* yacc.c:1915  */
 
 /* Token type.  */
-#ifndef CSLAYOUTTOKENTYPE
-# define CSLAYOUTTOKENTYPE
-  enum cslayouttokentype
+#ifndef COSLAYOUTTOKENTYPE
+# define COSLAYOUTTOKENTYPE
+  enum coslayouttokentype
   {
-    CSLAYOUT_TOKEN_ATTR = 258,
-    CSLAYOUT_TOKEN_NUMBER = 259,
-    CSLAYOUT_TOKEN_PERCENTAGE = 260,
-    CSLAYOUT_TOKEN_COORD = 261
+    COSLAYOUT_TOKEN_ATTR = 258,
+    COSLAYOUT_TOKEN_NUMBER = 259,
+    COSLAYOUT_TOKEN_PERCENTAGE = 260,
+    COSLAYOUT_TOKEN_COORD = 261
   };
 #endif
 
 /* Value type.  */
-#if ! defined CSLAYOUTSTYPE && ! defined CSLAYOUTSTYPE_IS_DECLARED
-typedef CSLAYOUT_AST * CSLAYOUTSTYPE;
-# define CSLAYOUTSTYPE_IS_TRIVIAL 1
-# define CSLAYOUTSTYPE_IS_DECLARED 1
+#if ! defined COSLAYOUTSTYPE && ! defined COSLAYOUTSTYPE_IS_DECLARED
+typedef COSLAYOUT_AST * COSLAYOUTSTYPE;
+# define COSLAYOUTSTYPE_IS_TRIVIAL 1
+# define COSLAYOUTSTYPE_IS_DECLARED 1
 #endif
 
 
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
+int coslayoutparse (void *scanner, COSLAYOUT_AST **astpp);
 
-#endif /* !YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED  */
+#endif /* !YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED  */

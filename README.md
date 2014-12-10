@@ -6,23 +6,23 @@ CocoaSugar is an Objective-C library that can make developing apps easier. It in
 Documentation
 =============
 
-## `CSLayout`
+## `COSLayout`
 
-`CSLayout` is yet another layout library. It's neither a wrapper nor a replacement for Auto Layout. It dose not handle circular references of constraints and constraint priority. Besides that, `CSLayout` can solve all layout cases. What's more, `CSLayout` provides some additional benefits: smaller memory footprint, better performance and more intuitive expression.
+`COSLayout` is yet another layout library. It's neither a wrapper nor a replacement for Auto Layout. It dose not handle circular references of constraints and constraint priority. Besides that, `COSLayout` can solve all layout cases. What's more, `COSLayout` provides some additional benefits: smaller memory footprint, better performance and more intuitive expression.
 
-`CSLayout` is an abstraction of layout of view. With `CSLayout`, you can specify view's layout relative to it's superview, sibling views and non-sibling views. Following example specifies a 10-points constraint from view's bottom to superview's bottom:
+`COSLayout` is an abstraction of layout of view. With `COSLayout`, you can specify view's layout relative to it's superview, sibling views and non-sibling views. Following example specifies a 10-points constraint from view's bottom to superview's bottom:
 
 ```objc
 UIView *view = [[UIView alloc] init];
 
-CSLayout *layout = [CSLayout layoutOfView:view];
+COSLayout *layout = [COSLayout layoutOfView:view];
 
 [layout addRule:@"bb = 10"];
 ```
 
 In the example above, a rule has been added into layout by method `addRule:`. A rule is expressed in Sample Layout Language or "SLL", which can specify constraints intuitively. The syntax of SLL is very simple, just comma-separated assignment expressions. Each assignment expression specifies a constraint, l-value is constraint name, r-value is constraint value.
 
-`CSLayout` supports 14 constraints:
+`COSLayout` supports 14 constraints:
 
 Constraint | Direction  | Description
 -----------|------------|------------
@@ -41,7 +41,7 @@ Constraint | Direction  | Description
 `minh`     | Vertical   | Minimal height of view
 `maxh`     | Vertical   | Maximal height of view
 
-`CSLayout` supports 4 constraint value types:
+`COSLayout` supports 4 constraint value types:
 
 Constraint Value Type | Example             | Description
 ----------------------|---------------------|------------
@@ -52,9 +52,9 @@ Constraint            | `tt` `maxw`         | Constraint value of current layout
 
 Note that the percentage has different means for different constraint directions. If current constraint direction is horizontal, the percentage represents the percentage of view's width, otherwise, the percentage of view's height.
 
-Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `CSLayout` can specify constraints between non-sibling views.
+Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `COSLayout` can specify constraints between non-sibling views.
 
-`CSLayout` support 13 format specifier:
+`COSLayout` support 13 format specifier:
 
 Format specifier | Type       | Description
 -----------------|------------|------------
@@ -72,7 +72,7 @@ Format specifier | Type       | Description
 `%h`             | `UIView *` | Height of view
 `%f`             | `float`    | Fixed length on screen
 
-It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `CSLayout`, the dependencies is presented by DAG. So `CSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
+It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `COSLayout`, the dependencies is presented by DAG. So `COSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
 
 ### Constraint value expression
 
@@ -90,29 +90,29 @@ You can also use `()` to group sub-expression to change the evaluation order of 
 
 ### Examples
 
-In the following example, `CSLayout` aligns view's top-right corner to superview's top-right corner with 5-points space.
+In the following example, `COSLayout` aligns view's top-right corner to superview's top-right corner with 5-points space.
 
 ```objc
 UIView *view = [[UIView alloc] init];
 
-CSLayout *layout = [CSLayout layoutOfView:view];
+COSLayout *layout = [COSLayout layoutOfView:view];
 
 [layout addRule:@"tt = rr = 5"];
 ```
 
-In the following example, `CSLayout` aligns view's left/bottom/right to superview's left/bottom/right with 10-points space, and make the view's top aligned to superview's center.
+In the following example, `COSLayout` aligns view's left/bottom/right to superview's left/bottom/right with 10-points space, and make the view's top aligned to superview's center.
 
 ```objc
 UIView *view = [[UIView alloc] init];
 
-CSLayout *layout = [CSLayout layoutOfView:view];
+COSLayout *layout = [COSLayout layoutOfView:view];
 
 [layout addRule:@"ll = bb = rr = 10, tt = 50%"];
 ```
 
-## `CSObserver`
+## `COSObserver`
 
-`CSObserver` is an improvement of KVO. Using `CSObserver`, you can use block for KVO notification. It eliminates some inconvenience of KVO. After making an observation by `CSObserver`, there's no need to remove observer manually, `CSObserver` can remove observer for target automatically when either observer or target is dealloced.
+`COSObserver` is an improvement of KVO. Using `COSObserver`, you can use block for KVO notification. It eliminates some inconvenience of KVO. After making an observation by `COSObserver`, there's no need to remove observer manually, `COSObserver` can remove observer for target automatically when either observer or target is dealloced.
 
 In the following example, `observer` is the observer for `label1`. Then, `label2` is added to `observer` as target. When the text of `label2` changed, `observer` observes this change immediately and call the block, which makes text of `label1` the same as text of `label2`.
 
@@ -120,7 +120,7 @@ In the following example, `observer` is the observer for `label1`. Then, `label2
 UILabel *label1 = [[UILabel alloc] init];
 UILabel *label2 = [[UILabel alloc] init];
 
-CSObserver *observer = [CSObserver observerForObject:label1];
+COSObserver *observer = [COSObserver observerForObject:label1];
 
 [observer
  addTarget:label2

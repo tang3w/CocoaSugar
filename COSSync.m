@@ -1,4 +1,4 @@
-// CSSync.m
+// COSSync.m
 //
 // Copyright (c) 2014 Tang Tianyong
 //
@@ -23,24 +23,24 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#import "CSSync.h"
-#import "CSObserver.h"
+#import "COSSync.h"
+#import "COSObserver.h"
 
 
-@interface CSSync ()
+@interface COSSync ()
 
 @property (nonatomic, strong) NSArray *objects;
 
 @end
 
 
-@implementation CSSync
+@implementation COSSync
 
 + (instancetype)syncOfObjects:(NSObject *)firstObject, ... {
     va_list argv;
     va_start(argv, firstObject);
 
-    CSSync *sync = [[CSSync alloc] init];
+    COSSync *sync = [[COSSync alloc] init];
 
     NSObject *object = nil;
     NSMutableArray *objects = [NSMutableArray arrayWithObject:firstObject];
@@ -61,8 +61,8 @@
         keyPath1:(NSString *)keyPath1
         keyPath2:(NSString *)keyPath2
 {
-    CSObserver *observer1 = [CSObserver observerForObject:obj1];
-    CSObserver *observer2 = [CSObserver observerForObject:obj2];
+    COSObserver *observer1 = [COSObserver observerForObject:obj1];
+    COSObserver *observer2 = [COSObserver observerForObject:obj2];
 
     [observer1
      addTarget:obj2

@@ -59,26 +59,26 @@
 #define YYPULL 1
 
 /* Substitute the type names.  */
-#define YYSTYPE         CSLAYOUTSTYPE
+#define YYSTYPE         COSLAYOUTSTYPE
 /* Substitute the variable and function names.  */
-#define yyparse         cslayoutparse
-#define yylex           cslayoutlex
-#define yyerror         cslayouterror
-#define yydebug         cslayoutdebug
-#define yynerrs         cslayoutnerrs
+#define yyparse         coslayoutparse
+#define yylex           coslayoutlex
+#define yyerror         coslayouterror
+#define yydebug         coslayoutdebug
+#define yynerrs         coslayoutnerrs
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "CSLayoutParser.y" /* yacc.c:339  */
+#line 1 "COSLayoutParser.y" /* yacc.c:339  */
 
 #include <stdio.h>
-#include "CSLayoutParser.h"
-#include "CSLayoutLex.h"
+#include "COSLayoutParser.h"
+#include "COSLayoutLex.h"
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *msg);
-int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp);
+void coslayouterror(void *scanner, COSLAYOUT_AST **astpp, char *msg);
+int coslayoutlex(YYSTYPE *lvalp, void *scanner, COSLAYOUT_AST **astpp);
 
-#line 82 "CSLayoutParser.c" /* yacc.c:339  */
+#line 82 "COSLayoutParser.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -97,36 +97,36 @@ int cslayoutlex(YYSTYPE *lvalp, void *scanner, CSLAYOUT_AST **astpp);
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "CSLayoutParser.h".  */
-#ifndef YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED
-# define YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED
+   by #include "COSLayoutParser.h".  */
+#ifndef YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED
+# define YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED
 /* Debug traces.  */
-#ifndef CSLAYOUTDEBUG
+#ifndef COSLAYOUTDEBUG
 # if defined YYDEBUG
 #if YYDEBUG
-#   define CSLAYOUTDEBUG 1
+#   define COSLAYOUTDEBUG 1
 #  else
-#   define CSLAYOUTDEBUG 0
+#   define COSLAYOUTDEBUG 0
 #  endif
 # else /* ! defined YYDEBUG */
-#  define CSLAYOUTDEBUG 0
+#  define COSLAYOUTDEBUG 0
 # endif /* ! defined YYDEBUG */
-#endif  /* ! defined CSLAYOUTDEBUG */
-#if CSLAYOUTDEBUG
-extern int cslayoutdebug;
+#endif  /* ! defined COSLAYOUTDEBUG */
+#if COSLAYOUTDEBUG
+extern int coslayoutdebug;
 #endif
 /* "%code requires" blocks.  */
-#line 18 "CSLayoutParser.y" /* yacc.c:355  */
+#line 18 "COSLayoutParser.y" /* yacc.c:355  */
 
-#define YYSTYPE CSLAYOUTSTYPE
+#define YYSTYPE COSLAYOUTSTYPE
 
-#define YY_DECL int cslayoutlex \
-    (YYSTYPE *yylval_param, yyscan_t yyscanner, CSLAYOUT_AST **astpp)
+#define YY_DECL int coslayoutlex \
+    (YYSTYPE *yylval_param, yyscan_t yyscanner, COSLAYOUT_AST **astpp)
 
-struct CSLAYOUT_AST {
+struct COSLAYOUT_AST {
     int node_type;
-    struct CSLAYOUT_AST *l;
-    struct CSLAYOUT_AST *r;
+    struct COSLAYOUT_AST *l;
+    struct COSLAYOUT_AST *r;
     union {
         float number;
         float percentage;
@@ -135,43 +135,43 @@ struct CSLAYOUT_AST {
     void *data;
 };
 
-typedef struct CSLAYOUT_AST CSLAYOUT_AST;
+typedef struct COSLAYOUT_AST COSLAYOUT_AST;
 
-CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r);
+COSLAYOUT_AST *coslayout_create_ast(int type, COSLAYOUT_AST *l, COSLAYOUT_AST *r);
 
-int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp);
-void cslayout_destroy_ast(CSLAYOUT_AST *astp);
+int coslayout_parse_rule(char *rule, COSLAYOUT_AST **astpp);
+void coslayout_destroy_ast(COSLAYOUT_AST *astp);
 
-#line 146 "CSLayoutParser.c" /* yacc.c:355  */
+#line 146 "COSLayoutParser.c" /* yacc.c:355  */
 
 /* Token type.  */
-#ifndef CSLAYOUTTOKENTYPE
-# define CSLAYOUTTOKENTYPE
-  enum cslayouttokentype
+#ifndef COSLAYOUTTOKENTYPE
+# define COSLAYOUTTOKENTYPE
+  enum coslayouttokentype
   {
-    CSLAYOUT_TOKEN_ATTR = 258,
-    CSLAYOUT_TOKEN_NUMBER = 259,
-    CSLAYOUT_TOKEN_PERCENTAGE = 260,
-    CSLAYOUT_TOKEN_COORD = 261
+    COSLAYOUT_TOKEN_ATTR = 258,
+    COSLAYOUT_TOKEN_NUMBER = 259,
+    COSLAYOUT_TOKEN_PERCENTAGE = 260,
+    COSLAYOUT_TOKEN_COORD = 261
   };
 #endif
 
 /* Value type.  */
-#if ! defined CSLAYOUTSTYPE && ! defined CSLAYOUTSTYPE_IS_DECLARED
-typedef CSLAYOUT_AST * CSLAYOUTSTYPE;
-# define CSLAYOUTSTYPE_IS_TRIVIAL 1
-# define CSLAYOUTSTYPE_IS_DECLARED 1
+#if ! defined COSLAYOUTSTYPE && ! defined COSLAYOUTSTYPE_IS_DECLARED
+typedef COSLAYOUT_AST * COSLAYOUTSTYPE;
+# define COSLAYOUTSTYPE_IS_TRIVIAL 1
+# define COSLAYOUTSTYPE_IS_DECLARED 1
 #endif
 
 
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
+int coslayoutparse (void *scanner, COSLAYOUT_AST **astpp);
 
-#endif /* !YY_CSLAYOUT_CSLAYOUTPARSER_H_INCLUDED  */
+#endif /* !YY_COSLAYOUT_COSLAYOUTPARSER_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 175 "CSLayoutParser.c" /* yacc.c:358  */
+#line 175 "COSLayoutParser.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -352,7 +352,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-         || (defined CSLAYOUTSTYPE_IS_TRIVIAL && CSLAYOUTSTYPE_IS_TRIVIAL)))
+         || (defined COSLAYOUTSTYPE_IS_TRIVIAL && COSLAYOUTSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
@@ -465,7 +465,7 @@ static const yytype_uint8 yytranslate[] =
        5,     6
 };
 
-#if CSLAYOUTDEBUG
+#if COSLAYOUTDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
@@ -474,14 +474,14 @@ static const yytype_uint8 yyrline[] =
 };
 #endif
 
-#if CSLAYOUTDEBUG || YYERROR_VERBOSE || 0
+#if COSLAYOUTDEBUG || YYERROR_VERBOSE || 0
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "CSLAYOUT_TOKEN_ATTR",
-  "CSLAYOUT_TOKEN_NUMBER", "CSLAYOUT_TOKEN_PERCENTAGE",
-  "CSLAYOUT_TOKEN_COORD", "'+'", "'-'", "'*'", "'/'", "'='", "'('", "')'",
+  "$end", "error", "$undefined", "COSLAYOUT_TOKEN_ATTR",
+  "COSLAYOUT_TOKEN_NUMBER", "COSLAYOUT_TOKEN_PERCENTAGE",
+  "COSLAYOUT_TOKEN_COORD", "'+'", "'-'", "'*'", "'/'", "'='", "'('", "')'",
   "$accept", "expr", "rval", "item", "atom", YY_NULLPTR
 };
 #endif
@@ -618,7 +618,7 @@ while (0)
 
 
 /* Enable debugging if requested.  */
-#if CSLAYOUTDEBUG
+#if COSLAYOUTDEBUG
 
 # ifndef YYFPRINTF
 #  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
@@ -654,7 +654,7 @@ do {                                                                      \
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, COSLAYOUT_AST **astpp)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
@@ -675,7 +675,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, void *scanner, COSLAYOUT_AST **astpp)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
@@ -713,7 +713,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner, CSLAYOUT_AST **astpp)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, void *scanner, COSLAYOUT_AST **astpp)
 {
   unsigned long int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -741,12 +741,12 @@ do {                                    \
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
 int yydebug;
-#else /* !CSLAYOUTDEBUG */
+#else /* !COSLAYOUTDEBUG */
 # define YYDPRINTF(Args)
 # define YY_SYMBOL_PRINT(Title, Type, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
-#endif /* !CSLAYOUTDEBUG */
+#endif /* !COSLAYOUTDEBUG */
 
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
@@ -993,7 +993,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, CSLAYOUT_AST **astpp)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, COSLAYOUT_AST **astpp)
 {
   YYUSE (yyvaluep);
   YYUSE (scanner);
@@ -1015,7 +1015,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, void *scanner, CSL
 `----------*/
 
 int
-yyparse (void *scanner, CSLAYOUT_AST **astpp)
+yyparse (void *scanner, COSLAYOUT_AST **astpp)
 {
 /* The lookahead symbol.  */
 int yychar;
@@ -1263,91 +1263,91 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 56 "CSLayoutParser.y" /* yacc.c:1661  */
-    { cslayout_destroy_ast(*astpp); *astpp = NULL; YYABORT; }
-#line 1269 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 56 "COSLayoutParser.y" /* yacc.c:1661  */
+    { coslayout_destroy_ast(*astpp); *astpp = NULL; YYABORT; }
+#line 1269 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 57 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
-#line 1275 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 57 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = coslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
+#line 1275 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 58 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 58 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1281 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1281 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 60 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
-#line 1287 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 60 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = coslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
+#line 1287 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 61 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
-#line 1293 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 61 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = coslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
+#line 1293 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 62 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 62 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1299 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1299 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 64 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
-#line 1305 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 64 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = coslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
+#line 1305 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 65 "CSLayoutParser.y" /* yacc.c:1661  */
-    { *astpp = (yyval) = cslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
-#line 1311 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 65 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = coslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
+#line 1311 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 66 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 66 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1317 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1317 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 68 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 68 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1323 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1323 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 69 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 69 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1329 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1329 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 70 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 70 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1335 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1335 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 71 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 71 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1341 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1341 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 16:
-#line 72 "CSLayoutParser.y" /* yacc.c:1661  */
+#line 72 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[-1]); }
-#line 1347 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1347 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
 
-#line 1351 "CSLayoutParser.c" /* yacc.c:1661  */
+#line 1351 "COSLayoutParser.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1569,19 +1569,19 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 75 "CSLayoutParser.y" /* yacc.c:1906  */
+#line 75 "COSLayoutParser.y" /* yacc.c:1906  */
 
 
-void cslayouterror(void *scanner, CSLAYOUT_AST **astpp, char *msg) {
-  fprintf(stderr, "CSLayout: %s\n", msg);
+void coslayouterror(void *scanner, COSLAYOUT_AST **astpp, char *msg) {
+  fprintf(stderr, "COSLayout: %s\n", msg);
 }
 
-int cslayoutparse (void *scanner, CSLAYOUT_AST **astpp);
-int cslayoutlex_init (yyscan_t* scanner);
-int cslayoutlex_destroy (yyscan_t yyscanner);
+int coslayoutparse (void *scanner, COSLAYOUT_AST **astpp);
+int coslayoutlex_init (yyscan_t* scanner);
+int coslayoutlex_destroy (yyscan_t yyscanner);
 
-CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r) {
-    CSLAYOUT_AST *astp = (CSLAYOUT_AST *)malloc(sizeof(CSLAYOUT_AST));
+COSLAYOUT_AST *coslayout_create_ast(int type, COSLAYOUT_AST *l, COSLAYOUT_AST *r) {
+    COSLAYOUT_AST *astp = (COSLAYOUT_AST *)malloc(sizeof(COSLAYOUT_AST));
 
     astp->node_type = type;
     astp->l = l;
@@ -1592,33 +1592,33 @@ CSLAYOUT_AST *cslayout_create_ast(int type, CSLAYOUT_AST *l, CSLAYOUT_AST *r) {
     return astp;
 }
 
-int cslayout_parse_rule(char *rule, CSLAYOUT_AST **astpp) {
+int coslayout_parse_rule(char *rule, COSLAYOUT_AST **astpp) {
     yyscan_t scanner;
-    cslayoutlex_init(&scanner);
-    YY_BUFFER_STATE state = cslayout_scan_string(rule, scanner);
+    coslayoutlex_init(&scanner);
+    YY_BUFFER_STATE state = coslayout_scan_string(rule, scanner);
 
-    int result = cslayoutparse(scanner, astpp);
+    int result = coslayoutparse(scanner, astpp);
 
-    cslayout_delete_buffer(state, scanner);
-    cslayoutlex_destroy(scanner);
+    coslayout_delete_buffer(state, scanner);
+    coslayoutlex_destroy(scanner);
 
     if (result) {
-        cslayout_destroy_ast(*astpp);
+        coslayout_destroy_ast(*astpp);
         *astpp = NULL;
     }
 
     return result;
 }
 
-void cslayout_destroy_ast(CSLAYOUT_AST *astp) {
+void coslayout_destroy_ast(COSLAYOUT_AST *astp) {
     if (astp != NULL) {
-        cslayout_destroy_ast(astp->l);
-        cslayout_destroy_ast(astp->r);
+        coslayout_destroy_ast(astp->l);
+        coslayout_destroy_ast(astp->r);
 
         int type = astp->node_type;
         char *coord = astp->value.coord;
 
-        if ((type == CSLAYOUT_TOKEN_ATTR || type == CSLAYOUT_TOKEN_COORD) && coord != NULL)
+        if ((type == COSLAYOUT_TOKEN_ATTR || type == COSLAYOUT_TOKEN_COORD) && coord != NULL)
             free(coord);
 
         free(astp);

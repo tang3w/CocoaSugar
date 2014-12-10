@@ -1,4 +1,4 @@
-// CSEigen.m
+// COSEigen.m
 //
 // Copyright (c) 2014 Tianyong Tang
 //
@@ -23,12 +23,12 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#import "CSEigen.h"
+#import "COSEigen.h"
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
 
 
-@interface CSEigen ()
+@interface COSEigen ()
 
 @property (atomic, unsafe_unretained) Class eigenClass;
 
@@ -39,14 +39,14 @@
 @end
 
 
-@interface CSEigenSlots : NSObject
+@interface COSEigenSlots : NSObject
 
 + (instancetype)eigenSlotsOfObject:(NSObject *)object;
 
 @property (atomic, readonly) NSMutableArray *slots;
 @property (atomic, assign) OSSpinLock *deallocLock;
 
-- (void)addEigen:(CSEigen *)eigen;
+- (void)addEigen:(COSEigen *)eigen;
 
 @end
 
@@ -55,22 +55,22 @@ static SEL deallocSel = NULL;
 static const void *classKey = &classKey;
 
 NS_INLINE
-Class cs_class(id self, SEL _cmd) {
+Class cos_class(id self, SEL _cmd) {
     return objc_getAssociatedObject(self, classKey);
 }
 
 NS_INLINE
-BOOL cs_responds_to_selector(id self, SEL _cmd, SEL sel) {
+BOOL cos_responds_to_selector(id self, SEL _cmd, SEL sel) {
     return class_respondsToSelector(object_getClass(self), sel);
 }
 
 NS_INLINE
-Class cs_create_eigen_class(NSObject *object) {
+Class cos_create_eigen_class(NSObject *object) {
     Class eigenClass = Nil;
 
     char *clsname = NULL;
-    static const char *fmt = "CSEigen_%s_%p_%u";
-    Class class = cs_class(object, NULL);
+    static const char *fmt = "COSEigen_%s_%p_%u";
+    Class class = cos_class(object, NULL);
 
     while (eigenClass == Nil) {
         if (asprintf(&clsname, fmt, class_getName(class), object, arc4random()) > 0) {
@@ -85,7 +85,7 @@ Class cs_create_eigen_class(NSObject *object) {
 }
 
 NS_INLINE
-void cs_dispose_eigen_class(Class eigenClass) {
+void cos_dispose_eigen_class(Class eigenClass) {
     unsigned int count = 0;
     Method *methods = class_copyMethodList(eigenClass, &count);
 
@@ -99,7 +99,7 @@ void cs_dispose_eigen_class(Class eigenClass) {
 }
 
 
-@implementation CSEigenSlots
+@implementation COSEigenSlots
 
 @synthesize slots = _slots;
 
@@ -110,16 +110,16 @@ void cs_dispose_eigen_class(Class eigenClass) {
 + (instancetype)eigenSlotsOfObject:(NSObject *)object {
     static const void *eigenSlotsKey = &eigenSlotsKey;
 
-    CSEigenSlots *eigenSlots = objc_getAssociatedObject(object, eigenSlotsKey);
+    COSEigenSlots *eigenSlots = objc_getAssociatedObject(object, eigenSlotsKey);
 
     if (eigenSlots) return eigenSlots;
 
-    eigenSlots = [[CSEigenSlots alloc] init];
+    eigenSlots = [[COSEigenSlots alloc] init];
 
     objc_setAssociatedObject(object, eigenSlotsKey, eigenSlots, OBJC_ASSOCIATION_RETAIN);
     objc_setAssociatedObject(object, classKey, [object class], OBJC_ASSOCIATION_ASSIGN);
 
-    Class rootEigenClass = cs_create_eigen_class(object);
+    Class rootEigenClass = cos_create_eigen_class(object);
     IMP superDeallocImp = class_getMethodImplementation(object_getClass(object), deallocSel);
     OSSpinLock *deallocLock = (OSSpinLock *)malloc(sizeof(OSSpinLock));
 
@@ -133,7 +133,7 @@ void cs_dispose_eigen_class(Class eigenClass) {
         OSSpinLockUnlock(deallocLock);
     }), "v@:");
 
-    [eigenSlots addEigen:[[CSEigen alloc] initWithEigenClass:rootEigenClass]];
+    [eigenSlots addEigen:[[COSEigen alloc] initWithEigenClass:rootEigenClass]];
 
     object_setClass(object, rootEigenClass);
 
@@ -146,7 +146,7 @@ void cs_dispose_eigen_class(Class eigenClass) {
     }
 }
 
-- (void)addEigen:(CSEigen *)eigen {
+- (void)addEigen:(COSEigen *)eigen {
     [self.slots addObject:eigen];
 }
 
@@ -160,7 +160,7 @@ void cs_dispose_eigen_class(Class eigenClass) {
 
     dispatch_async(queue, ^{
         OSSpinLockLock(deallocLock);
-        for (CSEigen *eigen in slots.reverseObjectEnumerator) {
+        for (COSEigen *eigen in slots.reverseObjectEnumerator) {
             [eigen dispose];
         }
         OSSpinLockUnlock(deallocLock);
@@ -171,20 +171,20 @@ void cs_dispose_eigen_class(Class eigenClass) {
 @end
 
 
-@implementation CSEigen
+@implementation COSEigen
 
 + (instancetype)eigenForObject:(NSObject *)object {
-    CSEigen *eigen = nil;
+    COSEigen *eigen = nil;
 
     if (object) {
-        CSEigenSlots *eigenSlots = [CSEigenSlots eigenSlotsOfObject:object];
+        COSEigenSlots *eigenSlots = [COSEigenSlots eigenSlotsOfObject:object];
 
-        Class eigenClass = cs_create_eigen_class(object);
+        Class eigenClass = cos_create_eigen_class(object);
 
-        class_addMethod(eigenClass, @selector(class), (IMP)cs_class, "#@:");
-        class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cs_responds_to_selector, "c@::");
+        class_addMethod(eigenClass, @selector(class), (IMP)cos_class, "#@:");
+        class_addMethod(eigenClass, @selector(respondsToSelector:), (IMP)cos_responds_to_selector, "c@::");
 
-        eigen = [[CSEigen alloc] initWithEigenClass:eigenClass];
+        eigen = [[COSEigen alloc] initWithEigenClass:eigenClass];
 
         [eigenSlots addEigen:eigen];
 
@@ -219,14 +219,14 @@ void cs_dispose_eigen_class(Class eigenClass) {
     class_replaceMethod(self.eigenClass, sel, imp_implementationWithBlock(block), types);
 }
 
-- (CS_IMP)superImp:(SEL)sel {
+- (COS_IMP)superImp:(SEL)sel {
     Class superCls = class_getSuperclass(self.eigenClass);
 
-    return (CS_IMP)method_getImplementation(class_getInstanceMethod(superCls, sel));
+    return (COS_IMP)method_getImplementation(class_getInstanceMethod(superCls, sel));
 }
 
 - (void)dispose {
-    cs_dispose_eigen_class(self.eigenClass);
+    cos_dispose_eigen_class(self.eigenClass);
 }
 
 @end

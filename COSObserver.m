@@ -1,4 +1,4 @@
-// CSObserver.m
+// COSObserver.m
 //
 // Copyright (c) 2014 Tianyong Tang
 //
@@ -23,11 +23,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#import "CSObserver.h"
+#import "COSObserver.h"
 #import <objc/runtime.h>
 
 
-@interface CSObserver ()
+@interface COSObserver ()
 
 @property (atomic, weak) NSObject *object;
 
@@ -36,13 +36,13 @@
 @end
 
 
-@interface CSObservation : NSObject
+@interface COSObservation : NSObject
 
 @property (atomic, unsafe_unretained) id object;
 @property (atomic, unsafe_unretained) id target;
 @property (atomic, copy) NSString *keyPath;
 @property (atomic, assign) NSKeyValueObservingOptions options;
-@property (atomic, copy) CSObserverBlock block;
+@property (atomic, copy) COSObserverBlock block;
 
 - (void)deregister;
 
@@ -51,10 +51,10 @@
 
 static SEL deallocSel = NULL;
 static NSMutableSet *swizzledClasses = nil;
-static void *cs_context = &cs_context;
+static void *cos_context = &cos_context;
 
 NS_INLINE
-NSMutableSet *cs_observation_pool(NSObject *object) {
+NSMutableSet *cos_observation_pool(NSObject *object) {
     static const void *poolKey = &poolKey;
 
     NSMutableSet *observationPool = objc_getAssociatedObject(object, poolKey);
@@ -69,7 +69,7 @@ NSMutableSet *cs_observation_pool(NSObject *object) {
 }
 
 NS_INLINE
-void cs_hook_object_if_needed(NSObject *object) {
+void cos_hook_object_if_needed(NSObject *object) {
     @synchronized (swizzledClasses) {
         Class class = [object class];
 
@@ -77,7 +77,7 @@ void cs_hook_object_if_needed(NSObject *object) {
 
         IMP oldDeallocImp = class_getMethodImplementation(class, deallocSel);
         IMP newDeallocImp = imp_implementationWithBlock(^(void *object) {
-            for (CSObservation *observation in [cs_observation_pool((__bridge id)object) copy]) {
+            for (COSObservation *observation in [cos_observation_pool((__bridge id)object) copy]) {
                 [observation deregister];
             }
 
@@ -91,7 +91,7 @@ void cs_hook_object_if_needed(NSObject *object) {
 }
 
 
-@implementation CSObserver
+@implementation COSObserver
 
 + (void)initialize {
     deallocSel = sel_registerName("dealloc");
@@ -99,7 +99,7 @@ void cs_hook_object_if_needed(NSObject *object) {
 }
 
 + (instancetype)observerForObject:(NSObject *)object {
-    CSObserver *observer = nil;
+    COSObserver *observer = nil;
 
     if (object) {
         static const void *observerKey = &observerKey;
@@ -107,7 +107,7 @@ void cs_hook_object_if_needed(NSObject *object) {
         observer = objc_getAssociatedObject(object, observerKey);
 
         if (!observer) {
-            observer = [[CSObserver alloc] initWithObject:object];
+            observer = [[COSObserver alloc] initWithObject:object];
 
             objc_setAssociatedObject(object, observerKey, observer, OBJC_ASSOCIATION_RETAIN);
         }
@@ -127,14 +127,14 @@ void cs_hook_object_if_needed(NSObject *object) {
 - (void)addTarget:(NSObject *)target
        forKeyPath:(NSString *)keyPath
           options:(NSKeyValueObservingOptions)options
-            block:(CSObserverBlock)block {
+            block:(COSObserverBlock)block {
     if (target) {
         NSObject *object = self.object;
 
-        cs_hook_object_if_needed(object);
-        cs_hook_object_if_needed(target);
+        cos_hook_object_if_needed(object);
+        cos_hook_object_if_needed(target);
 
-        CSObservation *observation = [[CSObservation alloc] init];
+        COSObservation *observation = [[COSObservation alloc] init];
 
         observation.object = object;
         observation.target = target;
@@ -142,8 +142,8 @@ void cs_hook_object_if_needed(NSObject *object) {
         observation.options = options;
         observation.block = block;
 
-        [cs_observation_pool(object) addObject:observation];
-        [cs_observation_pool(target) addObject:observation];
+        [cos_observation_pool(object) addObject:observation];
+        [cos_observation_pool(target) addObject:observation];
 
         if ([target isKindOfClass:[NSArray class]]) {
             NSArray *array = (NSArray *)target;
@@ -152,12 +152,12 @@ void cs_hook_object_if_needed(NSObject *object) {
             toObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [array count])]
                     forKeyPath:keyPath
                        options:options
-                       context:cs_context];
+                       context:cos_context];
         } else {
             [target addObserver:observation
                      forKeyPath:keyPath
                         options:options
-                        context:cs_context];
+                        context:cos_context];
         }
     }
 }
@@ -166,13 +166,13 @@ void cs_hook_object_if_needed(NSObject *object) {
     if (target && keyPath) {
         NSMutableSet *find = [[NSMutableSet alloc] init];
 
-        for (CSObservation *observation in cs_observation_pool(self.object)) {
+        for (COSObservation *observation in cos_observation_pool(self.object)) {
             if (observation.target == target && [observation.keyPath isEqualToString:keyPath]) {
                 [find addObject:observation];
             }
         }
 
-        for (CSObservation *observation in find) {
+        for (COSObservation *observation in find) {
             [observation deregister];
         }
     } else if (target) {
@@ -184,12 +184,12 @@ void cs_hook_object_if_needed(NSObject *object) {
 
 - (void)removeTarget:(NSObject *)target {
     NSMutableSet *find = nil;
-    NSMutableSet *observationPool = cs_observation_pool(self.object);
+    NSMutableSet *observationPool = cos_observation_pool(self.object);
 
     if (target) {
         find = [[NSMutableSet alloc] init];
 
-        for (CSObservation *observation in observationPool) {
+        for (COSObservation *observation in observationPool) {
             if (observation.target == target) {
                 [find addObject:observation];
             }
@@ -198,7 +198,7 @@ void cs_hook_object_if_needed(NSObject *object) {
         find = [observationPool copy];
     }
 
-    for (CSObservation *observation in find) {
+    for (COSObservation *observation in find) {
         [observation deregister];
     }
 }
@@ -206,13 +206,13 @@ void cs_hook_object_if_needed(NSObject *object) {
 @end
 
 
-@implementation CSObservation
+@implementation COSObservation
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
                       ofObject:(id)object
                         change:(NSDictionary *)change
                        context:(void *)context {
-    if (context == cs_context) {
+    if (context == cos_context) {
         if (self.block) {
             self.block(self.object, self.target, change);
         }
@@ -228,13 +228,13 @@ void cs_hook_object_if_needed(NSObject *object) {
     if ([_target isKindOfClass:[NSArray class]]) {
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_target count])];
 
-        [_target removeObserver:self fromObjectsAtIndexes:indexSet forKeyPath:_keyPath context:cs_context];
+        [_target removeObserver:self fromObjectsAtIndexes:indexSet forKeyPath:_keyPath context:cos_context];
     } else {
-        [_target removeObserver:self forKeyPath:_keyPath context:cs_context];
+        [_target removeObserver:self forKeyPath:_keyPath context:cos_context];
     }
 
-    [cs_observation_pool(_target) removeObject:self], _target = nil;
-    [cs_observation_pool(_object) removeObject:self];
+    [cos_observation_pool(_target) removeObject:self], _target = nil;
+    [cos_observation_pool(_object) removeObject:self];
 }
 
 @end

@@ -1,4 +1,4 @@
-// CSLayout.h
+// COSEigen.h
 //
 // Copyright (c) 2014 Tianyong Tang
 //
@@ -24,20 +24,23 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
+
+typedef void (*COS_IMP)   (void);
+typedef void (*COS_IMP_V) (id, SEL, ...);
+typedef id   (*COS_IMP_I) (id, SEL, ...);
 
 
-@interface CSLayout : NSObject
+@interface COSEigen : NSObject
 
-+ (instancetype)layoutOfView:(UIView *)view;
++ (instancetype)eigenForObject:(NSObject *)object;
 
-- (void)addRule:(NSString *)format, ...;
-- (void)addRule:(NSString *)format args:(va_list)args;
+- (void)setMethod:(SEL)sel types:(const char *)types block:(id)block;
+- (COS_IMP)superImp:(SEL)sel;
 
 @end
 
 
 NS_INLINE
-CSLayout *CSLayoutMake(UIView *view) {
-    return [CSLayout layoutOfView:view];
+COSEigen *COSEigenMake(NSObject *object) {
+    return [COSEigen eigenForObject:object];
 }

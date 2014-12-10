@@ -1,4 +1,4 @@
-// CSEigen.h
+// COSObserver.h
 //
 // Copyright (c) 2014 Tianyong Tang
 //
@@ -25,22 +25,27 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void (*CS_IMP)   (void);
-typedef void (*CS_IMP_V) (id, SEL, ...);
-typedef id   (*CS_IMP_I) (id, SEL, ...);
+typedef void(^COSObserverBlock)(id object, id target, NSDictionary *change);
 
 
-@interface CSEigen : NSObject
+@interface COSObserver : NSObject
 
-+ (instancetype)eigenForObject:(NSObject *)object;
++ (instancetype)observerForObject:(NSObject *)object;
 
-- (void)setMethod:(SEL)sel types:(const char *)types block:(id)block;
-- (CS_IMP)superImp:(SEL)sel;
+@property (atomic, weak, readonly) NSObject *object;
+
+- (void)addTarget:(NSObject *)target
+       forKeyPath:(NSString *)keyPath
+          options:(NSKeyValueObservingOptions)options
+            block:(COSObserverBlock)block;
+
+- (void)removeTarget:(NSObject *)target forKeyPath:(NSString *)keyPath;
+- (void)removeTarget:(NSObject *)target;
 
 @end
 
 
 NS_INLINE
-CSEigen *CSEigenMake(NSObject *object) {
-    return [CSEigen eigenForObject:object];
+COSObserver *COSObserverMake(NSObject *object) {
+    return [COSObserver observerForObject:object];
 }

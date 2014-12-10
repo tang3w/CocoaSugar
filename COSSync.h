@@ -1,6 +1,6 @@
-// CSObserver.h
+// COSSync.h
 //
-// Copyright (c) 2014 Tianyong Tang
+// Copyright (c) 2014 Tang Tianyong
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -25,27 +25,11 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void(^CSObserverBlock)(id object, id target, NSDictionary *change);
 
+@interface COSSync : NSObject
 
-@interface CSObserver : NSObject
++ (instancetype)syncOfObjects:(NSObject *)firstObject, ... NS_REQUIRES_NIL_TERMINATION;
 
-+ (instancetype)observerForObject:(NSObject *)object;
-
-@property (atomic, weak, readonly) NSObject *object;
-
-- (void)addTarget:(NSObject *)target
-       forKeyPath:(NSString *)keyPath
-          options:(NSKeyValueObservingOptions)options
-            block:(CSObserverBlock)block;
-
-- (void)removeTarget:(NSObject *)target forKeyPath:(NSString *)keyPath;
-- (void)removeTarget:(NSObject *)target;
+- (void)addKeyPaths:(NSString *)firstKeyPath, ... NS_REQUIRES_NIL_TERMINATION;
 
 @end
-
-
-NS_INLINE
-CSObserver *CSObserverMake(NSObject *object) {
-    return [CSObserver observerForObject:object];
-}

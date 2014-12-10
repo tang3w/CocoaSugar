@@ -1,10 +1,10 @@
-#ifndef cslayoutHEADER_H
-#define cslayoutHEADER_H 1
-#define cslayoutIN_HEADER 1
+#ifndef coslayoutHEADER_H
+#define coslayoutHEADER_H 1
+#define coslayoutIN_HEADER 1
 
-#line 6 "CSLayoutLex.h"
+#line 6 "COSLayoutLex.h"
 
-#line 8 "CSLayoutLex.h"
+#line 8 "COSLayoutLex.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -196,25 +196,25 @@ struct yy_buffer_state
 	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
-void cslayoutrestart (FILE *input_file ,yyscan_t yyscanner );
-void cslayout_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cslayout_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cslayout_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cslayout_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cslayoutpush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void cslayoutpop_buffer_state (yyscan_t yyscanner );
+void coslayoutrestart (FILE *input_file ,yyscan_t yyscanner );
+void coslayout_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE coslayout_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void coslayout_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void coslayout_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void coslayoutpush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void coslayoutpop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE cslayout_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cslayout_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cslayout_scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE coslayout_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE coslayout_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE coslayout_scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
-void *cslayoutalloc (yy_size_t ,yyscan_t yyscanner );
-void *cslayoutrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void cslayoutfree (void * ,yyscan_t yyscanner );
+void *coslayoutalloc (yy_size_t ,yyscan_t yyscanner );
+void *coslayoutrealloc (void *,yy_size_t ,yyscan_t yyscanner );
+void coslayoutfree (void * ,yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define cslayoutwrap(n) 1
+#define coslayoutwrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define yytext_ptr yytext_r
@@ -236,42 +236,42 @@ void cslayoutfree (void * ,yyscan_t yyscanner );
 #define YY_EXTRA_TYPE void *
 #endif
 
-int cslayoutlex_init (yyscan_t* scanner);
+int coslayoutlex_init (yyscan_t* scanner);
 
-int cslayoutlex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int coslayoutlex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int cslayoutlex_destroy (yyscan_t yyscanner );
+int coslayoutlex_destroy (yyscan_t yyscanner );
 
-int cslayoutget_debug (yyscan_t yyscanner );
+int coslayoutget_debug (yyscan_t yyscanner );
 
-void cslayoutset_debug (int debug_flag ,yyscan_t yyscanner );
+void coslayoutset_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE cslayoutget_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE coslayoutget_extra (yyscan_t yyscanner );
 
-void cslayoutset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void coslayoutset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *cslayoutget_in (yyscan_t yyscanner );
+FILE *coslayoutget_in (yyscan_t yyscanner );
 
-void cslayoutset_in  (FILE * in_str ,yyscan_t yyscanner );
+void coslayoutset_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *cslayoutget_out (yyscan_t yyscanner );
+FILE *coslayoutget_out (yyscan_t yyscanner );
 
-void cslayoutset_out  (FILE * out_str ,yyscan_t yyscanner );
+void coslayoutset_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t cslayoutget_leng (yyscan_t yyscanner );
+yy_size_t coslayoutget_leng (yyscan_t yyscanner );
 
-char *cslayoutget_text (yyscan_t yyscanner );
+char *coslayoutget_text (yyscan_t yyscanner );
 
-int cslayoutget_lineno (yyscan_t yyscanner );
+int coslayoutget_lineno (yyscan_t yyscanner );
 
-void cslayoutset_lineno (int line_number ,yyscan_t yyscanner );
+void coslayoutset_lineno (int line_number ,yyscan_t yyscanner );
 
-YYSTYPE * cslayoutget_lval (yyscan_t yyscanner );
+YYSTYPE * coslayoutget_lval (yyscan_t yyscanner );
 
-void cslayoutset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
+void coslayoutset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -279,9 +279,9 @@ void cslayoutset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int cslayoutwrap (yyscan_t yyscanner );
+extern "C" int coslayoutwrap (yyscan_t yyscanner );
 #else
-extern int cslayoutwrap (yyscan_t yyscanner );
+extern int coslayoutwrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -313,10 +313,10 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int cslayoutlex \
+extern int coslayoutlex \
                (YYSTYPE * yylval_param ,yyscan_t yyscanner);
 
-#define YY_DECL int cslayoutlex \
+#define YY_DECL int coslayoutlex \
                (YYSTYPE * yylval_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
@@ -334,9 +334,9 @@ extern int cslayoutlex \
 #undef YY_DECL
 #endif
 
-#line 73 "CSLayoutLex.l"
+#line 73 "COSLayoutLex.l"
 
 
-#line 341 "CSLayoutLex.h"
-#undef cslayoutIN_HEADER
-#endif /* cslayoutHEADER_H */
+#line 341 "COSLayoutLex.h"
+#undef coslayoutIN_HEADER
+#endif /* coslayoutHEADER_H */
