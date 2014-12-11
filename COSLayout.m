@@ -232,59 +232,59 @@ typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
 #define COSLAYOUT_FRAME(view) \
     ([objc_getAssociatedObject(view, COSLayoutKey) frame])
 
-#define COSLAYOUT_SOLVE_SINGLE_H(var, left)   \
+#define COSLAYOUT_SOLVE_SINGLE_H(var, left)  \
 do {                                         \
-    COSLayoutRule *rule = rules[0];           \
+    COSLayoutRule *rule = rules[0];          \
     float var = [[rule coord] block](rule);  \
     UIView *view = _view;                    \
-    CGRect frame = COSLAYOUT_FRAME(view);     \
+    CGRect frame = COSLAYOUT_FRAME(view);    \
     frame.origin.x = (left);                 \
     return frame;                            \
 } while (0)
 
-#define COSLAYOUT_SOLVE_SINGLE_V(var, top)    \
+#define COSLAYOUT_SOLVE_SINGLE_V(var, top)   \
 do {                                         \
-    COSLayoutRule *rule = rules[0];           \
+    COSLayoutRule *rule = rules[0];          \
     float var = [[rule coord] block](rule);  \
     UIView *view = _view;                    \
-    CGRect frame = COSLAYOUT_FRAME(view);     \
+    CGRect frame = COSLAYOUT_FRAME(view);    \
     frame.origin.y = (top);                  \
     return frame;                            \
 } while (0)
 
 #define COSLAYOUT_SOLVE_DOUBLE_H(var1, var2, width_, left)  \
-do {                                                       \
+do {                                                        \
     COSLayoutRule *rule0 = rules[0];                        \
     COSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] block](rule0);             \
-    float var2 = [[rule1 coord] block](rule1);             \
-    UIView *view = _view;                                  \
+    float var1 = [[rule0 coord] block](rule0);              \
+    float var2 = [[rule1 coord] block](rule1);              \
+    UIView *view = _view;                                   \
     CGRect frame = COSLAYOUT_FRAME(view);                   \
-    frame.size.width = [self calcWidth:(width_)];          \
-    frame.origin.x = (left);                               \
-    return frame;                                          \
+    frame.size.width = [self calcWidth:(width_)];           \
+    frame.origin.x = (left);                                \
+    return frame;                                           \
 } while (0)
 
 #define COSLAYOUT_SOLVE_DOUBLE_V(var1, var2, height_, top)  \
-do {                                                       \
+do {                                                        \
     COSLayoutRule *rule0 = rules[0];                        \
     COSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] block](rule0);             \
-    float var2 = [[rule1 coord] block](rule1);             \
-    UIView *view = _view;                                  \
+    float var1 = [[rule0 coord] block](rule0);              \
+    float var2 = [[rule1 coord] block](rule1);              \
+    UIView *view = _view;                                   \
     CGRect frame = COSLAYOUT_FRAME(view);                   \
-    frame.size.height = [self calcHeight:(height_)];       \
-    frame.origin.y = (top);                                \
-    return frame;                                          \
+    frame.size.height = [self calcHeight:(height_)];        \
+    frame.origin.y = (top);                                 \
+    return frame;                                           \
 } while (0)
 
 #define COS_MM_RAW_VALUE(layout, var)             \
-({                                               \
+({                                                \
     COSLayoutRule *rule = layout.ruleMap[@#var];  \
-                                                 \
-    rule.coord ?                                 \
-    rule.coord.block(rule) :                     \
-    NAN;                                         \
+                                                  \
+    rule.coord ?                                  \
+    rule.coord.block(rule) :                      \
+    NAN;                                          \
 })
 
 #define COS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
@@ -598,47 +598,47 @@ void COSMakeViewVisited(UIView *view) {
 
 
 #define COSCOORD_MAKE(dependencies_, expr)       \
-({                                              \
-    __weak UIView *__view = _view;              \
-                                                \
-    COSCoord *coord = [[COSCoord alloc] init];    \
-                                                \
-    coord.dependencies = (dependencies_);       \
+({                                               \
+    __weak UIView *__view = _view;               \
+                                                 \
+    COSCoord *coord = [[COSCoord alloc] init];   \
+                                                 \
+    coord.dependencies = (dependencies_);        \
     coord.block = ^float(COSLayoutRule *rule) {  \
-        UIView *view = __view;                  \
-                                                \
-        return (expr);                          \
-    };                                          \
-                                                \
-    coord;                                      \
+        UIView *view = __view;                   \
+                                                 \
+        return (expr);                           \
+    };                                           \
+                                                 \
+    coord;                                       \
 })
 
 #define COSLAYOUT_ADD_RULE(var, dir_)        \
-do {                                        \
-    _##var = (var);                         \
-    NSString *name = @#var;                 \
-                                            \
+do {                                         \
+    _##var = (var);                          \
+    NSString *name = @#var;                  \
+                                             \
     COSLayoutRule *rule =                    \
     [COSLayoutRule layoutRuleWithView:_view  \
-        name:name                           \
-        coord:_##var                        \
+        name:name                            \
+        coord:_##var                         \
         dir:COSLayoutDir##dir_];             \
-                                            \
-    [self.ruleHub dir_##AddRule:rule];      \
+                                             \
+    [self.ruleHub dir_##AddRule:rule];       \
 } while (0)
 
 #define COSLAYOUT_ADD_RULE_MAP(var, dir_)    \
-do {                                        \
-    _##var = (var);                         \
-    NSString *name = @#var;                 \
-                                            \
+do {                                         \
+    _##var = (var);                          \
+    NSString *name = @#var;                  \
+                                             \
     COSLayoutRule *rule =                    \
     [COSLayoutRule layoutRuleWithView:_view  \
-        name:name                           \
-        coord:_##var                        \
+        name:name                            \
+        coord:_##var                         \
         dir:COSLayoutDir##dir_];             \
-                                            \
-    self.ruleMap[name] = rule;              \
+                                             \
+    self.ruleMap[name] = rule;               \
 } while (0)
 
 NS_INLINE
@@ -1069,15 +1069,15 @@ void cos_initialize_driver_if_needed(UIView *view) {
 @end
 
 
-#define COSCOORD_CALC(expr)                           \
+#define COSCOORD_CALC(expr)                          \
 do {                                                 \
-    COSCoord *coord = [[COSCoord alloc] init];         \
+    COSCoord *coord = [[COSCoord alloc] init];       \
     NSMutableSet *dependencies = self.dependencies;  \
                                                      \
     [dependencies unionSet:other.dependencies];      \
                                                      \
     coord.dependencies = dependencies;               \
-    coord.block = ^float(COSLayoutRule *rule) {       \
+    coord.block = ^float(COSLayoutRule *rule) {      \
         return (expr);                               \
     };                                               \
                                                      \
