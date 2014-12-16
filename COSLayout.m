@@ -810,14 +810,13 @@ void cos_initialize_driver_if_needed(UIView *view) {
         COSCoord *coord = nil;
 
         if (!strcmp(ast->value.coord, "f")) {
-            float value = va_arg(*argv, double);
-
-            coord = [COSCoord coordWithFloat:value];
+            coord = [COSCoord coordWithFloat:va_arg(*argv, double)];
+            [keeper addObject:coord];
+        } else if (!strcmp(ast->value.coord, "p")) {
+            coord = [COSCoord coordWithPercentage:va_arg(*argv, double)];
             [keeper addObject:coord];
         } else {
-            UIView *view = va_arg(*argv, id);
-            COSCoords *coords = [COSCoords coordsOfView:view];
-
+            COSCoords *coords = [COSCoords coordsOfView:va_arg(*argv, UIView *)];
             coord = [coords valueForKey:COS_COORD_NAME(ast->value.coord)];
         }
 
