@@ -116,6 +116,8 @@ typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
 
 @property (nonatomic, strong) COSCoord *ct;
 @property (nonatomic, strong) COSCoord *cl;
+@property (nonatomic, strong) COSCoord *cb;
+@property (nonatomic, strong) COSCoord *cr;
 
 @property (nonatomic, assign) CGRect frame;
 
@@ -627,7 +629,13 @@ do {                                         \
     [self.ruleHub dir_##AddRule:rule];       \
 } while (0)
 
-#define COSLAYOUT_ADD_RULE_MAP(var, dir_)    \
+#define COSLAYOUT_ADD_TRANS_RULE(var, dst, exp)                 \
+do {                                                            \
+    COSCoord *c = _##var = (var);                               \
+    self.dst = c ? COSCOORD_MAKE(c.dependencies, (exp)) : nil;  \
+} while (0)
+
+#define COSLAYOUT_ADD_BOUND_RULE(var, dir_)  \
 do {                                         \
     _##var = (var);                          \
     NSString *name = @#var;                  \
@@ -986,19 +994,19 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)setMinw:(COSCoord *)minw {
-    COSLAYOUT_ADD_RULE_MAP(minw, h);
+    COSLAYOUT_ADD_BOUND_RULE(minw, h);
 }
 
 - (void)setMaxw:(COSCoord *)maxw {
-    COSLAYOUT_ADD_RULE_MAP(maxw, h);
+    COSLAYOUT_ADD_BOUND_RULE(maxw, h);
 }
 
 - (void)setMinh:(COSCoord *)minh {
-    COSLAYOUT_ADD_RULE_MAP(minh, v);
+    COSLAYOUT_ADD_BOUND_RULE(minh, v);
 }
 
 - (void)setMaxh:(COSCoord *)maxh {
-    COSLAYOUT_ADD_RULE_MAP(maxh, v);
+    COSLAYOUT_ADD_BOUND_RULE(maxh, v);
 }
 
 - (void)setTt:(COSCoord *)tt {
@@ -1006,11 +1014,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)setTb:(COSCoord *)tb {
-    _tb = tb;
-
-    COSCoord *tt = tb ? COSCOORD_MAKE(tb.dependencies, COS_SUPERVIEW_HEIGHT - tb.block(rule)) : nil;
-
-    [self setTt:tt];
+    COSLAYOUT_ADD_TRANS_RULE(tb, tt, COS_SUPERVIEW_HEIGHT - tb.block(rule));
 }
 
 - (void)setLl:(COSCoord *)ll {
@@ -1018,19 +1022,11 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)setLr:(COSCoord *)lr {
-    _lr = lr;
-
-    COSCoord *ll = lr ? COSCOORD_MAKE(lr.dependencies, COS_SUPERVIEW_WIDTH - lr.block(rule)) : nil;
-
-    [self setLl:ll];
+    COSLAYOUT_ADD_TRANS_RULE(lr, ll, COS_SUPERVIEW_WIDTH - lr.block(rule));
 }
 
 - (void)setBb:(COSCoord *)bb {
-    _bb = bb;
-
-    COSCoord *bt = bb ? COSCOORD_MAKE(bb.dependencies, COS_SUPERVIEW_HEIGHT - bb.block(rule)) : nil;
-
-    [self setBt:bt];
+    COSLAYOUT_ADD_TRANS_RULE(bb, bt, COS_SUPERVIEW_HEIGHT - bb.block(rule));
 }
 
 - (void)setBt:(COSCoord *)bt {
@@ -1038,11 +1034,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)setRr:(COSCoord *)rr {
-    _rr = rr;
-
-    COSCoord *rl = rr ? COSCOORD_MAKE(rr.dependencies, COS_SUPERVIEW_WIDTH - rr.block(rule)) : nil;
-
-    [self setRl:rl];
+    COSLAYOUT_ADD_TRANS_RULE(rr, rl, COS_SUPERVIEW_WIDTH - rr.block(rule));
 }
 
 - (void)setRl:(COSCoord *)rl {
@@ -1055,6 +1047,14 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
 - (void)setCl:(COSCoord *)cl {
     COSLAYOUT_ADD_RULE(cl, h);
+}
+
+- (void)setCb:(COSCoord *)cb {
+    COSLAYOUT_ADD_TRANS_RULE(cb, ct, COS_SUPERVIEW_HEIGHT - cb.block(rule));
+}
+
+- (void)setCr:(COSCoord *)cr {
+    COSLAYOUT_ADD_TRANS_RULE(cr, cl, COS_SUPERVIEW_WIDTH - cr.block(rule));
 }
 
 - (COSLayoutRuleHub *)ruleHub {
@@ -1157,6 +1157,8 @@ do {                                                 \
 
 @property (nonatomic, strong) COSCoord *ct;
 @property (nonatomic, strong) COSCoord *cl;
+@property (nonatomic, strong) COSCoord *cb;
+@property (nonatomic, strong) COSCoord *cr;
 
 @end
 
@@ -1230,6 +1232,14 @@ do {                                                 \
 
 - (COSCoord *)cl {
     return LAZY_LOAD_COORD(_cl, COS_VIEW_LEFT + COS_VIEW_WIDTH / 2);
+}
+
+- (COSCoord *)cb {
+    return LAZY_LOAD_COORD(_cb, COS_SUPERVIEW_HEIGHT - COS_VIEW_TOP - COS_VIEW_HEIGHT / 2);
+}
+
+- (COSCoord *)cr {
+    return LAZY_LOAD_COORD(_cr, COS_SUPERVIEW_WIDTH - COS_VIEW_LEFT - COS_VIEW_WIDTH / 2);
 }
 
 - (COSCoord *)w {
