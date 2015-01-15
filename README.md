@@ -22,7 +22,7 @@ COSLayout *layout = [COSLayout layoutOfView:view];
 
 In the example above, a rule has been added into layout by method `addRule:`. A rule is expressed in Sample Layout Language or "SLL", which can specify constraints intuitively. The syntax of SLL is very simple, just comma-separated assignment expressions. Each assignment expression specifies a constraint, l-value is constraint name, r-value is constraint value.
 
-`COSLayout` supports 14 constraints:
+`COSLayout` supports 16 constraints:
 
 Constraint | Direction  | Description
 -----------|------------|------------
@@ -36,6 +36,8 @@ Constraint | Direction  | Description
 `rl`       | Horizontal | Space from view's right to superview's left
 `ct`       | Vertical   | Space from view's center to superview's top
 `cl`       | Horizontal | Space from view's center to superview's left
+`cb`       | Vertical   | Space from view's center to superview's bottom
+`cr`       | Horizontal | Space from view's center to superview's right
 `minw`     | Horizontal | Minimal width of view
 `maxw`     | Horizontal | Maximal width of view
 `minh`     | Vertical   | Minimal height of view
@@ -54,7 +56,7 @@ Note that the percentage has different means for different constraint directions
 
 Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `COSLayout` can specify constraints between non-sibling views.
 
-`COSLayout` support 14 format specifiers:
+`COSLayout` support 16 format specifiers:
 
 Format specifier | Type       | Description
 -----------------|------------|------------
@@ -68,6 +70,8 @@ Format specifier | Type       | Description
 `%rl`            | `UIView *` | Space from view's right to superview's left
 `%ct`            | `UIView *` | Space from view's center to superview's top
 `%cl`            | `UIView *` | Space from view's center to superview's left
+`%cb`            | `UIView *` | Space from view's center to superview's bottom
+`%cr`            | `UIView *` | Space from view's center to superview's right
 `%w`             | `UIView *` | Width of view
 `%h`             | `UIView *` | Height of view
 `%f`             | `float`    | Fixed length on screen
