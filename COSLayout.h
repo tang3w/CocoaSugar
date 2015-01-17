@@ -37,7 +37,8 @@
 @end
 
 
-NS_INLINE
-COSLayout *COSLayoutMake(UIView *view) {
-    return [COSLayout layoutOfView:view];
-}
+@interface UIView (COSLayout)
+
+- (void)cos_addRule:(NSString *)format, ...;
+
+@end

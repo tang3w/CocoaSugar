@@ -1251,3 +1251,17 @@ do {                                                 \
 }
 
 @end
+
+
+@implementation UIView (COSLayout)
+
+- (void)cos_addRule:(NSString *)format, ... {
+    va_list argv;
+    va_start(argv, format);
+
+    [[COSLayout layoutOfView:self] addRule:format args:argv];
+
+    va_end(argv);
+}
+
+@end
