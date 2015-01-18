@@ -30,11 +30,16 @@
 
 @class COSLayoutRule;
 
+typedef float(^COSCoordBlock)(COSLayoutRule *);
+typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
+
 static const void *COSLayoutKey = &COSLayoutKey;
+
 static NSMutableSet *swizzledDriverClasses = nil;
 static NSMutableSet *swizzledLayoutClasses = nil;
 
-typedef float(^COSCoordBlock)(COSLayoutRule *);
+static NSString *COSLayoutCycleExceptionName = @"COSLayoutCycleException";
+static NSString *COSLayoutCycleExceptionDesc = @"Layout can not be solved because of cycle";
 
 
 @interface COSCoord : NSObject
@@ -53,7 +58,11 @@ typedef float(^COSCoordBlock)(COSLayoutRule *);
 @end
 
 
-typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
+@interface COSCoords : NSObject
+
++ (instancetype)coordsOfView:(UIView *)view;
+
+@end
 
 
 @interface COSLayoutRule : NSObject
@@ -67,13 +76,6 @@ typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, strong) COSCoord *coord;
 @property (nonatomic, assign) COSLayoutDir dir;
-
-@end
-
-
-@interface COSCoords : NSObject
-
-+ (instancetype)coordsOfView:(UIView *)view;
 
 @end
 
@@ -194,32 +196,20 @@ typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
     return _hRules ?: (_hRules = [[NSMutableArray alloc] init]);
 }
 
+- (void)addRule:(COSLayoutRule *)rule toRules:(NSMutableArray *)rules {
+    [rules filterUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name != %@", rule.name]];
+
+    if ([rules count] > 1) [rules removeObjectAtIndex:0];
+
+    if (rule.coord) [rules addObject:rule];
+}
+
 - (void)vAddRule:(COSLayoutRule *)rule {
-    NSMutableArray *vRules = [self vRules];
-
-    [vRules filterUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name != %@", rule.name]];
-
-    if ([vRules count] > 1) {
-        [vRules removeObjectAtIndex:0];
-    }
-
-    if (rule.coord) {
-        [vRules addObject:rule];
-    }
+    [self addRule:rule toRules:self.vRules];
 }
 
 - (void)hAddRule:(COSLayoutRule *)rule {
-    NSMutableArray *hRules = [self hRules];
-
-    [hRules filterUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name != %@", rule.name]];
-
-    if ([hRules count] > 1) {
-        [hRules removeObjectAtIndex:0];
-    }
-
-    if (rule.coord) {
-        [hRules addObject:rule];
-    }
+    [self addRule:rule toRules:self.hRules];
 }
 
 @end
@@ -437,7 +427,7 @@ void COSMakeViewVisited(UIView *view) {
 
 - (NSMutableArray *)viewTopo;
 
-- (void)parse;
+- (void)iterate;
 
 @end
 
@@ -455,7 +445,7 @@ void COSMakeViewVisited(UIView *view) {
     return (_viewTopo ?: (_viewTopo = [[NSMutableArray alloc] init]));
 }
 
-- (void)parse {
+- (void)iterate {
     [self makeViewSet];
     [self cleanVisitFlag];
     [self makeViewTopo];
@@ -533,7 +523,7 @@ void COSMakeViewVisited(UIView *view) {
 }
 
 - (void)cycleError {
-    [NSException raise:@"COSLayoutCycleException" format:@"Layout can not be solved because of cycle"];
+    [NSException raise:COSLayoutCycleExceptionName format:@"%@", COSLayoutCycleExceptionDesc];
 }
 
 @end
@@ -544,6 +534,8 @@ void COSMakeViewVisited(UIView *view) {
 + (instancetype)layoutSolverOfView:(UIView *)view;
 
 @property (nonatomic, weak) UIView *view;
+
+- (instancetype)initWithView:(UIView *)view;
 
 - (void)solve;
 
@@ -558,14 +550,20 @@ void COSMakeViewVisited(UIView *view) {
     COSLayoutSolver *solver = objc_getAssociatedObject(view, layoutSolverKey);
 
     if (!solver) {
-        solver = [[COSLayoutSolver alloc] init];
-
-        solver.view = view;
+        solver = [[COSLayoutSolver alloc] initWithView:view];
 
         objc_setAssociatedObject(view, layoutSolverKey, solver, OBJC_ASSOCIATION_RETAIN);
     }
 
     return solver;
+}
+
+- (instancetype)initWithView:(UIView *)view {
+    self = [super init];
+
+    if (self) _view = view;
+
+    return self;
 }
 
 - (void)solve {
@@ -581,13 +579,13 @@ void COSMakeViewVisited(UIView *view) {
         }
     }
 
-    COSLayoutIterator *parser = [[COSLayoutIterator alloc] init];
+    COSLayoutIterator *iterator = [[COSLayoutIterator alloc] init];
 
-    parser.layouts = layouts;
+    iterator.layouts = layouts;
 
-    [parser parse];
+    [iterator iterate];
 
-    for (UIView *view in [parser viewTopo]) {
+    for (UIView *view in [iterator viewTopo]) {
         if (view == _view) continue;
 
         COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
