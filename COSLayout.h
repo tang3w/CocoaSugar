@@ -39,6 +39,6 @@
 
 @interface UIView (COSLayout)
 
-- (void)cos_addRule:(NSString *)format, ...;
+@property (readonly) COSLayout *cosLayout;
 
 @end
