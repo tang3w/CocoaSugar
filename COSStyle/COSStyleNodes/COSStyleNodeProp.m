@@ -62,8 +62,8 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"content-mode", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        UIViewContentMode contentMode = [nodeVal contentModeValue];
-        if (contentMode >= 0)
+        UIViewContentMode contentMode;
+        if ([nodeVal getContentModeValue:&contentMode])
             view.contentMode = contentMode;
     });
 

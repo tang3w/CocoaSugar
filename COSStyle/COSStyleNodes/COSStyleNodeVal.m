@@ -110,14 +110,19 @@
 }
 
 - (CGFloat)CGFloatValue {
+    CGFloat floatValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:self.stringValue];
+
 #if CGFLOAT_IS_DOUBLE
-    return [self.stringValue doubleValue];
+    BOOL valid = [scanner scanDouble:&floatValue];
 #else
-    return [self.stringValue floatValue];
+    BOOL valid = [scanner scanFloat:&floatValue];
 #endif
+
+    return valid ? floatValue : NAN;
 }
 
-- (UIViewContentMode)contentModeValue {
+- (BOOL)getContentModeValue:(UIViewContentMode *)contentMode {
     static dispatch_once_t onceToken;
     static NSDictionary *contentModeMap = nil;
 
@@ -139,9 +144,12 @@
         };
     });
 
-    NSNumber *contentMode = contentModeMap[self.stringValue];
+    NSNumber *modeNumber = contentModeMap[self.stringValue];
 
-    return contentMode ? [contentMode integerValue] : -1;
+    if (modeNumber)
+        *contentMode = [modeNumber integerValue];
+
+    return modeNumber != nil;
 }
 
 @end

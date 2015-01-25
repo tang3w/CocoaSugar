@@ -30,6 +30,6 @@
 - (UIColor *)colorValue;
 - (UIImage *)imageValue;
 - (CGFloat)CGFloatValue;
-- (UIViewContentMode)contentModeValue;
+- (BOOL)getContentModeValue:(UIViewContentMode *)contentMode;
 
 @end
