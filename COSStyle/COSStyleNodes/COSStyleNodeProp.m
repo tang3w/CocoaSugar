@@ -62,17 +62,23 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"overflow", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if ([nodeVal.stringValue isEqualToString:@"hidden"]) {
+        if ([nodeVal.stringValue isEqualToString:@"hidden"])
             view.layer.masksToBounds = YES;
-        } else if ([nodeVal.stringValue isEqualToString:@"visible"]) {
+        else if ([nodeVal.stringValue isEqualToString:@"visible"])
             view.layer.masksToBounds = NO;
-        }
     });
 
     COSStyleAddRenderBlock(@"opacity", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         CGFloat floatValue = [nodeVal CGFloatValue];
         if (!isnan(floatValue))
             view.layer.opacity = floatValue;
+    });
+
+    COSStyleAddRenderBlock(@"visibility", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if ([nodeVal.stringValue isEqualToString:@"hidden"])
+            view.hidden = YES;
+        else if ([nodeVal.stringValue isEqualToString:@"visible"])
+            view.hidden = NO;
     });
 
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
