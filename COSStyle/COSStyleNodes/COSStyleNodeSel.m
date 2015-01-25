@@ -33,7 +33,7 @@
             _clsList = (__bridge COSStyleNodeClsList *)ast->r->data;
         }
 
-        self.stringValue = COSSTYLE_AST_STRING_VALUE(ast);
+        self.stringValue = COSSTYLE_AST_STRING_VALUE(ast) ?: @"UIView";
     }
 
     return self;

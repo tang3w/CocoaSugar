@@ -80,8 +80,8 @@ typedef union {
 #define COSStyleParseARG_PDECL , COSStyleCtx *ctx 
 #define COSStyleParseARG_FETCH  COSStyleCtx *ctx  = yypParser->ctx 
 #define COSStyleParseARG_STORE yypParser->ctx  = ctx 
-#define YYNSTATE 25
-#define YYNRULE 19
+#define YYNSTATE 26
+#define YYNRULE 20
 #define YY_NO_ACTION      (YYNSTATE+YYNRULE+2)
 #define YY_ACCEPT_ACTION  (YYNSTATE+YYNRULE+1)
 #define YY_ERROR_ACTION   (YYNSTATE+YYNRULE)
@@ -150,36 +150,38 @@ static const YYMINORTYPE yyzerominor = { 0 };
 **                     shifting non-terminals after a reduce.
 **  yy_default[]       Default action for each state.
 */
-#define YY_ACTTAB_COUNT (27)
+#define YY_ACTTAB_COUNT (34)
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */    12,    9,   24,    8,   18,    6,   21,   19,   13,    5,
- /*    10 */    22,   23,   11,   17,   25,    1,   45,    4,    3,   14,
- /*    20 */     2,   20,   16,    3,   15,   10,    7,
+ /*     0 */    14,    6,   13,   10,   25,   14,    6,   17,   26,   14,
+ /*    10 */     7,    5,    4,   11,    9,   23,    2,   12,   19,   15,
+ /*    20 */    24,   20,   18,    4,   11,    1,   47,   11,    3,   21,
+ /*    30 */    22,   16,   48,    8,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */    16,   17,   18,    1,    4,    3,   21,    7,   14,   15,
- /*    10 */    11,    2,   13,    4,    0,   19,   20,    6,    4,    4,
- /*    20 */    12,    8,   16,    4,   14,    5,   10,
+ /*     0 */    14,   15,   16,   17,   18,   14,   15,   16,    0,   14,
+ /*    10 */    15,    6,    4,    5,    1,   11,    3,   13,    4,    4,
+ /*    20 */     2,    7,    4,    4,    5,   19,   20,    5,   12,    8,
+ /*    30 */    21,   14,   22,   10,
 };
 #define YY_SHIFT_USE_DFLT (-1)
-#define YY_SHIFT_COUNT (11)
+#define YY_SHIFT_COUNT (12)
 #define YY_SHIFT_MIN   (0)
-#define YY_SHIFT_MAX   (20)
+#define YY_SHIFT_MAX   (22)
 static const signed char yy_shift_ofst[] = {
- /*     0 */    -1,   14,    9,   20,    0,   20,   19,   13,   -1,    2,
- /*    10 */    15,   11,
+ /*     0 */    -1,    8,   19,   18,   22,   14,   22,   22,   21,   -1,
+ /*    10 */    13,   15,    5,
 };
-#define YY_REDUCE_USE_DFLT (-17)
-#define YY_REDUCE_COUNT (8)
-#define YY_REDUCE_MIN   (-16)
-#define YY_REDUCE_MAX   (16)
+#define YY_REDUCE_USE_DFLT (-15)
+#define YY_REDUCE_COUNT (9)
+#define YY_REDUCE_MIN   (-14)
+#define YY_REDUCE_MAX   (23)
 static const signed char yy_reduce_ofst[] = {
- /*     0 */    -4,  -16,   -1,   -6,   16,   10,    6,  -15,    8,
+ /*     0 */     6,  -14,   -9,    4,   -5,   23,   17,   17,    9,   16,
 };
 static const YYACTIONTYPE yy_default[] = {
- /*     0 */    26,   44,   44,   31,   44,   32,   44,   42,   36,   44,
- /*    10 */    44,   44,   29,   33,   35,   34,   30,   39,   41,   40,
- /*    20 */    43,   38,   37,   28,   27,
+ /*     0 */    27,   46,   46,   46,   32,   46,   33,   34,   44,   38,
+ /*    10 */    46,   46,   46,   30,   35,   37,   36,   31,   41,   43,
+ /*    20 */    42,   45,   40,   39,   29,   28,
 };
 
 /* The next table maps tokens into fallback tokens.  If a construct
@@ -292,18 +294,19 @@ static const char *const yyRuleName[] = {
  /*   4 */ "sellist ::= sel",
  /*   5 */ "sellist ::= sellist COMMA sel",
  /*   6 */ "sel ::= ID",
- /*   7 */ "sel ::= ID clslist",
- /*   8 */ "clslist ::= cls",
- /*   9 */ "clslist ::= clslist cls",
- /*  10 */ "cls ::= DOT ID",
- /*  11 */ "decllist ::=",
- /*  12 */ "decllist ::= decllist decl",
- /*  13 */ "decl ::= prop COLON val semi",
- /*  14 */ "prop ::= ID",
- /*  15 */ "val ::= VAL",
- /*  16 */ "val ::= ID",
- /*  17 */ "semi ::=",
- /*  18 */ "semi ::= SEMI",
+ /*   7 */ "sel ::= clslist",
+ /*   8 */ "sel ::= ID clslist",
+ /*   9 */ "clslist ::= cls",
+ /*  10 */ "clslist ::= clslist cls",
+ /*  11 */ "cls ::= DOT ID",
+ /*  12 */ "decllist ::=",
+ /*  13 */ "decllist ::= decllist decl",
+ /*  14 */ "decl ::= prop COLON val semi",
+ /*  15 */ "prop ::= ID",
+ /*  16 */ "val ::= VAL",
+ /*  17 */ "val ::= ID",
+ /*  18 */ "semi ::=",
+ /*  19 */ "semi ::= SEMI",
 };
 #endif /* NDEBUG */
 
@@ -623,6 +626,7 @@ static const struct {
   { 17, 1 },
   { 17, 3 },
   { 16, 1 },
+  { 16, 1 },
   { 16, 2 },
   { 15, 1 },
   { 15, 2 },
@@ -694,105 +698,112 @@ static void yy_reduce(
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSheet, NULL, NULL, yymsp[0].minor.yy41);
 }
-#line 699 "COSStyleParser.c"
+#line 703 "COSStyleParser.c"
         break;
       case 2: /* rulelist ::= rulelist rule */
 #line 36 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRuleList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
 }
-#line 706 "COSStyleParser.c"
+#line 710 "COSStyleParser.c"
         break;
       case 3: /* rule ::= sellist LBRACE decllist RBRACE */
 #line 40 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRule, NULL, yymsp[-3].minor.yy41, yymsp[-1].minor.yy41);
 }
-#line 713 "COSStyleParser.c"
+#line 717 "COSStyleParser.c"
         break;
       case 4: /* sellist ::= sel */
 #line 44 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, NULL, yymsp[0].minor.yy41);
 }
-#line 720 "COSStyleParser.c"
+#line 724 "COSStyleParser.c"
         break;
       case 5: /* sellist ::= sellist COMMA sel */
 #line 48 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, yymsp[-2].minor.yy41, yymsp[0].minor.yy41);
 }
-#line 727 "COSStyleParser.c"
+#line 731 "COSStyleParser.c"
         break;
       case 6: /* sel ::= ID */
 #line 52 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 734 "COSStyleParser.c"
+#line 738 "COSStyleParser.c"
         break;
-      case 7: /* sel ::= ID clslist */
+      case 7: /* sel ::= clslist */
 #line 56 "COSStyleParser.y"
+{
+    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, NULL, NULL, yymsp[0].minor.yy41);
+}
+#line 745 "COSStyleParser.c"
+        break;
+      case 8: /* sel ::= ID clslist */
+#line 60 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[-1].minor.yy0, NULL, yymsp[0].minor.yy41);
 }
-#line 741 "COSStyleParser.c"
+#line 752 "COSStyleParser.c"
         break;
-      case 8: /* clslist ::= cls */
-#line 60 "COSStyleParser.y"
+      case 9: /* clslist ::= cls */
+#line 64 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, NULL, yymsp[0].minor.yy41);
 }
-#line 748 "COSStyleParser.c"
+#line 759 "COSStyleParser.c"
         break;
-      case 9: /* clslist ::= clslist cls */
-#line 64 "COSStyleParser.y"
+      case 10: /* clslist ::= clslist cls */
+#line 68 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
 }
-#line 755 "COSStyleParser.c"
+#line 766 "COSStyleParser.c"
         break;
-      case 10: /* cls ::= DOT ID */
-#line 68 "COSStyleParser.y"
+      case 11: /* cls ::= DOT ID */
+#line 72 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeCls, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 762 "COSStyleParser.c"
+#line 773 "COSStyleParser.c"
         break;
-      case 12: /* decllist ::= decllist decl */
-#line 74 "COSStyleParser.y"
+      case 13: /* decllist ::= decllist decl */
+#line 78 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDeclList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
 }
-#line 769 "COSStyleParser.c"
+#line 780 "COSStyleParser.c"
         break;
-      case 13: /* decl ::= prop COLON val semi */
-#line 78 "COSStyleParser.y"
+      case 14: /* decl ::= prop COLON val semi */
+#line 82 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDecl, NULL, yymsp[-3].minor.yy41, yymsp[-1].minor.yy41);
 }
-#line 776 "COSStyleParser.c"
+#line 787 "COSStyleParser.c"
         break;
-      case 14: /* prop ::= ID */
-#line 82 "COSStyleParser.y"
+      case 15: /* prop ::= ID */
+#line 86 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeProp, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 783 "COSStyleParser.c"
+#line 794 "COSStyleParser.c"
         break;
-      case 15: /* val ::= VAL */
-      case 16: /* val ::= ID */ yytestcase(yyruleno==16);
-#line 86 "COSStyleParser.y"
+      case 16: /* val ::= VAL */
+      case 17: /* val ::= ID */ yytestcase(yyruleno==17);
+#line 90 "COSStyleParser.y"
 {
     yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 791 "COSStyleParser.c"
+#line 802 "COSStyleParser.c"
         break;
       default:
       /* (1) rulelist ::= */ yytestcase(yyruleno==1);
-      /* (11) decllist ::= */ yytestcase(yyruleno==11);
-      /* (17) semi ::= */ yytestcase(yyruleno==17);
-      /* (18) semi ::= SEMI */ yytestcase(yyruleno==18);
+      /* (12) decllist ::= */ yytestcase(yyruleno==12);
+      /* (18) semi ::= */ yytestcase(yyruleno==18);
+      /* (19) semi ::= SEMI */ yytestcase(yyruleno==19);
         break;
   };
   yygoto = yyRuleInfo[yyruleno].lhs;
@@ -854,7 +865,7 @@ static void yy_syntax_error(
 #define TOKEN (yyminor.yy0)
 #line 15 "COSStyleParser.y"
  ctx->result = 1; 
-#line 859 "COSStyleParser.c"
+#line 870 "COSStyleParser.c"
   COSStyleParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
@@ -1045,7 +1056,7 @@ void COSStyleParse(
   }while( yymajor!=YYNOCODE && yypParser->yyidx>=0 );
   return;
 }
-#line 97 "COSStyleParser.y"
+#line 101 "COSStyleParser.y"
 
 
 char *COSStyleNodeTypeToStr(COSStyleNodeType nodeType) {
@@ -1126,4 +1137,4 @@ void COSStyleCtxFree(COSStyleCtx ctx) {
     }
 }
 
-#line 1131 "COSStyleParser.c"
+#line 1142 "COSStyleParser.c"
