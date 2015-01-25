@@ -61,6 +61,12 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
             view.layer.cornerRadius = floatValue;
     });
 
+    COSStyleAddRenderBlock(@"content-mode", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        UIViewContentMode contentMode = [nodeVal contentModeValue];
+        if (contentMode >= 0)
+            view.contentMode = contentMode;
+    });
+
     COSStyleAddRenderBlock(@"overflow", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         if ([nodeVal.stringValue isEqualToString:@"hidden"])
             view.layer.masksToBounds = YES;

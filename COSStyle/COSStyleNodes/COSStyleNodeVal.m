@@ -117,4 +117,31 @@
 #endif
 }
 
+- (UIViewContentMode)contentModeValue {
+    static dispatch_once_t onceToken;
+    static NSDictionary *contentModeMap = nil;
+
+    dispatch_once(&onceToken, ^{
+        contentModeMap = @{
+            @"scale-to-fill":     @(UIViewContentModeScaleToFill),
+            @"scale-aspect-fit":  @(UIViewContentModeScaleAspectFit),
+            @"scale-aspect-fill": @(UIViewContentModeScaleAspectFill),
+            @"redraw":            @(UIViewContentModeRedraw),
+            @"center":            @(UIViewContentModeCenter),
+            @"top":               @(UIViewContentModeTop),
+            @"bottom":            @(UIViewContentModeBottom),
+            @"left":              @(UIViewContentModeLeft),
+            @"right":             @(UIViewContentModeRight),
+            @"top-left":          @(UIViewContentModeTopLeft),
+            @"top-right":         @(UIViewContentModeTopRight),
+            @"bottom-left":       @(UIViewContentModeBottomLeft),
+            @"bottom-right":      @(UIViewContentModeBottomRight)
+        };
+    });
+
+    NSNumber *contentMode = contentModeMap[self.stringValue];
+
+    return contentMode ? [contentMode integerValue] : -1;
+}
+
 @end
