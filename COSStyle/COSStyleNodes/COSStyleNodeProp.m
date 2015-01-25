@@ -69,6 +69,12 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
         }
     });
 
+    COSStyleAddRenderBlock(@"opacity", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        CGFloat floatValue = [nodeVal CGFloatValue];
+        if (!isnan(floatValue))
+            view.layer.opacity = floatValue;
+    });
+
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         CGFloat floatValue = [nodeVal CGFloatValue];
         if (!isnan(floatValue)) {
