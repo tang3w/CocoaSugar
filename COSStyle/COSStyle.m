@@ -156,7 +156,10 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
     NSMutableSet *keeper = [NSMutableSet set];
     [self parseAst:ctx.ast parent:NULL keeper:keeper];
     COSStyleNodeSheet *nodeSheet = (__bridge COSStyleNodeSheet *)ctx.ast->data;
-    [self.nodeSheets addObject:nodeSheet];
+
+    if (nodeSheet) {
+        [self.nodeSheets addObject:nodeSheet];
+    }
 }
 
 - (void)parseAst:(COSStyleAST *)ast parent:(COSStyleAST *)parent keeper:(NSMutableSet *)keeper {
