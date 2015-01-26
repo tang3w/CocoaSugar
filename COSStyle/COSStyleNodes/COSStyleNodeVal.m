@@ -46,7 +46,7 @@
     return component / 255.0;
 }
 
-- (UIColor *)colorValue {
+- (BOOL)getColorValue:(UIColor *__autoreleasing *)value {
     static dispatch_once_t onceToken;
     static NSRegularExpression *hexColorRegExp = nil;
 
@@ -95,31 +95,28 @@
                 a = [self colorComponentFromString:hexString start:6 length:2];
                 break;
             default:
-                return nil;
+                return NO;
             }
 
-            return [UIColor colorWithRed:r green:g blue:b alpha:a];
+            *value = [UIColor colorWithRed:r green:g blue:b alpha:a];
+
+            return YES;
         }
     }
 
-    return nil;
+    return NO;
 }
 
-- (UIImage *)imageValue {
-    return [UIImage imageNamed:self.stringValue];
-}
-
-- (CGFloat)CGFloatValue {
-    CGFloat floatValue = 0;
+- (BOOL)getCGFloatValue:(CGFloat *)value {
     NSScanner *scanner = [NSScanner scannerWithString:self.stringValue];
 
 #if CGFLOAT_IS_DOUBLE
-    BOOL valid = [scanner scanDouble:&floatValue];
+    BOOL valid = [scanner scanDouble:value];
 #else
-    BOOL valid = [scanner scanFloat:&floatValue];
+    BOOL valid = [scanner scanFloat:value];
 #endif
 
-    return valid ? floatValue : NAN;
+    return valid;
 }
 
 - (BOOL)getContentModeValue:(UIViewContentMode *)contentMode {
@@ -150,6 +147,25 @@
         *contentMode = [modeNumber integerValue];
 
     return modeNumber != nil;
+}
+
+- (BOOL)getVisibleValue:(BOOL *)visible {
+    static dispatch_once_t onceToken;
+    static NSDictionary *visibilityMap = nil;
+
+    dispatch_once(&onceToken, ^{
+        visibilityMap = @{
+            @"visible": @YES,
+            @"hidden": @NO
+        };
+    });
+
+    NSNumber *visibility = visibilityMap[self.stringValue];
+
+    if (visibility)
+        *visible = [visibility boolValue];
+
+    return visibility != nil;
 }
 
 @end

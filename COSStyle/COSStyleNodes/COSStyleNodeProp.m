@@ -44,20 +44,20 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"background-color", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        UIColor *colorValue = [nodeVal colorValue];
-        if (colorValue)
+        UIColor *colorValue = nil;
+        if ([nodeVal getColorValue:&colorValue])
             view.backgroundColor = colorValue;
     });
 
     COSStyleAddRenderBlock(@"background-image", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        UIImage *imageValue = [nodeVal imageValue];
+        UIImage *imageValue = [UIImage imageNamed:nodeVal.stringValue];
         if (imageValue)
             view.backgroundColor = [UIColor colorWithPatternImage:imageValue];
     });
 
     COSStyleAddRenderBlock(@"border-radius", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = [nodeVal CGFloatValue];
-        if (!isnan(floatValue))
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue])
             view.layer.cornerRadius = floatValue;
     });
 
@@ -68,28 +68,26 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"overflow", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if ([nodeVal.stringValue isEqualToString:@"hidden"])
-            view.layer.masksToBounds = YES;
-        else if ([nodeVal.stringValue isEqualToString:@"visible"])
-            view.layer.masksToBounds = NO;
+        BOOL visible = NO;
+        if ([nodeVal getVisibleValue:&visible])
+            view.clipsToBounds = !visible;
     });
 
     COSStyleAddRenderBlock(@"opacity", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = [nodeVal CGFloatValue];
-        if (!isnan(floatValue))
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue])
             view.layer.opacity = floatValue;
     });
 
     COSStyleAddRenderBlock(@"visibility", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if ([nodeVal.stringValue isEqualToString:@"hidden"])
-            view.hidden = YES;
-        else if ([nodeVal.stringValue isEqualToString:@"visible"])
-            view.hidden = NO;
+        BOOL visible = NO;
+        if ([nodeVal getVisibleValue:&visible])
+            view.hidden = !visible;
     });
 
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = [nodeVal CGFloatValue];
-        if (!isnan(floatValue)) {
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue]) {
             CGRect bounds = view.bounds;
             bounds.size.width = floatValue;
             view.bounds = bounds;
@@ -97,8 +95,8 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = [nodeVal CGFloatValue];
-        if (!isnan(floatValue)) {
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue]) {
             CGRect bounds = view.bounds;
             bounds.size.height = floatValue;
             view.bounds = bounds;
