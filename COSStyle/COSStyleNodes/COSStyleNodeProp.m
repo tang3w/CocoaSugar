@@ -88,18 +88,18 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         CGFloat floatValue = 0;
         if ([nodeVal getCGFloatValue:&floatValue]) {
-            CGRect bounds = view.bounds;
-            bounds.size.width = floatValue;
-            view.bounds = bounds;
+            CGRect frame = view.frame;
+            frame.size.width = floatValue;
+            view.frame = frame;
         }
     });
 
     COSStyleAddRenderBlock(@"height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         CGFloat floatValue = 0;
         if ([nodeVal getCGFloatValue:&floatValue]) {
-            CGRect bounds = view.bounds;
-            bounds.size.height = floatValue;
-            view.bounds = bounds;
+            CGRect frame = view.frame;
+            frame.size.height = floatValue;
+            view.frame = frame;
         }
     });
 }
