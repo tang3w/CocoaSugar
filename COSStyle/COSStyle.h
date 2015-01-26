@@ -27,18 +27,11 @@
 #import <UIKit/UIKit.h>
 
 
-@interface COSStyleSheet : NSObject
-
-+ (instancetype)sharedStyleSheet;
-
-- (void)loadFiles:(NSArray *)files inBundle:(NSBundle *)bundle;
-- (void)loadFiles:(NSString *)file, ... NS_REQUIRES_NIL_TERMINATION;
-- (void)loadURLs:(NSURL *)URL, ... NS_REQUIRES_NIL_TERMINATION;
-
-@end
-
-
 @interface COSStyle : NSObject
+
++ (void)loadFiles:(NSArray *)files inBundle:(NSBundle *)bundle;
++ (void)loadFiles:(NSString *)file, ... NS_REQUIRES_NIL_TERMINATION;
++ (void)loadURLs:(NSURL *)URL, ... NS_REQUIRES_NIL_TERMINATION;
 
 + (instancetype)styleOfView:(UIView *)view;
 

@@ -61,9 +61,16 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
 @end
 
 
+@interface COSStyleSheet : NSObject
+
+@end
+
+
 @interface COSStyleSheet ()
 
 @property (nonatomic, strong) NSMutableArray *nodeSheets;
+
++ (instancetype)sharedStyleSheet;
 
 - (COSStyleNodeDeclList *)declListForView:(UIView *)view classNames:(NSSet *)classNames;
 
@@ -105,35 +112,7 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
     }
 }
 
-- (void)loadFiles:(NSString *)file, ... {
-    NSMutableArray *files = [[NSMutableArray alloc] init];
-
-    if (file) [files addObject:file];
-
-    va_list argv;
-    va_start(argv, file);
-
-    while ((file = va_arg(argv, NSString *)))
-        [files addObject:file];
-
-    va_end(argv);
-
-    [self loadFiles:files inBundle:[NSBundle mainBundle]];
-}
-
-- (void)loadURLs:(NSURL *)URL, ... {
-    NSMutableArray *URLs = [[NSMutableArray alloc] init];
-
-    if (URL) [URLs addObject:URL];
-
-    va_list argv;
-    va_start(argv, URL);
-
-    while ((URL = va_arg(argv, NSURL *)))
-        [URLs addObject:URL];
-
-    va_end(argv);
-
+- (void)loadURLs:(NSArray *)URLs {
     for (NSURL *URL in URLs) {
         NSString *text = [NSString stringWithContentsOfURL:URL
                                                   encoding:NSUTF8StringEncoding
@@ -294,6 +273,42 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
 
 
 @implementation COSStyle
+
++ (void)loadFiles:(NSArray *)files inBundle:(NSBundle *)bundle {
+    [[COSStyleSheet sharedStyleSheet] loadFiles:files inBundle:bundle];
+}
+
++ (void)loadFiles:(NSString *)file, ... {
+    NSMutableArray *files = [[NSMutableArray alloc] init];
+
+    if (file) [files addObject:file];
+
+    va_list argv;
+    va_start(argv, file);
+
+    while ((file = va_arg(argv, NSString *)))
+        [files addObject:file];
+
+    va_end(argv);
+
+    [self loadFiles:files inBundle:[NSBundle mainBundle]];
+}
+
++ (void)loadURLs:(NSURL *)URL, ... {
+    NSMutableArray *URLs = [[NSMutableArray alloc] init];
+
+    if (URL) [URLs addObject:URL];
+
+    va_list argv;
+    va_start(argv, URL);
+
+    while ((URL = va_arg(argv, NSURL *)))
+        [URLs addObject:URL];
+
+    va_end(argv);
+
+    [[COSStyleSheet sharedStyleSheet] loadURLs:URLs];
+}
 
 + (instancetype)styleOfView:(UIView *)view {
     static const void *COSStyleKey = &COSStyleKey;
