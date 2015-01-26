@@ -68,7 +68,7 @@ static NSDictionary *COSStyleW3CNamedColors(void);
     dispatch_once(&onceToken, ^{
         hexColorRegExp = (
             [NSRegularExpression
-             regularExpressionWithPattern:@"^#?([0-9a-f]+)$"
+             regularExpressionWithPattern:@"^#?[0-9a-f]+$"
              options:NSRegularExpressionCaseInsensitive
              error:nil]
         );
@@ -80,8 +80,7 @@ static NSDictionary *COSStyleW3CNamedColors(void);
     if (![matches count])
         return NO;
 
-    NSRange hexRange = [[matches firstObject] rangeAtIndex:1];
-    hexString = [hexString substringWithRange:hexRange];
+    hexString = [hexString substringFromIndex:1];
 
     if (hexString) {
         CGFloat r, g, b, a;
