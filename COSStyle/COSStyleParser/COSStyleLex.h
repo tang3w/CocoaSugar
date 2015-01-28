@@ -328,7 +328,7 @@ extern int COSStylelex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 59 "COSStyleLex.l"
+#line 79 "COSStyleLex.l"
 
 
 #line 335 "COSStyleLex.h"

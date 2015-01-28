@@ -8,13 +8,45 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 #include "COSStyleDefine.h"
+
+inline static
+char *COSStyleStrDup(const char *s) {
+    if (!s)
+        return NULL;
+
+    size_t len = (strlen(s) + 1);
+    char *p = malloc(len * sizeof(char));
+
+    if (p)
+        return memcpy(p, s, len);
+    else
+        return NULL;
+}
+
+inline static
+char *COSStyleStrDupPrintf(const char *format, ...) {
+    char *ptr = NULL;
+
+    va_list ap;
+    va_start(ap, format);
+
+    vasprintf(&ptr, format, ap);
+
+    va_end(ap);
+
+    return ptr;
+}
 
 void COSStyleCtxInit(COSStyleCtx *ctx);
 
 COSStyleAST *COSStyleASTCreate(COSStyleNodeType nodeType, void *nodeValue, COSStyleAST *l, COSStyleAST *r);
 
-#line 18 "COSStyleParser.c"
+void COSStyleAstFree(COSStyleAST *ast);
+
+#line 50 "COSStyleParser.c"
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
 */
@@ -65,13 +97,13 @@ COSStyleAST *COSStyleASTCreate(COSStyleNodeType nodeType, void *nodeValue, COSSt
 **                       defined, then do no error processing.
 */
 #define YYCODETYPE unsigned char
-#define YYNOCODE 23
+#define YYNOCODE 35
 #define YYACTIONTYPE unsigned char
 #define COSStyleParseTOKENTYPE  char * 
 typedef union {
   int yyinit;
   COSStyleParseTOKENTYPE yy0;
-  COSStyleAST * yy41;
+  COSStyleAST * yy33;
 } YYMINORTYPE;
 #ifndef YYSTACKDEPTH
 #define YYSTACKDEPTH 100
@@ -80,8 +112,8 @@ typedef union {
 #define COSStyleParseARG_PDECL , COSStyleCtx *ctx 
 #define COSStyleParseARG_FETCH  COSStyleCtx *ctx  = yypParser->ctx 
 #define COSStyleParseARG_STORE yypParser->ctx  = ctx 
-#define YYNSTATE 26
-#define YYNRULE 20
+#define YYNSTATE 43
+#define YYNRULE 31
 #define YY_NO_ACTION      (YYNSTATE+YYNRULE+2)
 #define YY_ACCEPT_ACTION  (YYNSTATE+YYNRULE+1)
 #define YY_ERROR_ACTION   (YYNSTATE+YYNRULE)
@@ -150,38 +182,46 @@ static const YYMINORTYPE yyzerominor = { 0 };
 **                     shifting non-terminals after a reduce.
 **  yy_default[]       Default action for each state.
 */
-#define YY_ACTTAB_COUNT (34)
+#define YY_ACTTAB_COUNT (59)
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */    14,    6,   13,   10,   25,   14,    6,   17,   26,   14,
- /*    10 */     7,    5,    4,   11,    9,   23,    2,   12,   19,   15,
- /*    20 */    24,   20,   18,    4,   11,    1,   47,   11,    3,   21,
- /*    30 */    22,   16,   48,    8,
+ /*     0 */    37,    6,    5,   36,   35,   24,   11,   27,   29,   33,
+ /*    10 */    32,    3,   24,   11,   23,   20,   42,   30,   17,   19,
+ /*    20 */    13,    2,   33,   32,    3,   30,   17,   15,   43,    6,
+ /*    30 */     5,    7,    8,   21,   14,   25,    4,   10,    9,   24,
+ /*    40 */    12,   40,   41,   22,   28,   39,   30,   18,   30,   16,
+ /*    50 */    26,    8,   21,   38,    1,   75,   21,   34,   31,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */    14,   15,   16,   17,   18,   14,   15,   16,    0,   14,
- /*    10 */    15,    6,    4,    5,    1,   11,    3,   13,    4,    4,
- /*    20 */     2,    7,    4,    4,    5,   19,   20,    5,   12,    8,
- /*    30 */    21,   14,   22,   10,
+ /*     0 */     4,    9,   10,    7,    8,   26,   27,   28,   16,   13,
+ /*    10 */    14,   15,   26,   27,   28,   29,   30,   19,   20,   21,
+ /*    20 */    22,    6,   13,   14,   15,   19,   20,   21,    0,    9,
+ /*    30 */    10,   24,    4,    5,    1,    4,    3,   11,   12,   26,
+ /*    40 */    27,   23,    2,   25,    4,   33,   19,   20,   19,   20,
+ /*    50 */    26,    4,    5,   17,   31,   32,    5,   19,   19,
 };
-#define YY_SHIFT_USE_DFLT (-1)
-#define YY_SHIFT_COUNT (12)
-#define YY_SHIFT_MIN   (0)
-#define YY_SHIFT_MAX   (22)
+#define YY_SHIFT_USE_DFLT (-9)
+#define YY_SHIFT_COUNT (22)
+#define YY_SHIFT_MIN   (-8)
+#define YY_SHIFT_MAX   (51)
 static const signed char yy_shift_ofst[] = {
- /*     0 */    -1,    8,   19,   18,   22,   14,   22,   22,   21,   -1,
- /*    10 */    13,   15,    5,
+ /*     0 */    -9,   28,   -4,    9,   47,    9,    9,   40,   51,    9,
+ /*    10 */     9,   51,   51,   36,   -9,   -8,   26,   26,   26,   20,
+ /*    20 */    33,   31,   15,
 };
-#define YY_REDUCE_USE_DFLT (-15)
-#define YY_REDUCE_COUNT (9)
-#define YY_REDUCE_MIN   (-14)
-#define YY_REDUCE_MAX   (23)
+#define YY_REDUCE_USE_DFLT (-22)
+#define YY_REDUCE_COUNT (14)
+#define YY_REDUCE_MIN   (-21)
+#define YY_REDUCE_MAX   (39)
 static const signed char yy_reduce_ofst[] = {
- /*     0 */     6,  -14,   -9,    4,   -5,   23,   17,   17,    9,   16,
+ /*     0 */    23,  -14,   -2,    6,  -21,   29,   27,   18,   13,   39,
+ /*    10 */    38,   24,   24,   12,    7,
 };
 static const YYACTIONTYPE yy_default[] = {
- /*     0 */    27,   46,   46,   46,   32,   46,   33,   34,   44,   38,
- /*    10 */    46,   46,   46,   30,   35,   37,   36,   31,   41,   43,
- /*    20 */    42,   45,   40,   39,   29,   28,
+ /*     0 */    44,   74,   74,   74,   74,   74,   74,   74,   49,   74,
+ /*    10 */    74,   50,   51,   73,   55,   74,   65,   63,   64,   62,
+ /*    20 */    74,   74,   74,   47,   52,   54,   53,   48,   58,   71,
+ /*    30 */    66,   68,   70,   69,   67,   61,   60,   59,   72,   57,
+ /*    40 */    56,   46,   45,
 };
 
 /* The next table maps tokens into fallback tokens.  If a construct
@@ -275,8 +315,11 @@ void COSStyleParseTrace(FILE *TraceFILE, char *zTracePrompt){
 ** are required.  The following table supplies these names */
 static const char *const yyTokenName[] = { 
   "$",             "LBRACE",        "RBRACE",        "COMMA",       
-  "ID",            "DOT",           "COLON",         "VAL",         
-  "SEMI",          "error",         "val",           "decl",        
+  "ID",            "DOT",           "COLON",         "STRING",      
+  "HEX",           "ADD",           "SUB",           "MUL",         
+  "DIV",           "NUMBER",        "PERCENTAGE",    "LPAREN",      
+  "RPAREN",        "SEMI",          "error",         "atom",        
+  "item",          "expr",          "val",           "decl",        
   "decllist",      "prop",          "cls",           "clslist",     
   "sel",           "sellist",       "rule",          "rulelist",    
   "sheet",         "semi",        
@@ -303,10 +346,21 @@ static const char *const yyRuleName[] = {
  /*  13 */ "decllist ::= decllist decl",
  /*  14 */ "decl ::= prop COLON val semi",
  /*  15 */ "prop ::= ID",
- /*  16 */ "val ::= VAL",
- /*  17 */ "val ::= ID",
- /*  18 */ "semi ::=",
- /*  19 */ "semi ::= SEMI",
+ /*  16 */ "val ::= ID",
+ /*  17 */ "val ::= STRING",
+ /*  18 */ "val ::= HEX",
+ /*  19 */ "val ::= expr",
+ /*  20 */ "expr ::= item",
+ /*  21 */ "expr ::= expr ADD item",
+ /*  22 */ "expr ::= expr SUB item",
+ /*  23 */ "item ::= atom",
+ /*  24 */ "item ::= item MUL atom",
+ /*  25 */ "item ::= item DIV atom",
+ /*  26 */ "atom ::= NUMBER",
+ /*  27 */ "atom ::= PERCENTAGE",
+ /*  28 */ "atom ::= LPAREN expr RPAREN",
+ /*  29 */ "semi ::= SEMI",
+ /*  30 */ "semi ::=",
 };
 #endif /* NDEBUG */
 
@@ -619,26 +673,37 @@ static const struct {
   YYCODETYPE lhs;         /* Symbol on the left-hand side of the rule */
   unsigned char nrhs;     /* Number of right-hand side symbols in the rule */
 } yyRuleInfo[] = {
-  { 20, 1 },
-  { 19, 0 },
-  { 19, 2 },
-  { 18, 4 },
-  { 17, 1 },
-  { 17, 3 },
-  { 16, 1 },
-  { 16, 1 },
-  { 16, 2 },
-  { 15, 1 },
-  { 15, 2 },
-  { 14, 2 },
-  { 12, 0 },
-  { 12, 2 },
-  { 11, 4 },
-  { 13, 1 },
-  { 10, 1 },
-  { 10, 1 },
-  { 21, 0 },
+  { 32, 1 },
+  { 31, 0 },
+  { 31, 2 },
+  { 30, 4 },
+  { 29, 1 },
+  { 29, 3 },
+  { 28, 1 },
+  { 28, 1 },
+  { 28, 2 },
+  { 27, 1 },
+  { 27, 2 },
+  { 26, 2 },
+  { 24, 0 },
+  { 24, 2 },
+  { 23, 4 },
+  { 25, 1 },
+  { 22, 1 },
+  { 22, 1 },
+  { 22, 1 },
+  { 22, 1 },
   { 21, 1 },
+  { 21, 3 },
+  { 21, 3 },
+  { 20, 1 },
+  { 20, 3 },
+  { 20, 3 },
+  { 19, 1 },
+  { 19, 1 },
+  { 19, 3 },
+  { 33, 1 },
+  { 33, 0 },
 };
 
 static void yy_accept(yyParser*);  /* Forward Declaration */
@@ -694,116 +759,290 @@ static void yy_reduce(
   **     break;
   */
       case 0: /* sheet ::= rulelist */
-#line 30 "COSStyleParser.y"
+#line 65 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSheet, NULL, NULL, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSheet, NULL, NULL, yymsp[0].minor.yy33);
 }
-#line 703 "COSStyleParser.c"
+#line 768 "COSStyleParser.c"
         break;
       case 2: /* rulelist ::= rulelist rule */
-#line 36 "COSStyleParser.y"
+#line 71 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRuleList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRuleList, NULL, yymsp[-1].minor.yy33, yymsp[0].minor.yy33);
 }
-#line 710 "COSStyleParser.c"
+#line 775 "COSStyleParser.c"
         break;
       case 3: /* rule ::= sellist LBRACE decllist RBRACE */
-#line 40 "COSStyleParser.y"
+#line 75 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRule, NULL, yymsp[-3].minor.yy41, yymsp[-1].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeRule, NULL, yymsp[-3].minor.yy33, yymsp[-1].minor.yy33);
 }
-#line 717 "COSStyleParser.c"
+#line 782 "COSStyleParser.c"
         break;
       case 4: /* sellist ::= sel */
-#line 44 "COSStyleParser.y"
+#line 79 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, NULL, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, NULL, yymsp[0].minor.yy33);
 }
-#line 724 "COSStyleParser.c"
+#line 789 "COSStyleParser.c"
         break;
       case 5: /* sellist ::= sellist COMMA sel */
-#line 48 "COSStyleParser.y"
+#line 83 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, yymsp[-2].minor.yy41, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSelList, NULL, yymsp[-2].minor.yy33, yymsp[0].minor.yy33);
 }
-#line 731 "COSStyleParser.c"
+#line 796 "COSStyleParser.c"
         break;
       case 6: /* sel ::= ID */
-#line 52 "COSStyleParser.y"
+#line 87 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[0].minor.yy0, NULL, NULL);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 738 "COSStyleParser.c"
+#line 803 "COSStyleParser.c"
         break;
       case 7: /* sel ::= clslist */
-#line 56 "COSStyleParser.y"
+#line 91 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, NULL, NULL, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, NULL, NULL, yymsp[0].minor.yy33);
 }
-#line 745 "COSStyleParser.c"
+#line 810 "COSStyleParser.c"
         break;
       case 8: /* sel ::= ID clslist */
-#line 60 "COSStyleParser.y"
+#line 95 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[-1].minor.yy0, NULL, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeSel, yymsp[-1].minor.yy0, NULL, yymsp[0].minor.yy33);
 }
-#line 752 "COSStyleParser.c"
+#line 817 "COSStyleParser.c"
         break;
       case 9: /* clslist ::= cls */
-#line 64 "COSStyleParser.y"
+#line 99 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, NULL, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, NULL, yymsp[0].minor.yy33);
 }
-#line 759 "COSStyleParser.c"
+#line 824 "COSStyleParser.c"
         break;
       case 10: /* clslist ::= clslist cls */
-#line 68 "COSStyleParser.y"
+#line 103 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeClsList, NULL, yymsp[-1].minor.yy33, yymsp[0].minor.yy33);
 }
-#line 766 "COSStyleParser.c"
+#line 831 "COSStyleParser.c"
         break;
       case 11: /* cls ::= DOT ID */
-#line 72 "COSStyleParser.y"
+#line 107 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeCls, yymsp[0].minor.yy0, NULL, NULL);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeCls, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 773 "COSStyleParser.c"
+#line 838 "COSStyleParser.c"
         break;
       case 13: /* decllist ::= decllist decl */
-#line 78 "COSStyleParser.y"
+#line 113 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDeclList, NULL, yymsp[-1].minor.yy41, yymsp[0].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDeclList, NULL, yymsp[-1].minor.yy33, yymsp[0].minor.yy33);
 }
-#line 780 "COSStyleParser.c"
+#line 845 "COSStyleParser.c"
         break;
       case 14: /* decl ::= prop COLON val semi */
-#line 82 "COSStyleParser.y"
+#line 117 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDecl, NULL, yymsp[-3].minor.yy41, yymsp[-1].minor.yy41);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeDecl, NULL, yymsp[-3].minor.yy33, yymsp[-1].minor.yy33);
 }
-#line 787 "COSStyleParser.c"
+#line 852 "COSStyleParser.c"
         break;
       case 15: /* prop ::= ID */
-#line 86 "COSStyleParser.y"
+#line 121 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeProp, yymsp[0].minor.yy0, NULL, NULL);
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeProp, yymsp[0].minor.yy0, NULL, NULL);
 }
-#line 794 "COSStyleParser.c"
+#line 859 "COSStyleParser.c"
         break;
-      case 16: /* val ::= VAL */
-      case 17: /* val ::= ID */ yytestcase(yyruleno==17);
-#line 90 "COSStyleParser.y"
+      case 16: /* val ::= ID */
+#line 125 "COSStyleParser.y"
 {
-    yygotominor.yy41 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+    COSStyleAST *ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+    ast->flag.nodeValueType = COSStyleNodeValTypeID;
+
+    yygotominor.yy33 = ctx->ast = ast;
 }
-#line 802 "COSStyleParser.c"
+#line 869 "COSStyleParser.c"
+        break;
+      case 17: /* val ::= STRING */
+#line 132 "COSStyleParser.y"
+{
+    COSStyleAST *ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+    ast->flag.nodeValueType = COSStyleNodeValTypeString;
+
+    yygotominor.yy33 = ctx->ast = ast;
+}
+#line 879 "COSStyleParser.c"
+        break;
+      case 18: /* val ::= HEX */
+#line 139 "COSStyleParser.y"
+{
+    COSStyleAST *ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+    ast->flag.nodeValueType = COSStyleNodeValTypeHex;
+
+    yygotominor.yy33 = ctx->ast = ast;
+}
+#line 889 "COSStyleParser.c"
+        break;
+      case 19: /* val ::= expr */
+#line 146 "COSStyleParser.y"
+{
+    char *nodeValue = COSStyleStrDup(yymsp[0].minor.yy33->nodeValue);
+
+    COSStyleAST *ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+    ast->flag.nodeValueType = COSStyleNodeValTypeExpression;
+
+    yygotominor.yy33 = ctx->ast = ast;
+
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 903 "COSStyleParser.c"
+        break;
+      case 20: /* expr ::= item */
+      case 23: /* item ::= atom */ yytestcase(yyruleno==23);
+#line 157 "COSStyleParser.y"
+{
+    char *nodeValue = COSStyleStrDup(yymsp[0].minor.yy33->nodeValue);
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(yymsp[0].minor.yy33->nodeType, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 915 "COSStyleParser.c"
+        break;
+      case 21: /* expr ::= expr ADD item */
+#line 165 "COSStyleParser.y"
+{
+    char *nodeValue = NULL;
+
+    if (yymsp[-2].minor.yy33->flag.nodeValueIsNumber &&
+        yymsp[0].minor.yy33->flag.nodeValueIsNumber )
+    {
+        double lop = strtof(yymsp[-2].minor.yy33->nodeValue, NULL);
+        double rop = strtof(yymsp[0].minor.yy33->nodeValue, NULL);
+
+        nodeValue = COSStyleStrDupPrintf("%f", lop + rop);
+    } else {
+        nodeValue = COSStyleStrDupPrintf("%s + %s", yymsp[-2].minor.yy33->nodeValue, yymsp[0].minor.yy33->nodeValue);
+    }
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[-2].minor.yy33);
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 938 "COSStyleParser.c"
+        break;
+      case 22: /* expr ::= expr SUB item */
+#line 185 "COSStyleParser.y"
+{
+    char *nodeValue = NULL;
+
+    if (yymsp[-2].minor.yy33->flag.nodeValueIsNumber &&
+        yymsp[0].minor.yy33->flag.nodeValueIsNumber )
+    {
+        double lop = strtof(yymsp[-2].minor.yy33->nodeValue, NULL);
+        double rop = strtof(yymsp[0].minor.yy33->nodeValue, NULL);
+
+        nodeValue = COSStyleStrDupPrintf("%f", lop - rop);
+    } else {
+        nodeValue = COSStyleStrDupPrintf("%s - %s", yymsp[-2].minor.yy33->nodeValue, yymsp[0].minor.yy33->nodeValue);
+    }
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[-2].minor.yy33);
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 961 "COSStyleParser.c"
+        break;
+      case 24: /* item ::= item MUL atom */
+#line 213 "COSStyleParser.y"
+{
+    char *nodeValue = NULL;
+
+    if (yymsp[-2].minor.yy33->flag.nodeValueIsNumber &&
+        yymsp[0].minor.yy33->flag.nodeValueIsNumber )
+    {
+        double lop = strtof(yymsp[-2].minor.yy33->nodeValue, NULL);
+        double rop = strtof(yymsp[0].minor.yy33->nodeValue, NULL);
+
+        nodeValue = COSStyleStrDupPrintf("%f", lop * rop);
+    } else {
+        nodeValue = COSStyleStrDupPrintf("%s * %s", yymsp[-2].minor.yy33->nodeValue, yymsp[0].minor.yy33->nodeValue);
+    }
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[-2].minor.yy33);
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 984 "COSStyleParser.c"
+        break;
+      case 25: /* item ::= item DIV atom */
+#line 233 "COSStyleParser.y"
+{
+    char *nodeValue = NULL;
+
+    if (yymsp[-2].minor.yy33->flag.nodeValueIsNumber &&
+        yymsp[0].minor.yy33->flag.nodeValueIsNumber )
+    {
+        double lop = strtof(yymsp[-2].minor.yy33->nodeValue, NULL);
+        double rop = strtof(yymsp[0].minor.yy33->nodeValue, NULL);
+
+        nodeValue = COSStyleStrDupPrintf("%f", lop / rop);
+    } else {
+        nodeValue = COSStyleStrDupPrintf("%s / %s", yymsp[-2].minor.yy33->nodeValue, yymsp[0].minor.yy33->nodeValue);
+    }
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[-2].minor.yy33);
+    COSStyleAstFree(yymsp[0].minor.yy33);
+}
+#line 1007 "COSStyleParser.c"
+        break;
+      case 26: /* atom ::= NUMBER */
+#line 253 "COSStyleParser.y"
+{
+    COSStyleAST *ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+    ast->flag.nodeValueIsNumber = 1;
+
+    yygotominor.yy33 = ctx->ast = ast;
+}
+#line 1017 "COSStyleParser.c"
+        break;
+      case 27: /* atom ::= PERCENTAGE */
+#line 260 "COSStyleParser.y"
+{
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, yymsp[0].minor.yy0, NULL, NULL);
+}
+#line 1024 "COSStyleParser.c"
+        break;
+      case 28: /* atom ::= LPAREN expr RPAREN */
+#line 264 "COSStyleParser.y"
+{
+    char *nodeValue = NULL;
+
+    if (yymsp[-1].minor.yy33->flag.nodeValueIsNumber) {
+        nodeValue = COSStyleStrDup(yymsp[-1].minor.yy33->nodeValue);
+    } else {
+        nodeValue = COSStyleStrDupPrintf("( %s )", yymsp[-1].minor.yy33->nodeValue);
+    }
+
+    yygotominor.yy33 = ctx->ast = COSStyleASTCreate(COSStyleNodeTypeVal, nodeValue, NULL, NULL);
+
+    COSStyleAstFree(yymsp[-1].minor.yy33);
+}
+#line 1041 "COSStyleParser.c"
         break;
       default:
       /* (1) rulelist ::= */ yytestcase(yyruleno==1);
       /* (12) decllist ::= */ yytestcase(yyruleno==12);
-      /* (18) semi ::= */ yytestcase(yyruleno==18);
-      /* (19) semi ::= SEMI */ yytestcase(yyruleno==19);
+      /* (29) semi ::= SEMI */ yytestcase(yyruleno==29);
+      /* (30) semi ::= */ yytestcase(yyruleno==30);
         break;
   };
   yygoto = yyRuleInfo[yyruleno].lhs;
@@ -863,9 +1102,9 @@ static void yy_syntax_error(
 ){
   COSStyleParseARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 15 "COSStyleParser.y"
+#line 47 "COSStyleParser.y"
  ctx->result = 1; 
-#line 870 "COSStyleParser.c"
+#line 1109 "COSStyleParser.c"
   COSStyleParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
@@ -1056,7 +1295,7 @@ void COSStyleParse(
   }while( yymajor!=YYNOCODE && yypParser->yyidx>=0 );
   return;
 }
-#line 101 "COSStyleParser.y"
+#line 281 "COSStyleParser.y"
 
 
 char *COSStyleNodeTypeToStr(COSStyleNodeType nodeType) {
@@ -1105,6 +1344,8 @@ COSStyleAST *COSStyleASTCreate(COSStyleNodeType nodeType, void *nodeValue, COSSt
     COSStyleAST *astp = (COSStyleAST *)malloc(sizeof(COSStyleAST));
     astp->nodeType  = nodeType;
     astp->nodeValue = nodeValue;
+    astp->flag.nodeValueType = 0;
+    astp->flag.nodeValueIsNumber = 0;
     astp->data = NULL;
     astp->l = l;
     astp->r = r;
@@ -1137,4 +1378,4 @@ void COSStyleCtxFree(COSStyleCtx ctx) {
     }
 }
 
-#line 1142 "COSStyleParser.c"
+#line 1383 "COSStyleParser.c"

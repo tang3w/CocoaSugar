@@ -27,6 +27,8 @@
 
 @interface COSStyleNodeVal : COSStyleNode
 
+@property (readonly) COSStyleNodeValType nodeValType;
+
 - (BOOL)getColorValue:(UIColor **)value;
 - (BOOL)getCGFloatValue:(CGFloat *)value;
 - (BOOL)getContentModeValue:(UIViewContentMode *)value;

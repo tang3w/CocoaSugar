@@ -27,11 +27,19 @@
 
 static NSDictionary *COSStyleW3CNamedColors(void);
 
+@interface COSStyleNodeVal ()
+
+@property (nonatomic, assign) COSStyleNodeValType nodeValType;
+
+@end
+
 @implementation COSStyleNodeVal
 
 - (instancetype)initWithAst:(COSStyleAST *)ast {
-    if ((self = [super initWithAst:ast]))
+    if ((self = [super initWithAst:ast])) {
         self.stringValue = COSSTYLE_AST_STRING_VALUE(ast);
+        self.nodeValType = ast->flag.nodeValueType;
+    }
 
     return self;
 }
@@ -49,6 +57,10 @@ static NSDictionary *COSStyleW3CNamedColors(void);
 }
 
 - (BOOL)getColorValue:(UIColor *__autoreleasing *)value {
+    if (self.nodeValType != COSStyleNodeValTypeID &&
+        self.nodeValType != COSStyleNodeValTypeHex)
+        return NO;
+
     NSString *hexString = self.stringValue;
 
     if (!hexString.length)
@@ -123,6 +135,9 @@ static NSDictionary *COSStyleW3CNamedColors(void);
 }
 
 - (BOOL)getCGFloatValue:(CGFloat *)value {
+    if (self.nodeValType != COSStyleNodeValTypeExpression)
+        return NO;
+
     NSScanner *scanner = [NSScanner scannerWithString:self.stringValue];
 
 #if CGFLOAT_IS_DOUBLE
@@ -135,6 +150,9 @@ static NSDictionary *COSStyleW3CNamedColors(void);
 }
 
 - (BOOL)getContentModeValue:(UIViewContentMode *)contentMode {
+    if (self.nodeValType != COSStyleNodeValTypeID)
+        return NO;
+
     static dispatch_once_t onceToken;
     static NSDictionary *contentModeMap = nil;
 
@@ -165,6 +183,9 @@ static NSDictionary *COSStyleW3CNamedColors(void);
 }
 
 - (BOOL)getVisibleValue:(BOOL *)visible {
+    if (self.nodeValType != COSStyleNodeValTypeID)
+        return NO;
+
     static dispatch_once_t onceToken;
     static NSDictionary *visibilityMap = nil;
 

@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #import "COSStyleNodeProp.h"
+#import "COSLayout.h"
 
 static NSMutableDictionary *COSStyleRenderBlockMap = nil;
 
@@ -100,6 +101,48 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
             CGRect frame = view.frame;
             frame.size.height = floatValue;
             view.frame = frame;
+        }
+    });
+
+    COSStyleAddRenderBlock(@"top", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"tt = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
+        }
+    });
+
+    COSStyleAddRenderBlock(@"left", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"ll = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
+        }
+    });
+
+    COSStyleAddRenderBlock(@"right", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"rr = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
+        }
+    });
+
+    COSStyleAddRenderBlock(@"bottom", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"bb = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
+        }
+    });
+
+    COSStyleAddRenderBlock(@"center-x", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"cl = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
+        }
+    });
+
+    COSStyleAddRenderBlock(@"center-y", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"ct = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
         }
     });
 }

@@ -5,30 +5,6 @@
 #define COSSTYLE_INVALID -1
 #define YY_DECL int COSStylelex (yyscan_t yyscanner, char **token_value)
 
-typedef struct COSStyleCtx COSStyleCtx;
-
-struct COSStyleAST {
-    int nodeType;
-    void *nodeValue;
-    struct COSStyleAST *l;
-    struct COSStyleAST *r;
-    void *data;
-};
-
-struct COSStyleCtx {
-    int result;
-    struct COSStyleAST *ast;
-};
-
-typedef struct COSStyleAST COSStyleAST;
-
-struct COSStyleDecl {
-    char *name;
-    char *value;
-};
-
-typedef struct COSStyleDecl COSStyleDecl;
-
 enum COSStyleNodeType {
     COSStyleNodeTypeVal = 1,
     COSStyleNodeTypeProp,
@@ -44,6 +20,36 @@ enum COSStyleNodeType {
 };
 
 typedef enum COSStyleNodeType COSStyleNodeType;
+
+enum COSStyleNodeValType {
+    COSStyleNodeValTypeID = 1,
+    COSStyleNodeValTypeString,
+    COSStyleNodeValTypeHex,
+    COSStyleNodeValTypeExpression,
+};
+
+typedef enum COSStyleNodeValType COSStyleNodeValType;
+
+struct COSStyleAST {
+    COSStyleNodeType nodeType;
+    void *nodeValue;
+    struct {
+        COSStyleNodeValType nodeValueType;
+        int nodeValueIsNumber;
+    } flag;
+    struct COSStyleAST *l;
+    struct COSStyleAST *r;
+    void *data;
+};
+
+typedef struct COSStyleAST COSStyleAST;
+
+struct COSStyleCtx {
+    int result;
+    struct COSStyleAST *ast;
+};
+
+typedef struct COSStyleCtx COSStyleCtx;
 
 void *COSStyleParseAlloc(void *(*mallocProc)(size_t));
 void COSStyleParse(void *parser, int token, char *value, COSStyleCtx *cxt);
