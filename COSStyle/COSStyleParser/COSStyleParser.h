@@ -10,8 +10,8 @@
 #define COSSTYLE_SUB                             10
 #define COSSTYLE_MUL                             11
 #define COSSTYLE_DIV                             12
-#define COSSTYLE_NUMBER                          13
-#define COSSTYLE_PERCENTAGE                      14
-#define COSSTYLE_LPAREN                          15
-#define COSSTYLE_RPAREN                          16
+#define COSSTYLE_LPAREN                          13
+#define COSSTYLE_RPAREN                          14
+#define COSSTYLE_PERCENTAGE                      15
+#define COSSTYLE_NUMBER                          16
 #define COSSTYLE_SEMI                            17

@@ -87,20 +87,16 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = 0;
-        if ([nodeVal getCGFloatValue:&floatValue]) {
-            CGRect frame = view.frame;
-            frame.size.width = floatValue;
-            view.frame = frame;
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"minw = maxw = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
         }
     });
 
     COSStyleAddRenderBlock(@"height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        CGFloat floatValue = 0;
-        if ([nodeVal getCGFloatValue:&floatValue]) {
-            CGRect frame = view.frame;
-            frame.size.height = floatValue;
-            view.frame = frame;
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
+            NSString *rule = [NSString stringWithFormat:@"minh = maxh = %@", nodeVal.stringValue];
+            [[COSLayout layoutOfView:view] addRule:rule];
         }
     });
 

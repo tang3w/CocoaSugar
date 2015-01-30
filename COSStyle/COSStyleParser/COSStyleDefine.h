@@ -33,10 +33,7 @@ typedef enum COSStyleNodeValType COSStyleNodeValType;
 struct COSStyleAST {
     COSStyleNodeType nodeType;
     void *nodeValue;
-    struct {
-        COSStyleNodeValType nodeValueType;
-        int nodeValueIsNumber;
-    } flag;
+    COSStyleNodeValType nodeValueType;
     struct COSStyleAST *l;
     struct COSStyleAST *r;
     void *data;

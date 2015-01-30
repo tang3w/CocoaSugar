@@ -38,7 +38,7 @@ static NSDictionary *COSStyleW3CNamedColors(void);
 - (instancetype)initWithAst:(COSStyleAST *)ast {
     if ((self = [super initWithAst:ast])) {
         self.stringValue = COSSTYLE_AST_STRING_VALUE(ast);
-        self.nodeValType = ast->flag.nodeValueType;
+        self.nodeValType = ast->nodeValueType;
     }
 
     return self;
