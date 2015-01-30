@@ -32,6 +32,7 @@
 - (BOOL)getColorValue:(UIColor **)value;
 - (BOOL)getCGFloatValue:(CGFloat *)value;
 - (BOOL)getContentModeValue:(UIViewContentMode *)value;
-- (BOOL)getVisibleValue:(BOOL *)visible;
+- (BOOL)getVisibleValue:(BOOL *)value;
+- (BOOL)getCGSizeValue:(CGSize *)value;
 
 @end

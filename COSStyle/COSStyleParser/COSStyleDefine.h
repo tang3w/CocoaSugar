@@ -26,6 +26,7 @@ enum COSStyleNodeValType {
     COSStyleNodeValTypeString,
     COSStyleNodeValTypeHex,
     COSStyleNodeValTypeExpression,
+    COSStyleNodeValTypeSize,
 };
 
 typedef enum COSStyleNodeValType COSStyleNodeValType;

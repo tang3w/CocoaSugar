@@ -62,6 +62,42 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
             view.layer.cornerRadius = floatValue;
     });
 
+    COSStyleAddRenderBlock(@"border-width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue])
+            view.layer.borderWidth = floatValue;
+    });
+
+    COSStyleAddRenderBlock(@"border-color", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        UIColor *colorValue = nil;
+        if ([nodeVal getColorValue:&colorValue])
+            view.layer.borderColor = colorValue.CGColor;
+    });
+
+    COSStyleAddRenderBlock(@"shadow-color", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        UIColor *colorValue = nil;
+        if ([nodeVal getColorValue:&colorValue])
+            view.layer.shadowColor = colorValue.CGColor;
+    });
+
+    COSStyleAddRenderBlock(@"shadow-opacity", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue])
+            view.layer.shadowOpacity = floatValue;
+    });
+
+    COSStyleAddRenderBlock(@"shadow-radius", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        CGFloat floatValue = 0;
+        if ([nodeVal getCGFloatValue:&floatValue])
+            view.layer.shadowRadius = floatValue;
+    });
+
+    COSStyleAddRenderBlock(@"shadow-offset", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        CGSize sizeValue = CGSizeZero;
+        if ([nodeVal getCGSizeValue:&sizeValue])
+            view.layer.shadowOffset = sizeValue;
+    });
+
     COSStyleAddRenderBlock(@"content-mode", ^(UIView *view, COSStyleNodeVal *nodeVal) {
         UIViewContentMode contentMode;
         if ([nodeVal getContentModeValue:&contentMode])

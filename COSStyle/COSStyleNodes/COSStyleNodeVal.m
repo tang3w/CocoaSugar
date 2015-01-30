@@ -182,7 +182,7 @@ static NSDictionary *COSStyleW3CNamedColors(void);
     return modeNumber != nil;
 }
 
-- (BOOL)getVisibleValue:(BOOL *)visible {
+- (BOOL)getVisibleValue:(BOOL *)value {
     if (self.nodeValType != COSStyleNodeValTypeID)
         return NO;
 
@@ -199,9 +199,35 @@ static NSDictionary *COSStyleW3CNamedColors(void);
     NSNumber *visibility = visibilityMap[self.stringValue];
 
     if (visibility)
-        *visible = [visibility boolValue];
+        *value = [visibility boolValue];
 
     return visibility != nil;
+}
+
+- (BOOL)getCGSizeValue:(CGSize *)value {
+    if (self.nodeValType != COSStyleNodeValTypeSize)
+        return NO;
+
+    NSArray *components = [self.stringValue componentsSeparatedByString:@","];
+
+    NSCharacterSet *spaceSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+
+    NSString *wstr = [components[0] stringByTrimmingCharactersInSet:spaceSet];
+    NSString *hstr = [components[1] stringByTrimmingCharactersInSet:spaceSet];
+
+    CGFloat width = 0, height = 0;
+
+#if CGFLOAT_IS_DOUBLE
+    width = [wstr doubleValue];
+    height = [hstr doubleValue];
+#else
+    width = [wstr floatValue];
+    height = [hstr floatValue];
+#endif
+
+    *value = CGSizeMake(width, height);
+
+    return YES;
 }
 
 @end
