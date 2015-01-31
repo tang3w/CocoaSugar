@@ -123,59 +123,87 @@ void COSStyleAddRenderBlock(NSString *property, COSStyleRenderBlock block) {
     });
 
     COSStyleAddRenderBlock(@"width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"minw = maxw = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+               [NSString stringWithFormat:@"minw = maxw = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"minh = maxh = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"minh = maxh = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"top", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"tt = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"tt = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"left", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"ll = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"ll = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"right", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"rr = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"rr = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"bottom", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"bb = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"bb = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"center-x", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"cl = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"cl = %@", nodeVal.stringValue]
+            )];
     });
 
     COSStyleAddRenderBlock(@"center-y", ^(UIView *view, COSStyleNodeVal *nodeVal) {
-        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression) {
-            NSString *rule = [NSString stringWithFormat:@"ct = %@", nodeVal.stringValue];
-            [[COSLayout layoutOfView:view] addRule:rule];
-        }
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"ct = %@", nodeVal.stringValue]
+            )];
+    });
+
+    COSStyleAddRenderBlock(@"min-width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"minw = %@", nodeVal.stringValue]
+            )];
+    });
+
+    COSStyleAddRenderBlock(@"max-width", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"maxw = %@", nodeVal.stringValue]
+            )];
+    });
+
+    COSStyleAddRenderBlock(@"min-height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"minh = %@", nodeVal.stringValue]
+            )];
+    });
+
+    COSStyleAddRenderBlock(@"max-height", ^(UIView *view, COSStyleNodeVal *nodeVal) {
+        if (nodeVal.nodeValType == COSStyleNodeValTypeExpression)
+            [[COSLayout layoutOfView:view] addRule:(
+                [NSString stringWithFormat:@"maxh = %@", nodeVal.stringValue]
+            )];
     });
 }
 
