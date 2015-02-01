@@ -68,9 +68,10 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
 
 @interface COSStyleSheet ()
 
-@property (nonatomic, strong) NSMutableArray *nodeSheets;
-
 + (instancetype)sharedStyleSheet;
+
+@property (nonatomic, strong) NSMutableArray *nodeSheets;
+@property (nonatomic, strong) NSMutableDictionary *declListCache;
 
 - (COSStyleNodeDeclList *)declListForView:(UIView *)view classNames:(NSSet *)classNames;
 
@@ -206,6 +207,14 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
 }
 
 - (COSStyleNodeDeclList *)declListForView:(UIView *)view classNames:(NSSet *)classNames {
+    Class clazz = object_getClass(view);
+
+    NSSet *key = [classNames setByAddingObject:clazz];
+    COSStyleNodeDeclList *cachedDeclList = self.declListCache[key];
+
+    if (cachedDeclList)
+        return cachedDeclList;
+
     NSArray *combinations = [self allCombinationsOfSet:classNames];
     COSStyleNodeDeclList *declList = [[COSStyleNodeDeclList alloc] init];
 
@@ -217,6 +226,8 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
             [declList addDeclsFromDeclList:subDeclList];
         }
     }
+
+    self.declListCache[key] = declList;
 
     return declList;
 }
@@ -270,6 +281,13 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
         _nodeSheets = [[NSMutableArray alloc] init];
 
     return _nodeSheets;
+}
+
+- (NSMutableDictionary *)declListCache {
+    if (!_declListCache)
+        _declListCache = [[NSMutableDictionary alloc] init];
+
+    return _declListCache;
 }
 
 @end
