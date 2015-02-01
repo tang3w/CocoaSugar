@@ -35,7 +35,7 @@
 
 + (instancetype)styleOfView:(UIView *)view;
 
-- (void)addClassNames:(NSString *)className, ... NS_REQUIRES_NIL_TERMINATION;
+- (void)addClassName:(NSString *)className;
 
 @end
 

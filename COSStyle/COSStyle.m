@@ -352,18 +352,18 @@ int COSStylelex(yyscan_t yyscanner, char **token_value);
     return self;
 }
 
-- (void)addClassNames:(NSString *)className, ... {
+- (void)addClassName:(NSString *)className {
     NSMutableSet *classNames = [[NSMutableSet alloc] init];
 
-    if (className) [classNames addObject:className];
+    NSCharacterSet *spaces = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    NSArray *slices = [className componentsSeparatedByCharactersInSet:spaces];
 
-    va_list argv;
-    va_start(argv, className);
+    for (NSString *slice in slices) {
+        NSString *trimedSlice = [slice stringByTrimmingCharactersInSet:spaces];
 
-    while ((className = va_arg(argv, NSString *)))
-        [classNames addObject:className];
-
-    va_end(argv);
+        if ([trimedSlice length])
+            [classNames addObject:trimedSlice];
+    }
 
     [self.classNames unionSet:classNames];
     [self renderStyle];
