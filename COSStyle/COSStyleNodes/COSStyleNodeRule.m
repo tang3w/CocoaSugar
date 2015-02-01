@@ -30,7 +30,8 @@
 - (instancetype)initWithAst:(COSStyleAST *)ast {
     if ((self = [super initWithAst:ast])) {
         _selList = (__bridge COSStyleNodeSelList *)ast->l->data;
-        _declList = (__bridge COSStyleNodeDeclList *)ast->r->data;
+        if (ast->r)
+            _declList = (__bridge COSStyleNodeDeclList *)ast->r->data;
     }
 
     return self;
