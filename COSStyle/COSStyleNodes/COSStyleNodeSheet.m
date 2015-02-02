@@ -31,7 +31,8 @@
 
 - (instancetype)initWithAst:(COSStyleAST *)ast {
     if ((self = [super initWithAst:ast]))
-        _ruleList = (__bridge COSStyleNodeRuleList *)ast->r->data;
+        if (ast->r)
+            _ruleList = (__bridge COSStyleNodeRuleList *)ast->r->data;
 
     return self;
 }
