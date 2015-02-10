@@ -914,7 +914,10 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     if ([set containsObject:[NSNull null]]) {
         [set removeObject:[NSNull null]];
-        [set addObject:_view.superview];
+
+        if (_view.superview) {
+            [set addObject:_view.superview];
+        }
     }
 
     return set;
@@ -1079,7 +1082,7 @@ do {                                                 \
     };                                               \
                                                      \
     return coord;                                    \
-} while (0);
+} while (0)
 
 
 @implementation COSCoord
