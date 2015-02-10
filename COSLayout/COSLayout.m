@@ -123,6 +123,8 @@ static NSString *COSLayoutCycleExceptionDesc = @"Layout can not be solved becaus
 
 @property (nonatomic, assign) CGRect frame;
 
+- (instancetype)initWithView:(UIView *)view;
+
 - (void)updateLayoutDriver;
 
 - (NSSet *)dependencies;
@@ -270,13 +272,13 @@ do {                                                        \
     return frame;                                           \
 } while (0)
 
-#define COS_MM_RAW_VALUE(layout, var)             \
-({                                                \
-    COSLayoutRule *rule = layout.ruleMap[@#var];  \
-                                                  \
-    rule.coord ?                                  \
-    rule.coord.block(rule) :                      \
-    NAN;                                          \
+#define COS_MM_RAW_VALUE(layout, var)               \
+({                                                  \
+    COSLayoutRule *rule = layout.ruleMap[@(#var)];  \
+                                                    \
+    rule.coord ?                                    \
+    rule.coord.block(rule) :                        \
+    NAN;                                            \
 })
 
 #define COS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
@@ -561,7 +563,9 @@ void COSMakeViewVisited(UIView *view) {
 - (instancetype)initWithView:(UIView *)view {
     self = [super init];
 
-    if (self) _view = view;
+    if (self) {
+        _view = view;
+    }
 
     return self;
 }
@@ -616,7 +620,7 @@ void COSMakeViewVisited(UIView *view) {
 #define COSLAYOUT_ADD_RULE(var, dir_)        \
 do {                                         \
     _##var = (var);                          \
-    NSString *name = @#var;                  \
+    NSString *name = @(#var);                \
                                              \
     COSLayoutRule *rule =                    \
     [COSLayoutRule layoutRuleWithView:_view  \
@@ -636,7 +640,7 @@ do {                                                            \
 #define COSLAYOUT_ADD_BOUND_RULE(var, dir_)  \
 do {                                         \
     _##var = (var);                          \
-    NSString *name = @#var;                  \
+    NSString *name = @(#var);                \
                                              \
     COSLayoutRule *rule =                    \
     [COSLayoutRule layoutRuleWithView:_view  \
@@ -721,9 +725,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
     COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
     if (!layout) {
-        layout = [[COSLayout alloc] init];
-
-        layout.view = view;
+        layout = [[COSLayout alloc] initWithView:view];
 
         objc_setAssociatedObject(view, COSLayoutKey, layout, OBJC_ASSOCIATION_RETAIN);
 
@@ -733,6 +735,16 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
 
     return layout;
+}
+
+- (instancetype)initWithView:(UIView *)view {
+    self = [super init];
+
+    if (self) {
+        _view = view;
+    }
+
+    return self;
 }
 
 - (void)addRule:(NSString *)format, ... {
@@ -1161,6 +1173,8 @@ do {                                                 \
 @property (nonatomic, strong) COSCoord *cb;
 @property (nonatomic, strong) COSCoord *cr;
 
+- (instancetype)initWithView:(UIView *)view;
+
 @end
 
 
@@ -1178,21 +1192,29 @@ do {                                                 \
 + (instancetype)coordsOfView:(UIView *)view {
     static const void *coordsKey = &coordsKey;
 
-    if ([view isKindOfClass:[UIView class]]) {
-        COSCoords *coords = objc_getAssociatedObject(view, coordsKey);
-
-        if (!coords) {
-            coords = [[COSCoords alloc] init];
-
-            coords.view = view;
-
-            objc_setAssociatedObject(view, coordsKey, coords, OBJC_ASSOCIATION_RETAIN);
-        }
-
-        return coords;
+    if (![view isKindOfClass:[UIView class]]) {
+        return nil;
     }
 
-    return nil;
+    COSCoords *coords = objc_getAssociatedObject(view, coordsKey);
+
+    if (!coords) {
+        coords = [[COSCoords alloc] initWithView:view];
+
+        objc_setAssociatedObject(view, coordsKey, coords, OBJC_ASSOCIATION_RETAIN);
+    }
+
+    return coords;
+}
+
+- (instancetype)initWithView:(UIView *)view {
+    self = [super init];
+
+    if (self) {
+        _view = view;
+    }
+
+    return self;
 }
 
 - (COSCoord *)tt {
