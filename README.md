@@ -56,26 +56,28 @@ Note that the percentage has different means for different constraint directions
 
 Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `COSLayout` can specify constraints between non-sibling views.
 
-`COSLayout` support 16 format specifiers:
+`COSLayout` support 18 format specifiers:
 
-Format specifier | Type       | Description
------------------|------------|------------
-`%tt`            | `UIView *` | Space from view's top to superview's top
-`%tb`            | `UIView *` | Space from view's top to superview's bottom
-`%ll`            | `UIView *` | Space from view's left to superview's left
-`%lr`            | `UIView *` | Space from view's left to superview's right
-`%bb`            | `UIView *` | Space from view's bottom to superview's bottom
-`%bt`            | `UIView *` | Space from view's bottom to superview's top
-`%rr`            | `UIView *` | Space from view's right to superview's right
-`%rl`            | `UIView *` | Space from view's right to superview's left
-`%ct`            | `UIView *` | Space from view's center to superview's top
-`%cl`            | `UIView *` | Space from view's center to superview's left
-`%cb`            | `UIView *` | Space from view's center to superview's bottom
-`%cr`            | `UIView *` | Space from view's center to superview's right
-`%w`             | `UIView *` | Width of view
-`%h`             | `UIView *` | Height of view
-`%f`             | `float`    | Fixed length on screen
-`%p`             | `float`    | Percentage of superview's width or superview's height
+Format | Type                 | Description
+-------|----------------------|------------
+`%tt`  | `UIView *`           | Space from view's top to superview's top
+`%tb`  | `UIView *`           | Space from view's top to superview's bottom
+`%ll`  | `UIView *`           | Space from view's left to superview's left
+`%lr`  | `UIView *`           | Space from view's left to superview's right
+`%bb`  | `UIView *`           | Space from view's bottom to superview's bottom
+`%bt`  | `UIView *`           | Space from view's bottom to superview's top
+`%rr`  | `UIView *`           | Space from view's right to superview's right
+`%rl`  | `UIView *`           | Space from view's right to superview's left
+`%ct`  | `UIView *`           | Space from view's center to superview's top
+`%cl`  | `UIView *`           | Space from view's center to superview's left
+`%cb`  | `UIView *`           | Space from view's center to superview's bottom
+`%cr`  | `UIView *`           | Space from view's center to superview's right
+`%w`   | `UIView *`           | Width of view
+`%h`   | `UIView *`           | Height of view
+`%f`   | `float`              | Fixed length on screen
+`%p`   | `float`              | Percentage of superview's width or superview's height
+`^f`   | `float(^)(UIView *)` | Space provided by a block
+`^p`   | `float(^)(UIView *)` | Percentage provided by a block
 
 It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `COSLayout`, the dependencies is presented by DAG. So `COSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
 

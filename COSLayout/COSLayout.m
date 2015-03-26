@@ -28,10 +28,17 @@
 
 #import <objc/runtime.h>
 
+#define COS_STREQ(a, b) (strcmp(a, b) == 0)
+
 @class COSLayoutRule;
 
+typedef float(^COSFloatBlock)(UIView *);
 typedef float(^COSCoordBlock)(COSLayoutRule *);
-typedef enum { COSLayoutDirv, COSLayoutDirh } COSLayoutDir;
+
+typedef NS_ENUM(NSInteger, COSLayoutDir) {
+    COSLayoutDirv,
+    COSLayoutDirh
+};
 
 static const void *COSLayoutKey = &COSLayoutKey;
 
@@ -46,6 +53,7 @@ static NSString *COSLayoutCycleExceptionDesc = @"Layout can not be solved becaus
 
 + (instancetype)coordWithFloat:(float)value;
 + (instancetype)coordWithPercentage:(float)percentage;
++ (instancetype)coordWithBlock:(COSCoordBlock)block;
 
 @property (nonatomic, strong) NSMutableSet *dependencies;
 @property (nonatomic, copy) COSCoordBlock block;
@@ -826,19 +834,39 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     case COSLAYOUT_TOKEN_COORD: {
         COSCoord *coord = nil;
+        char *format = ast->value.coord;
+        char *spec = format + 1;
 
-        if (!strcmp(ast->value.coord, "f")) {
-            coord = [COSCoord coordWithFloat:va_arg(*argv, double)];
-            [keeper addObject:coord];
-        } else if (!strcmp(ast->value.coord, "p")) {
-            coord = [COSCoord coordWithPercentage:va_arg(*argv, double)];
-            [keeper addObject:coord];
+        if (format[0] == '%') {
+            if (COS_STREQ(spec, "f")) {
+                coord = [COSCoord coordWithFloat:va_arg(*argv, double)];
+            } else if (COS_STREQ(spec, "p")) {
+                coord = [COSCoord coordWithPercentage:va_arg(*argv, double)];
+            } else {
+                COSCoords *coords = [COSCoords coordsOfView:va_arg(*argv, UIView *)];
+                coord = [coords valueForKey:COS_COORD_NAME(spec)];
+            }
         } else {
-            COSCoords *coords = [COSCoords coordsOfView:va_arg(*argv, UIView *)];
-            coord = [coords valueForKey:COS_COORD_NAME(ast->value.coord)];
+            COSFloatBlock block = va_arg(*argv, COSFloatBlock);
+            [block copy];
+
+            if (COS_STREQ(spec, "f")) {
+                coord = [COSCoord coordWithBlock:^float(COSLayoutRule *rule) {
+                    return block(rule.view);
+                }];
+            } else {
+                coord = [COSCoord coordWithBlock:^float(COSLayoutRule *rule) {
+                    float percentage = block(rule.view);
+                    COSCoord *coord = [COSCoord coordWithPercentage:percentage];
+
+                    return coord.block(rule);
+                }];
+            }
         }
 
         ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
     }
         break;
 
@@ -1102,7 +1130,6 @@ do {                                                 \
 + (instancetype)coordWithFloat:(float)value {
     COSCoord *coord = [[COSCoord alloc] init];
 
-    coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
     coord.block = ^float(COSLayoutRule *rule) {
         return value;
     };
@@ -1115,7 +1142,6 @@ do {                                                 \
 
     percentage /= 100.0f;
 
-    coord.dependencies = [NSMutableSet setWithObject:[NSNull null]];
     coord.block = ^float(COSLayoutRule *rule) {
         UIView *view = rule.view;
         CGFloat size = (rule.dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
@@ -1124,6 +1150,24 @@ do {                                                 \
     };
 
     return coord;
+}
+
++ (instancetype)coordWithBlock:(COSCoordBlock)block {
+    COSCoord *coord = [[COSCoord alloc] init];
+
+    coord.block = block;
+
+    return coord;
+}
+
+- (instancetype)init {
+    self = [super init];
+
+    if (self) {
+        _dependencies = [NSMutableSet setWithObject:[NSNull null]];
+    }
+
+    return self;
 }
 
 - (instancetype)add:(COSCoord *)other {
