@@ -41,6 +41,7 @@ typedef NS_ENUM(NSInteger, COSLayoutDir) {
 };
 
 static const void *COSLayoutKey = &COSLayoutKey;
+static const void *COSLayoutDriverKey = &COSLayoutDriverKey;
 
 static NSMutableSet *swizzledDriverClasses = nil;
 static NSMutableSet *swizzledLayoutClasses = nil;
@@ -169,6 +170,33 @@ static NSString *COSLayoutCycleExceptionDesc = @"Layout can not be solved becaus
 - (CGRect)solveCl:(NSArray *)rules;
 - (CGRect)solveClLl:(NSArray *)rules;
 - (CGRect)solveClRl:(NSArray *)rules;
+
+@end
+
+
+@interface COSLayoutSolver : NSObject
+
++ (instancetype)layoutSolverOfView:(UIView *)view;
+
+@property (nonatomic, weak) UIView *view;
+
+- (instancetype)initWithView:(UIView *)view;
+
+- (void)solve;
+
+@end
+
+
+@interface COSLayoutDriver : NSObject
+
+@property (nonatomic, weak) UIView *view;
+
+@property (nonatomic, strong) COSLayoutSolver *solver;
+
+- (instancetype)initWithView:(UIView *)view;
+
+- (void)beginSolves;
+- (void)endSolves;
 
 @end
 
@@ -539,19 +567,6 @@ void COSMakeViewVisited(UIView *view) {
 @end
 
 
-@interface COSLayoutSolver : NSObject
-
-+ (instancetype)layoutSolverOfView:(UIView *)view;
-
-@property (nonatomic, weak) UIView *view;
-
-- (instancetype)initWithView:(UIView *)view;
-
-- (void)solve;
-
-@end
-
-
 @implementation COSLayoutSolver
 
 + (instancetype)layoutSolverOfView:(UIView *)view {
@@ -603,6 +618,39 @@ void COSMakeViewVisited(UIView *view) {
         COSLayout *layout = objc_getAssociatedObject(view, COSLayoutKey);
 
         [layout startLayout];
+    }
+}
+
+@end
+
+
+@implementation COSLayoutDriver
+
+{
+    NSInteger stackId;
+}
+
+- (instancetype)initWithView:(UIView *)view {
+    self = [super init];
+
+    if (self) {
+        _view = view;
+    }
+
+    return self;
+}
+
+- (COSLayoutSolver *)solver {
+    return _solver ?: (_solver = [COSLayoutSolver layoutSolverOfView:self.view]);
+}
+
+- (void)beginSolves {
+    stackId += 1;
+}
+
+- (void)endSolves {
+    if ((--stackId) == 0) {
+        [self.solver solve];
     }
 }
 
@@ -661,8 +709,6 @@ do {                                         \
 
 NS_INLINE
 void cos_initialize_layout_if_needed(UIView *view) {
-    @synchronized (swizzledLayoutClasses) {
-
     Class class = [view class];
 
     if ([swizzledLayoutClasses containsObject:class]) return;
@@ -681,18 +727,10 @@ void cos_initialize_layout_if_needed(UIView *view) {
     class_replaceMethod(class, name, overImp, "v@:");
     
     [swizzledLayoutClasses addObject:class];
-
-    }
 }
 
 NS_INLINE
 void cos_initialize_driver_if_needed(UIView *view) {
-    static void *driverKey = &driverKey;
-
-    @synchronized (swizzledDriverClasses) {
-
-    objc_setAssociatedObject(view, driverKey, @YES, OBJC_ASSOCIATION_RETAIN);
-
     Class class = [view class];
 
     if ([swizzledDriverClasses containsObject:class]) return;
@@ -701,18 +739,20 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     IMP origImp = class_getMethodImplementation(class, name);
     IMP overImp = imp_implementationWithBlock(^(UIView *view) {
-        ((void(*)(id, SEL))(origImp))(view, name);
+        COSLayoutDriver *driver = objc_getAssociatedObject(view, COSLayoutDriverKey);
 
-        if (objc_getAssociatedObject(view, driverKey)) {
-            [[COSLayoutSolver layoutSolverOfView:(view)] solve];
+        if (driver) {
+            [driver beginSolves];
+            ((void(*)(id, SEL))(origImp))(view, name);
+            [driver endSolves];
+        } else {
+            ((void(*)(id, SEL))(origImp))(view, name);
         }
     });
 
     class_replaceMethod(class, name, overImp, "v@:");
 
     [swizzledDriverClasses addObject:class];
-
-    }
 }
 
 
@@ -723,8 +763,12 @@ void cos_initialize_driver_if_needed(UIView *view) {
 @implementation COSLayout
 
 + (void)initialize {
-    swizzledDriverClasses = [[NSMutableSet alloc] init];
-    swizzledLayoutClasses = [[NSMutableSet alloc] init];
+    static dispatch_once_t onceToken;
+
+    dispatch_once(&onceToken, ^{
+        swizzledDriverClasses = [[NSMutableSet alloc] init];
+        swizzledLayoutClasses = [[NSMutableSet alloc] init];
+    });
 }
 
 + (instancetype)layoutOfView:(UIView *)view {
@@ -932,8 +976,13 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)updateLayoutDriver {
-    if (_view.superview) {
-        cos_initialize_driver_if_needed(_view.superview);
+    UIView *superview = _view.superview;
+
+    if (superview && !objc_getAssociatedObject(superview, COSLayoutDriverKey)) {
+        COSLayoutDriver *driver = [[COSLayoutDriver alloc] initWithView:superview];
+
+        objc_setAssociatedObject(superview, COSLayoutDriverKey, driver, OBJC_ASSOCIATION_RETAIN);
+        cos_initialize_driver_if_needed(superview);
     }
 }
 
