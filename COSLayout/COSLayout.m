@@ -49,6 +49,9 @@ static NSMutableSet *swizzledLayoutClasses = nil;
 static NSString *COSLayoutCycleExceptionName = @"COSLayoutCycleException";
 static NSString *COSLayoutCycleExceptionDesc = @"Layout can not be solved because of cycle";
 
+static NSString *COSLayoutSyntaxExceptionName = @"COSLayoutSyntaxException";
+static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error";
+
 
 @interface COSCoord : NSObject
 
@@ -821,17 +824,27 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
         int result = coslayout_parse_rule(expr, &ast);
 
-        if (result) {
-            NSAssert(result != 1, @"Invalid layout rule"); break;
+        switch (result) {
+        case 0: {
+            NSMutableSet *keeper = [NSMutableSet set];
+
+            [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
+
+            coslayout_destroy_ast(ast);
         }
+            break;
 
-        NSMutableSet *keeper = [NSMutableSet set];
+        case 1: {
+            [NSException raise:COSLayoutSyntaxExceptionName format:@"%@", COSLayoutSyntaxExceptionDesc];
+        }
+            break;
 
-        [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
-
-        coslayout_destroy_ast(ast);
+        default:
+            goto end;
+        }
     }
 
+    end:
     va_end(argv);
 }
 
@@ -892,7 +905,6 @@ void cos_initialize_driver_if_needed(UIView *view) {
             }
         } else {
             COSFloatBlock block = va_arg(*argv, COSFloatBlock);
-            [block copy];
 
             if (COS_STREQ(spec, "f")) {
                 coord = [COSCoord coordWithBlock:^float(COSLayoutRule *rule) {
@@ -949,6 +961,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
         [keeper addObject:coord];
     }
         break;
+
     case '/': {
         COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
         COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
