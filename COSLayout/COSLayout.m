@@ -30,6 +30,8 @@
 
 #define COS_STREQ(a, b) (strcmp(a, b) == 0)
 
+#define COS_SUPERVIEW_PLACEHOLDER [NSNull null]
+
 @class COSLayoutRule;
 
 typedef float(^COSFloatBlock)(UIView *);
@@ -1014,8 +1016,8 @@ void cos_initialize_driver_if_needed(UIView *view) {
         [set unionSet:rule.coord.dependencies];
     }
 
-    if ([set containsObject:[NSNull null]]) {
-        [set removeObject:[NSNull null]];
+    if ([set containsObject:COS_SUPERVIEW_PLACEHOLDER]) {
+        [set removeObject:COS_SUPERVIEW_PLACEHOLDER];
 
         if (_view.superview) {
             [set addObject:_view.superview];
@@ -1226,7 +1228,7 @@ do {                                                 \
     self = [super init];
 
     if (self) {
-        _dependencies = [NSMutableSet setWithObject:[NSNull null]];
+        _dependencies = [NSMutableSet setWithObject:COS_SUPERVIEW_PLACEHOLDER];
     }
 
     return self;
