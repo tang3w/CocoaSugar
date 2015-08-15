@@ -34,8 +34,8 @@
 
 @class COSLayoutRule;
 
-typedef float(^COSFloatBlock)(UIView *);
-typedef float(^COSCoordBlock)(COSLayoutRule *);
+typedef CGFloat(^COSFloatBlock)(UIView *);
+typedef CGFloat(^COSCoordBlock)(COSLayoutRule *);
 
 typedef NS_ENUM(NSInteger, COSLayoutDir) {
     COSLayoutDirv,
@@ -57,8 +57,8 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 @interface COSCoord : NSObject
 
-+ (instancetype)coordWithFloat:(float)value;
-+ (instancetype)coordWithPercentage:(float)percentage;
++ (instancetype)coordWithFloat:(CGFloat)value;
++ (instancetype)coordWithPercentage:(CGFloat)percentage;
 + (instancetype)coordWithBlock:(COSCoordBlock)block;
 
 @property (nonatomic, strong) NSMutableSet *dependencies;
@@ -267,32 +267,32 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 #define COSLAYOUT_FRAME(view) \
     ([objc_getAssociatedObject(view, COSLayoutKey) frame])
 
-#define COSLAYOUT_SOLVE_SINGLE_H(var, left)  \
-do {                                         \
-    COSLayoutRule *rule = rules[0];          \
-    float var = [[rule coord] block](rule);  \
-    UIView *view = _view;                    \
-    CGRect frame = COSLAYOUT_FRAME(view);    \
-    frame.origin.x = (left);                 \
-    return frame;                            \
+#define COSLAYOUT_SOLVE_SINGLE_H(var, left)    \
+do {                                           \
+    COSLayoutRule *rule = rules[0];            \
+    CGFloat var = [[rule coord] block](rule);  \
+    UIView *view = _view;                      \
+    CGRect frame = COSLAYOUT_FRAME(view);      \
+    frame.origin.x = (left);                   \
+    return frame;                              \
 } while (0)
 
-#define COSLAYOUT_SOLVE_SINGLE_V(var, top)   \
-do {                                         \
-    COSLayoutRule *rule = rules[0];          \
-    float var = [[rule coord] block](rule);  \
-    UIView *view = _view;                    \
-    CGRect frame = COSLAYOUT_FRAME(view);    \
-    frame.origin.y = (top);                  \
-    return frame;                            \
+#define COSLAYOUT_SOLVE_SINGLE_V(var, top)     \
+do {                                           \
+    COSLayoutRule *rule = rules[0];            \
+    CGFloat var = [[rule coord] block](rule);  \
+    UIView *view = _view;                      \
+    CGRect frame = COSLAYOUT_FRAME(view);      \
+    frame.origin.y = (top);                    \
+    return frame;                              \
 } while (0)
 
 #define COSLAYOUT_SOLVE_DOUBLE_H(var1, var2, width_, left)  \
 do {                                                        \
     COSLayoutRule *rule0 = rules[0];                        \
     COSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] block](rule0);              \
-    float var2 = [[rule1 coord] block](rule1);              \
+    CGFloat var1 = [[rule0 coord] block](rule0);            \
+    CGFloat var2 = [[rule1 coord] block](rule1);            \
     UIView *view = _view;                                   \
     CGRect frame = COSLAYOUT_FRAME(view);                   \
     frame.size.width = [self calcWidth:(width_)];           \
@@ -304,8 +304,8 @@ do {                                                        \
 do {                                                        \
     COSLayoutRule *rule0 = rules[0];                        \
     COSLayoutRule *rule1 = rules[1];                        \
-    float var1 = [[rule0 coord] block](rule0);              \
-    float var2 = [[rule1 coord] block](rule1);              \
+    CGFloat var1 = [[rule0 coord] block](rule0);            \
+    CGFloat var2 = [[rule1 coord] block](rule1);            \
     UIView *view = _view;                                   \
     CGRect frame = COSLAYOUT_FRAME(view);                   \
     frame.size.height = [self calcHeight:(height_)];        \
@@ -662,20 +662,20 @@ void COSMakeViewVisited(UIView *view) {
 @end
 
 
-#define COSCOORD_MAKE(dependencies_, expr)       \
-({                                               \
-    __weak UIView *__view = _view;               \
-                                                 \
-    COSCoord *coord = [[COSCoord alloc] init];   \
-                                                 \
-    coord.dependencies = (dependencies_);        \
-    coord.block = ^float(COSLayoutRule *rule) {  \
-        UIView *view = __view;                   \
-                                                 \
-        return (expr);                           \
-    };                                           \
-                                                 \
-    coord;                                       \
+#define COSCOORD_MAKE(dependencies_, expr)         \
+({                                                 \
+    __weak UIView *__view = _view;                 \
+                                                   \
+    COSCoord *coord = [[COSCoord alloc] init];     \
+                                                   \
+    coord.dependencies = (dependencies_);          \
+    coord.block = ^CGFloat(COSLayoutRule *rule) {  \
+        UIView *view = __view;                     \
+                                                   \
+        return (expr);                             \
+    };                                             \
+                                                   \
+    coord;                                         \
 })
 
 #define COSLAYOUT_ADD_RULE(var, dir_)        \
@@ -898,9 +898,9 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
         if (format[0] == '%') {
             if (COS_STREQ(spec, "f")) {
-                coord = [COSCoord coordWithFloat:va_arg(*argv, double)];
+                coord = [COSCoord coordWithFloat:va_arg(*argv, CGFloat)];
             } else if (COS_STREQ(spec, "p")) {
-                coord = [COSCoord coordWithPercentage:va_arg(*argv, double)];
+                coord = [COSCoord coordWithPercentage:va_arg(*argv, CGFloat)];
             } else {
                 COSCoords *coords = [COSCoords coordsOfView:va_arg(*argv, UIView *)];
                 coord = [coords valueForKey:COS_COORD_NAME(spec)];
@@ -909,12 +909,12 @@ void cos_initialize_driver_if_needed(UIView *view) {
             COSFloatBlock block = va_arg(*argv, COSFloatBlock);
 
             if (COS_STREQ(spec, "f")) {
-                coord = [COSCoord coordWithBlock:^float(COSLayoutRule *rule) {
+                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
                     return block(rule.view);
                 }];
             } else {
-                coord = [COSCoord coordWithBlock:^float(COSLayoutRule *rule) {
-                    float percentage = block(rule.view);
+                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                    CGFloat percentage = block(rule.view);
                     COSCoord *coord = [COSCoord coordWithPercentage:percentage];
 
                     return coord.block(rule);
@@ -1181,7 +1181,7 @@ do {                                                 \
     [dependencies unionSet:other.dependencies];      \
                                                      \
     coord.dependencies = dependencies;               \
-    coord.block = ^float(COSLayoutRule *rule) {      \
+    coord.block = ^CGFloat(COSLayoutRule *rule) {    \
         return (expr);                               \
     };                                               \
                                                      \
@@ -1191,22 +1191,22 @@ do {                                                 \
 
 @implementation COSCoord
 
-+ (instancetype)coordWithFloat:(float)value {
++ (instancetype)coordWithFloat:(CGFloat)value {
     COSCoord *coord = [[COSCoord alloc] init];
 
-    coord.block = ^float(COSLayoutRule *rule) {
+    coord.block = ^CGFloat(COSLayoutRule *rule) {
         return value;
     };
 
     return coord;
 }
 
-+ (instancetype)coordWithPercentage:(float)percentage {
++ (instancetype)coordWithPercentage:(CGFloat)percentage {
     COSCoord *coord = [[COSCoord alloc] init];
 
-    percentage /= 100.0f;
+    percentage /= 100.0;
 
-    coord.block = ^float(COSLayoutRule *rule) {
+    coord.block = ^CGFloat(COSLayoutRule *rule) {
         UIView *view = rule.view;
         CGFloat size = (rule.dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
 
