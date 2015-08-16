@@ -368,11 +368,11 @@ do {                                                        \
 }
 
 - (CGRect)solveTtCt:(NSArray *)rules {
-    COSLAYOUT_SOLVE_DOUBLE_V(top, axisY, (axisY - top) * 2, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(top, axisY, (axisY - top) * 2, axisY - COS_FRAME_HEIGHT / 2);
 }
 
 - (CGRect)solveTtBt:(NSArray *)rules {
-    COSLAYOUT_SOLVE_DOUBLE_V(top, bottom, bottom - top, top);
+    COSLAYOUT_SOLVE_DOUBLE_V(top, bottom, bottom - top, bottom - COS_FRAME_HEIGHT);
 }
 
 - (CGRect)solveLl:(NSArray *)rules {
@@ -380,11 +380,11 @@ do {                                                        \
 }
 
 - (CGRect)solveLlCl:(NSArray *)rules {
-    COSLAYOUT_SOLVE_DOUBLE_H(left, axisX, (axisX - left) * 2, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(left, axisX, (axisX - left) * 2, axisX - COS_FRAME_WIDTH / 2);
 }
 
 - (CGRect)solveLlRl:(NSArray *)rules {
-    COSLAYOUT_SOLVE_DOUBLE_H(left, right, right - left, left);
+    COSLAYOUT_SOLVE_DOUBLE_H(left, right, right - left, right - COS_FRAME_WIDTH);
 }
 
 - (CGRect)solveBt:(NSArray *)rules {
