@@ -56,7 +56,7 @@ Note that the percentage has different means for different constraint directions
 
 Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `COSLayout` can specify constraints between non-sibling views.
 
-`COSLayout` support 18 format specifiers:
+`COSLayout` support 20 format specifiers:
 
 Format | Type                     | Description
 -------|--------------------------|------------
@@ -78,8 +78,8 @@ Format | Type                     | Description
 `%p`   | `CGFloat`                | Percentage of superview's width or superview's height
 `%^f`  | `CGFloat(^)(UIView *)`   | Space provided by a block
 `%^p`  | `CGFloat(^)(UIView *)`   | Percentage provided by a block
-`%:f`  | `id<COSCGFloatProtocol>` | Space provided by a object
-`%:p`  | `id<COSCGFloatProtocol>` | Percentage provided by a object
+`%:f`  | `id<COSCGFloatProtocol>` | Space provided by an object
+`%:p`  | `id<COSCGFloatProtocol>` | Percentage provided by an object
 
 It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `COSLayout`, the dependencies is presented by DAG. So `COSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
 
