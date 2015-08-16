@@ -33,12 +33,20 @@
 
 - (void)addRule:(NSString *)format, ...;
 - (void)addRule:(NSString *)format args:(va_list)args;
+- (void)addRule:(NSString *)format arguments:(NSArray *)arguments;
 
 @end
 
 
 @interface UIView (COSLayout)
 
-@property (readonly) COSLayout *cosLayout;
+@property (nonatomic, strong, readonly) COSLayout *coslayout;
+
+@end
+
+
+@protocol COSCGFloatProtocol
+
+- (CGFloat)cos_CGFloatValue;
 
 @end

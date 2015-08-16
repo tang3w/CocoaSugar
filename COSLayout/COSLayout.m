@@ -761,6 +761,99 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 
+@protocol COSLayoutArguments <NSObject>
+
+- (CGFloat)floatValue;
+- (COSFloatBlock)floatBlockValue;
+- (id)objectValue;
+
+@end
+
+
+@interface COSLayoutVaList : NSObject <COSLayoutArguments>
+
+- (instancetype)initWithVaList:(va_list)valist;
+
+@end
+
+
+@implementation COSLayoutVaList {
+    va_list _valist;
+}
+
+- (instancetype)initWithVaList:(va_list)valist {
+    self = [super init];
+
+    if (self) {
+        va_copy(_valist, valist);
+    }
+
+    return self;
+}
+
+- (CGFloat)floatValue {
+    return va_arg(_valist, CGFloat);
+}
+
+- (COSFloatBlock)floatBlockValue {
+    return va_arg(_valist, COSFloatBlock);
+}
+
+- (id)objectValue {
+    return va_arg(_valist, id);
+}
+
+- (void)dealloc {
+    va_end(_valist);
+}
+
+@end
+
+
+@interface COSLayoutArrayArguments : NSObject <COSLayoutArguments>
+
+- (instancetype)initWithArray:(NSArray *)array;
+
+@end
+
+
+@implementation COSLayoutArrayArguments {
+    NSMutableArray *_array;
+}
+
+- (instancetype)initWithArray:(NSArray *)array {
+    self = [super init];
+
+    if (self) {
+        _array = [array mutableCopy];
+    }
+
+    return self;
+}
+
+- (id)shiftArgument {
+    id argument = [_array firstObject];
+
+    [_array removeObjectAtIndex:0];
+
+    return argument;
+}
+
+- (CGFloat)floatValue {
+    return (CGFloat)[[self shiftArgument] doubleValue];
+}
+
+- (COSFloatBlock)floatBlockValue {
+    return [self shiftArgument];
+}
+
+- (id)objectValue {
+    return [self shiftArgument];
+}
+
+@end
+
+
 #define COS_COORD_NAME(coord) \
     [NSString stringWithCString:(coord) encoding:NSASCIIStringEncoding]
 
@@ -814,9 +907,18 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (void)addRule:(NSString *)format args:(va_list)args {
-    va_list argv;
-    va_copy(argv, args);
+    COSLayoutVaList *valist = [[COSLayoutVaList alloc] initWithVaList:args];
 
+    [self addRule:format _args:valist];
+}
+
+- (void)addRule:(NSString *)format arguments:(NSArray *)arguments {
+    COSLayoutArrayArguments *array = [[COSLayoutArrayArguments alloc] initWithArray:arguments];
+
+    [self addRule:format _args:array];
+}
+
+- (void)addRule:(NSString *)format _args:(id<COSLayoutArguments>)args {
     NSArray *subRules = [format componentsSeparatedByString:@","];
 
     for (NSString *subRule in subRules) {
@@ -830,7 +932,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
         case 0: {
             NSMutableSet *keeper = [NSMutableSet set];
 
-            [self parseAst:ast parent:NULL withArgv:&argv keeper:keeper];
+            [self parseAst:ast parent:NULL args:args keeper:keeper];
 
             coslayout_destroy_ast(ast);
         }
@@ -842,19 +944,16 @@ void cos_initialize_driver_if_needed(UIView *view) {
             break;
 
         default:
-            goto end;
+            return;
         }
     }
-
-    end:
-    va_end(argv);
 }
 
-- (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent withArgv:(va_list *)argv keeper:(NSMutableSet *)keeper {
+- (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent args:(id<COSLayoutArguments>)args keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
-    [self parseAst:ast->l parent:ast withArgv:argv keeper:keeper];
-    [self parseAst:ast->r parent:ast withArgv:argv keeper:keeper];
+    [self parseAst:ast->l parent:ast args:args keeper:keeper];
+    [self parseAst:ast->r parent:ast args:args keeper:keeper];
 
     switch (ast->node_type) {
     case COSLAYOUT_TOKEN_ATTR: {
@@ -894,25 +993,20 @@ void cos_initialize_driver_if_needed(UIView *view) {
     case COSLAYOUT_TOKEN_COORD: {
         COSCoord *coord = nil;
         char *format = ast->value.coord;
-        char *spec = format + 1;
 
-        if (format[0] == '%') {
-            if (COS_STREQ(spec, "f")) {
-                coord = [COSCoord coordWithFloat:va_arg(*argv, CGFloat)];
-            } else if (COS_STREQ(spec, "p")) {
-                coord = [COSCoord coordWithPercentage:va_arg(*argv, CGFloat)];
-            } else {
-                COSCoords *coords = [COSCoords coordsOfView:va_arg(*argv, UIView *)];
-                coord = [coords valueForKey:COS_COORD_NAME(spec)];
-            }
-        } else {
-            COSFloatBlock block = va_arg(*argv, COSFloatBlock);
+        switch (format[0]) {
+        case '^': {
+            COSFloatBlock block = [args floatBlockValue];
 
-            if (COS_STREQ(spec, "f")) {
+            switch (format[1]) {
+            case 'f': {
                 coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
                     return block(rule.view);
                 }];
-            } else {
+            }
+                break;
+
+            case 'p': {
                 coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
                     CGFloat percentage = block(rule.view);
                     COSCoord *coord = [COSCoord coordWithPercentage:percentage];
@@ -920,6 +1014,53 @@ void cos_initialize_driver_if_needed(UIView *view) {
                     return coord.block(rule);
                 }];
             }
+                break;
+            }
+        }
+            break;
+
+        case ':': {
+            id<COSCGFloatProtocol> value = [args objectValue];
+
+            switch (format[1]) {
+            case 'f': {
+                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                    return [value cos_CGFloatValue];
+                }];
+            }
+                break;
+
+            case 'p': {
+                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                    CGFloat percentage = [value cos_CGFloatValue];
+                    COSCoord *coord = [COSCoord coordWithPercentage:percentage];
+
+                    return coord.block(rule);
+                }];
+            }
+                break;
+            }
+        }
+            break;
+
+        default: {
+            switch (format[0]) {
+            case 'f':
+                coord = [COSCoord coordWithFloat:[args floatValue]];
+                break;
+
+            case 'p':
+                coord = [COSCoord coordWithPercentage:[args floatValue]];
+                break;
+
+            default: {
+                COSCoords *coords = [COSCoords coordsOfView:[args objectValue]];
+                coord = [coords valueForKey:COS_COORD_NAME(format)];
+            }
+                break;
+            }
+        }
+            break;
         }
 
         ast->data = (__bridge void *)(coord);
@@ -1386,7 +1527,7 @@ do {                                                 \
 
 @implementation UIView (COSLayout)
 
-- (COSLayout *)cosLayout {
+- (COSLayout *)coslayout {
     return [COSLayout layoutOfView:self];
 }
 
