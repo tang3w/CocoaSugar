@@ -957,18 +957,21 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     switch (ast->node_type) {
     case COSLAYOUT_TOKEN_ATTR: {
-        if (parent != NULL &&
-            parent->node_type == '=' &&
-            parent->l == ast) break;
+        if (parent) {
+            if (parent->node_type == '=' &&
+                parent->l == ast) break;
 
-        COSCoord *coord = [self valueForKey:COS_COORD_NAME(ast->value.coord)];
+            COSCoord *coord = [self valueForKey:COS_COORD_NAME(ast->value.coord)];
 
-        if (!coord) {
-            coord = [COSCoord coordWithFloat:0];
-            [keeper addObject:coord];
+            if (!coord) {
+                coord = [COSCoord coordWithFloat:0];
+                [keeper addObject:coord];
+            }
+
+            ast->data = (__bridge void *)(coord);
+        } else {
+            [self setValue:[COSCoord coordWithFloat:0] forKey:COS_COORD_NAME(ast->value.coord)];
         }
-
-        ast->data = (__bridge void *)(coord);
     }
         break;
 
