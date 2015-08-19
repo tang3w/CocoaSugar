@@ -91,6 +91,8 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 @property (nonatomic, strong) COSCoord *coord;
 @property (nonatomic, assign) COSLayoutDir dir;
 
+- (CGFloat)floatValue;
+
 @end
 
 
@@ -111,6 +113,12 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 @property (nonatomic, strong) COSLayoutRuleHub *ruleHub;
 @property (nonatomic, strong) NSMutableDictionary *ruleMap;
+
+@property (nonatomic, strong) COSLayoutRule *wRule;
+@property (nonatomic, strong) COSLayoutRule *hRule;
+
+@property (nonatomic, strong) COSCoord *w;
+@property (nonatomic, strong) COSCoord *h;
 
 @property (nonatomic, strong) COSCoord *minw;
 @property (nonatomic, strong) COSCoord *maxw;
@@ -221,6 +229,10 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
     rule.dir = dir;
 
     return rule;
+}
+
+- (CGFloat)floatValue {
+    return self.coord.block(self);
 }
 
 @end
@@ -1227,12 +1239,23 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     [self checkBounds];
 
-    if ([_ruleHub.vRules count]) {
-        [self solveRules:_ruleHub.vRules];
+    NSUInteger hRuleCount = [_ruleHub.hRules count];
+    NSUInteger vRuleCount = [_ruleHub.vRules count];
+
+    if (self.wRule && hRuleCount < 2) {
+        _frame.size.width = [self.wRule floatValue];
     }
 
-    if ([_ruleHub.hRules count]) {
+    if (self.hRule && vRuleCount < 2) {
+        _frame.size.height = [self.hRule floatValue];
+    }
+
+    if (hRuleCount > 0) {
         [self solveRules:_ruleHub.hRules];
+    }
+
+    if (vRuleCount > 0) {
+        [self solveRules:_ruleHub.vRules];
     }
 
     [self checkBounds];
@@ -1240,6 +1263,16 @@ void cos_initialize_driver_if_needed(UIView *view) {
     if (!CGRectEqualToRect(_frame, _view.frame)) {
         _view.frame = _frame;
     }
+}
+
+- (void)setW:(COSCoord *)w {
+    _w = w;
+    self.wRule = [COSLayoutRule layoutRuleWithView:_view name:nil coord:w dir:COSLayoutDirh];
+}
+
+- (void)setH:(COSCoord *)h {
+    _h = h;
+    self.hRule = [COSLayoutRule layoutRuleWithView:_view name:nil coord:h dir:COSLayoutDirv];
 }
 
 - (void)setMinw:(COSCoord *)minw {

@@ -22,10 +22,12 @@ COSLayout *layout = [COSLayout layoutOfView:view];
 
 In the example above, a rule has been added into layout by method `addRule:`. A rule is expressed in Sample Layout Language or "SLL", which can specify constraints intuitively. The syntax of SLL is very simple, just comma-separated assignment expressions. Each assignment expression specifies a constraint, l-value is constraint name, r-value is constraint value.
 
-`COSLayout` supports 16 constraints:
+`COSLayout` supports 18 constraints:
 
 Constraint | Direction  | Description
 -----------|------------|------------
+`w`        | Horizontal | View's width
+`h`        | Vertical   | View's height
 `tt`       | Vertical   | Space from view's top to superview's top
 `tb`       | Vertical   | Space from view's top to superview's bottom
 `ll`       | Horizontal | Space from view's left to superview's left
