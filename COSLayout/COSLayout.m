@@ -1037,7 +1037,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
         }
             break;
 
-        case ':': {
+        case '@': {
             id<COSCGFloatProtocol> value = [args objectValue];
 
             switch (format[1]) {
