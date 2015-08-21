@@ -30,8 +30,6 @@
 
 #define COS_STREQ(a, b) (strcmp(a, b) == 0)
 
-#define COS_SUPERVIEW_PLACEHOLDER [NSNull null]
-
 @class COSLayoutRule;
 
 typedef CGFloat(^COSFloatBlock)(UIView *);
@@ -1183,29 +1181,30 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (NSSet *)dependencies {
-    NSMutableSet *set = [[NSMutableSet alloc] init];
+    NSMutableSet *viewSet = [[NSMutableSet alloc] init];
+    NSMutableSet *ruleSet = [[NSMutableSet alloc] init];
 
-    for (COSLayoutRule *rule in _ruleHub.vRules) {
-        [set unionSet:rule.coord.dependencies];
+    if (self.hRule) {
+        [ruleSet addObject:self.hRule];
     }
 
-    for (COSLayoutRule *rule in _ruleHub.hRules) {
-        [set unionSet:rule.coord.dependencies];
+    if (self.wRule) {
+        [ruleSet addObject:self.wRule];
     }
 
-    for (COSLayoutRule *rule in [_ruleMap allValues]) {
-        [set unionSet:rule.coord.dependencies];
+    [ruleSet addObjectsFromArray:self.ruleHub.vRules];
+    [ruleSet addObjectsFromArray:self.ruleHub.hRules];
+    [ruleSet addObjectsFromArray:self.ruleMap.allValues];
+
+    for (COSLayoutRule *rule in ruleSet) {
+        [viewSet unionSet:rule.coord.dependencies];
     }
 
-    if ([set containsObject:COS_SUPERVIEW_PLACEHOLDER]) {
-        [set removeObject:COS_SUPERVIEW_PLACEHOLDER];
-
-        if (_view.superview) {
-            [set addObject:_view.superview];
-        }
+    if (_view.superview) {
+        [viewSet addObject:_view.superview];
     }
 
-    return set;
+    return viewSet;
 }
 
 - (void)solveRules:(NSArray *)rules {
@@ -1430,16 +1429,6 @@ do {                                                 \
     coord.block = block;
 
     return coord;
-}
-
-- (instancetype)init {
-    self = [super init];
-
-    if (self) {
-        _dependencies = [NSMutableSet setWithObject:COS_SUPERVIEW_PLACEHOLDER];
-    }
-
-    return self;
 }
 
 - (instancetype)add:(COSCoord *)other {
