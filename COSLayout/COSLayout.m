@@ -38,7 +38,7 @@ typedef CGFloat(^COSFloatBlock)(UIView *);
 typedef CGFloat(^COSCoordBlock)(COSLayoutRule *);
 
 typedef NS_ENUM(NSInteger, COSLayoutDir) {
-    COSLayoutDirv,
+    COSLayoutDirv = 1,
     COSLayoutDirh
 };
 
@@ -59,7 +59,7 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 + (instancetype)coordWithFloat:(CGFloat)value;
 + (instancetype)coordWithPercentage:(CGFloat)percentage;
-+ (instancetype)coordWithPercentage:(CGFloat)percentage type:(int)type;
++ (instancetype)coordWithPercentage:(CGFloat)percentage dir:(COSLayoutDir)dir;
 + (instancetype)coordWithBlock:(COSCoordBlock)block;
 
 @property (nonatomic, strong) NSMutableSet *dependencies;
@@ -1000,7 +1000,14 @@ void cos_initialize_driver_if_needed(UIView *view) {
     case COSLAYOUT_TOKEN_PERCENTAGE:
     case COSLAYOUT_TOKEN_PERCENTAGE_H:
     case COSLAYOUT_TOKEN_PERCENTAGE_V: {
-        COSCoord *coord = [COSCoord coordWithPercentage:ast->value.percentage type:ast->node_type];
+        COSLayoutDir dir = 0;
+
+        switch (ast->node_type) {
+        case COSLAYOUT_TOKEN_PERCENTAGE_H: dir = COSLayoutDirh; break;
+        case COSLAYOUT_TOKEN_PERCENTAGE_V: dir = COSLayoutDirv; break;
+        }
+
+        COSCoord *coord = [COSCoord coordWithPercentage:ast->value.percentage dir:dir];
 
         ast->data = (__bridge void *)(coord);
 
@@ -1010,74 +1017,89 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
     case COSLAYOUT_TOKEN_COORD: {
         COSCoord *coord = nil;
-        char *format = ast->value.coord;
+        char *spec = ast->value.coord;
 
-        switch (format[0]) {
+        switch (spec[0]) {
         case '^': {
             COSFloatBlock block = [args floatBlockValue];
 
-            switch (format[1]) {
-            case 'f': {
-                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
-                    return block(rule.view);
-                }];
-            }
-                break;
-
-            case 'p': {
-                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
-                    CGFloat percentage = block(rule.view);
-                    COSCoord *coord = [COSCoord coordWithPercentage:percentage];
-
-                    return coord.block(rule);
-                }];
-            }
-                break;
-            }
+            coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                return block(rule.view);
+            }];
         }
             break;
 
         case '@': {
             id<COSCGFloatProtocol> value = [args objectValue];
 
-            switch (format[1]) {
-            case 'f': {
-                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
-                    return [value cos_CGFloatValue];
-                }];
-            }
+            coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                return [value cos_CGFloatValue];
+            }];
+        }
+            break;
+
+        default: {
+            switch (spec[0]) {
+            case 'f':
+                coord = [COSCoord coordWithFloat:[args floatValue]];
                 break;
 
-            case 'p': {
-                coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
-                    CGFloat percentage = [value cos_CGFloatValue];
-                    COSCoord *coord = [COSCoord coordWithPercentage:percentage];
-
-                    return coord.block(rule);
-                }];
+            default: {
+                COSCoords *coords = [COSCoords coordsOfView:[args objectValue]];
+                coord = [coords valueForKey:COS_COORD_NAME(spec)];
             }
                 break;
             }
         }
             break;
-
-        default: {
-            switch (format[0]) {
-            case 'f':
-                coord = [COSCoord coordWithFloat:[args floatValue]];
-                break;
-
-            case 'p':
-                coord = [COSCoord coordWithPercentage:[args floatValue]];
-                break;
-
-            default: {
-                COSCoords *coords = [COSCoords coordsOfView:[args objectValue]];
-                coord = [coords valueForKey:COS_COORD_NAME(format)];
-            }
-                break;
-            }
         }
+
+        ast->data = (__bridge void *)(coord);
+
+        [keeper addObject:coord];
+    }
+        break;
+
+    case COSLAYOUT_TOKEN_COORD_PERCENTAGE:
+    case COSLAYOUT_TOKEN_COORD_PERCENTAGE_H:
+    case COSLAYOUT_TOKEN_COORD_PERCENTAGE_V: {
+        COSCoord *coord = nil;
+        char *spec = ast->value.coord;
+
+        COSLayoutDir dir = 0;
+
+        switch (ast->node_type) {
+        case COSLAYOUT_TOKEN_COORD_PERCENTAGE_H: dir = COSLayoutDirh; break;
+        case COSLAYOUT_TOKEN_COORD_PERCENTAGE_V: dir = COSLayoutDirv; break;
+        }
+
+        switch (spec[0]) {
+        case '^':{
+            COSFloatBlock block = [args floatBlockValue];
+
+            coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                CGFloat percentage = block(rule.view);
+                COSCoord *coord = [COSCoord coordWithPercentage:percentage dir:dir];
+
+                return coord.block(rule);
+            }];
+        }
+            break;
+
+        case '@': {
+            id<COSCGFloatProtocol> object = [args objectValue];
+
+            coord = [COSCoord coordWithBlock:^CGFloat(COSLayoutRule *rule) {
+                CGFloat percentage = [object cos_CGFloatValue];
+                COSCoord *coord = [COSCoord coordWithPercentage:percentage dir:dir];
+
+                return coord.block(rule);
+            }];
+        }
+            break;
+
+        default:
+            coord = [COSCoord coordWithPercentage:[args floatValue] dir:dir];
             break;
         }
 
@@ -1382,10 +1404,10 @@ do {                                                 \
 }
 
 + (instancetype)coordWithPercentage:(CGFloat)percentage {
-    return [self coordWithPercentage:percentage type:COSLAYOUT_TOKEN_PERCENTAGE];
+    return [self coordWithPercentage:percentage dir:0];
 }
 
-+ (instancetype)coordWithPercentage:(CGFloat)percentage type:(int)type {
++ (instancetype)coordWithPercentage:(CGFloat)percentage dir:(COSLayoutDir)dir_ {
     COSCoord *coord = [[COSCoord alloc] init];
 
     percentage /= 100.0;
@@ -1393,12 +1415,7 @@ do {                                                 \
     coord.block = ^CGFloat(COSLayoutRule *rule) {
         UIView *view = rule.view;
 
-        COSLayoutDir dir = (
-            type != COSLAYOUT_TOKEN_PERCENTAGE ?
-            (type == COSLAYOUT_TOKEN_PERCENTAGE_H ? COSLayoutDirh : COSLayoutDirv) :
-            rule.dir
-        );
-
+        COSLayoutDir dir = dir_ ? dir_ : rule.dir;
         CGFloat size = (dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
 
         return size * percentage;

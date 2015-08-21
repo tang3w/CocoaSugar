@@ -154,7 +154,10 @@ void coslayout_destroy_ast(COSLAYOUT_AST *astp);
     COSLAYOUT_TOKEN_PERCENTAGE = 260,
     COSLAYOUT_TOKEN_PERCENTAGE_H = 261,
     COSLAYOUT_TOKEN_PERCENTAGE_V = 262,
-    COSLAYOUT_TOKEN_COORD = 263
+    COSLAYOUT_TOKEN_COORD = 263,
+    COSLAYOUT_TOKEN_COORD_PERCENTAGE = 264,
+    COSLAYOUT_TOKEN_COORD_PERCENTAGE_H = 265,
+    COSLAYOUT_TOKEN_COORD_PERCENTAGE_V = 266
   };
 #endif
 
@@ -173,7 +176,7 @@ int coslayoutparse (void *scanner, COSLAYOUT_AST **astpp);
 
 /* Copy the second part of user declarations.  */
 
-#line 177 "COSLayoutParser.c" /* yacc.c:358  */
+#line 180 "COSLayoutParser.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -413,23 +416,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  15
+#define YYFINAL  18
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   55
+#define YYLAST   67
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  16
+#define YYNTOKENS  19
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  18
+#define YYNRULES  21
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  27
+#define YYNSTATES  30
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   263
+#define YYMAXUTOK   266
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -442,9 +445,9 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      14,    15,    11,     9,     2,    10,     2,    12,     2,     2,
+      17,    18,    14,    12,     2,    13,     2,    15,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    13,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,    16,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -464,15 +467,16 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8
+       5,     6,     7,     8,     9,    10,    11
 };
 
 #if COSLAYOUTDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    57,    57,    58,    59,    60,    62,    63,    64,    66,
-      67,    68,    70,    71,    72,    73,    74,    75,    76
+       0,    60,    60,    61,    62,    63,    65,    66,    67,    69,
+      70,    71,    73,    74,    75,    76,    77,    78,    79,    80,
+      81,    82
 };
 #endif
 
@@ -484,8 +488,10 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "COSLAYOUT_TOKEN_ATTR",
   "COSLAYOUT_TOKEN_NUMBER", "COSLAYOUT_TOKEN_PERCENTAGE",
   "COSLAYOUT_TOKEN_PERCENTAGE_H", "COSLAYOUT_TOKEN_PERCENTAGE_V",
-  "COSLAYOUT_TOKEN_COORD", "'+'", "'-'", "'*'", "'/'", "'='", "'('", "')'",
-  "$accept", "expr", "rval", "item", "atom", YY_NULLPTR
+  "COSLAYOUT_TOKEN_COORD", "COSLAYOUT_TOKEN_COORD_PERCENTAGE",
+  "COSLAYOUT_TOKEN_COORD_PERCENTAGE_H",
+  "COSLAYOUT_TOKEN_COORD_PERCENTAGE_V", "'+'", "'-'", "'*'", "'/'", "'='",
+  "'('", "')'", "$accept", "expr", "rval", "item", "atom", YY_NULLPTR
 };
 #endif
 
@@ -494,15 +500,15 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,    43,
-      45,    42,    47,    61,    40,    41
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,    43,    45,    42,    47,    61,    40,    41
 };
 # endif
 
-#define YYPACT_NINF -12
+#define YYPACT_NINF -15
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-12)))
+  (!!((Yystate) == (-15)))
 
 #define YYTABLE_NINF -3
 
@@ -513,9 +519,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      16,   -12,   -11,   -12,   -12,   -12,   -12,   -12,    28,     9,
-       1,    14,   -12,     0,    -3,   -12,    41,    41,    41,    41,
-     -12,   -12,   -12,    14,    14,   -12,   -12
+      19,   -15,   -14,   -15,   -15,   -15,   -15,   -15,   -15,   -15,
+     -15,    34,    12,     1,    17,   -15,     0,    -3,   -15,    50,
+      50,    50,    50,   -15,   -15,   -15,    17,    17,   -15,   -15
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -523,21 +529,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     3,    12,    13,    14,    15,    16,    17,     0,     0,
-       5,     8,    11,     0,     0,     1,     0,     0,     0,     0,
-       4,    18,    12,     6,     7,     9,    10
+       0,     3,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,     0,     0,     5,     8,    11,     0,     0,     1,     0,
+       0,     0,     0,     4,    21,    12,     6,     7,     9,    10
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,     5,   -12,    11,    19
+     -15,     5,   -15,    14,    25
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     9,    10,    11,    12
+      -1,    12,    13,    14,    15
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -545,45 +551,49 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      -2,     1,    13,     2,     3,     4,     5,     6,     7,    15,
-      16,    17,    21,    14,     8,    -2,    -2,     1,    20,     2,
-       3,     4,     5,     6,     7,    18,    19,    23,    24,     1,
-       8,     2,     3,     4,     5,     6,     7,    25,    26,     0,
-       0,     0,     8,    -2,    22,     3,     4,     5,     6,     7,
-       0,     0,     0,     0,     0,     8
+      -2,     1,    16,     2,     3,     4,     5,     6,     7,     8,
+       9,    10,    18,    19,    20,    24,    17,    11,    -2,    -2,
+       1,    23,     2,     3,     4,     5,     6,     7,     8,     9,
+      10,    21,    22,    26,    27,     1,    11,     2,     3,     4,
+       5,     6,     7,     8,     9,    10,    28,    29,     0,     0,
+       0,    11,    -2,    25,     3,     4,     5,     6,     7,     8,
+       9,    10,     0,     0,     0,     0,     0,    11
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,     1,    13,     3,     4,     5,     6,     7,     8,     0,
-       9,    10,    15,     8,    14,    15,     0,     1,    13,     3,
-       4,     5,     6,     7,     8,    11,    12,    16,    17,     1,
-      14,     3,     4,     5,     6,     7,     8,    18,    19,    -1,
-      -1,    -1,    14,    15,     3,     4,     5,     6,     7,     8,
-      -1,    -1,    -1,    -1,    -1,    14
+       0,     1,    16,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,     0,    12,    13,    18,    11,    17,    18,     0,
+       1,    16,     3,     4,     5,     6,     7,     8,     9,    10,
+      11,    14,    15,    19,    20,     1,    17,     3,     4,     5,
+       6,     7,     8,     9,    10,    11,    21,    22,    -1,    -1,
+      -1,    17,    18,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    -1,    -1,    -1,    -1,    -1,    17
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     1,     3,     4,     5,     6,     7,     8,    14,    17,
-      18,    19,    20,    13,    17,     0,     9,    10,    11,    12,
-      17,    15,     3,    19,    19,    20,    20
+       0,     1,     3,     4,     5,     6,     7,     8,     9,    10,
+      11,    17,    20,    21,    22,    23,    16,    20,     0,    12,
+      13,    14,    15,    20,    18,     3,    22,    22,    23,    23
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    16,    17,    17,    17,    17,    18,    18,    18,    19,
-      19,    19,    20,    20,    20,    20,    20,    20,    20
+       0,    19,    20,    20,    20,    20,    21,    21,    21,    22,
+      22,    22,    23,    23,    23,    23,    23,    23,    23,    23,
+      23,    23
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     1,     3,     1,     3,     3,     1,     3,
-       3,     1,     1,     1,     1,     1,     1,     1,     3
+       3,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     3
 };
 
 
@@ -1268,103 +1278,121 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 58 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 61 "COSLayoutParser.y" /* yacc.c:1661  */
     { coslayout_destroy_ast(*astpp); *astpp = NULL; YYABORT; }
-#line 1274 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1284 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 59 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 62 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = coslayout_create_ast('=', (yyvsp[-2]), (yyvsp[0])); }
-#line 1280 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1290 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 60 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 63 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1286 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1296 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 62 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 65 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = coslayout_create_ast('+', (yyvsp[-2]), (yyvsp[0])); }
-#line 1292 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1302 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 63 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 66 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = coslayout_create_ast('-', (yyvsp[-2]), (yyvsp[0])); }
-#line 1298 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1308 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 64 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 67 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1304 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1314 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 66 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 69 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = coslayout_create_ast('*', (yyvsp[-2]), (yyvsp[0])); }
-#line 1310 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1320 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 67 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 70 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = coslayout_create_ast('/', (yyvsp[-2]), (yyvsp[0])); }
-#line 1316 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1326 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 68 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 71 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1322 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1332 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 70 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 73 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1328 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1338 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 71 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 74 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1334 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1344 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 72 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 75 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1340 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1350 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 73 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 76 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1346 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1356 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 16:
-#line 74 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 77 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1352 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1362 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 17:
-#line 75 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 78 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[0]); }
-#line 1358 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1368 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
   case 18:
-#line 76 "COSLayoutParser.y" /* yacc.c:1661  */
+#line 79 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1374 "COSLayoutParser.c" /* yacc.c:1661  */
+    break;
+
+  case 19:
+#line 80 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1380 "COSLayoutParser.c" /* yacc.c:1661  */
+    break;
+
+  case 20:
+#line 81 "COSLayoutParser.y" /* yacc.c:1661  */
+    { *astpp = (yyval) = (yyvsp[0]); }
+#line 1386 "COSLayoutParser.c" /* yacc.c:1661  */
+    break;
+
+  case 21:
+#line 82 "COSLayoutParser.y" /* yacc.c:1661  */
     { *astpp = (yyval) = (yyvsp[-1]); }
-#line 1364 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1392 "COSLayoutParser.c" /* yacc.c:1661  */
     break;
 
 
-#line 1368 "COSLayoutParser.c" /* yacc.c:1661  */
+#line 1396 "COSLayoutParser.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1586,7 +1614,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 79 "COSLayoutParser.y" /* yacc.c:1906  */
+#line 85 "COSLayoutParser.y" /* yacc.c:1906  */
 
 
 void coslayouterror(void *scanner, COSLAYOUT_AST **astpp, char *msg) {
