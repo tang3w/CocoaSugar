@@ -334,7 +334,7 @@ extern int coslayoutlex \
 #undef YY_DECL
 #endif
 
-#line 72 "COSLayoutLex.l"
+#line 91 "COSLayoutLex.l"
 
 
 #line 341 "COSLayoutLex.h"

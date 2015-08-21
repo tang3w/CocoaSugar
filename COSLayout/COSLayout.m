@@ -59,6 +59,7 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 + (instancetype)coordWithFloat:(CGFloat)value;
 + (instancetype)coordWithPercentage:(CGFloat)percentage;
++ (instancetype)coordWithPercentage:(CGFloat)percentage type:(int)type;
 + (instancetype)coordWithBlock:(COSCoordBlock)block;
 
 @property (nonatomic, strong) NSMutableSet *dependencies;
@@ -996,8 +997,10 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
         break;
 
-    case COSLAYOUT_TOKEN_PERCENTAGE: {
-        COSCoord *coord = [COSCoord coordWithPercentage:ast->value.percentage];
+    case COSLAYOUT_TOKEN_PERCENTAGE:
+    case COSLAYOUT_TOKEN_PERCENTAGE_H:
+    case COSLAYOUT_TOKEN_PERCENTAGE_V: {
+        COSCoord *coord = [COSCoord coordWithPercentage:ast->value.percentage type:ast->node_type];
 
         ast->data = (__bridge void *)(coord);
 
@@ -1379,13 +1382,24 @@ do {                                                 \
 }
 
 + (instancetype)coordWithPercentage:(CGFloat)percentage {
+    return [self coordWithPercentage:percentage type:COSLAYOUT_TOKEN_PERCENTAGE];
+}
+
++ (instancetype)coordWithPercentage:(CGFloat)percentage type:(int)type {
     COSCoord *coord = [[COSCoord alloc] init];
 
     percentage /= 100.0;
 
     coord.block = ^CGFloat(COSLayoutRule *rule) {
         UIView *view = rule.view;
-        CGFloat size = (rule.dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
+
+        COSLayoutDir dir = (
+            type != COSLAYOUT_TOKEN_PERCENTAGE ?
+            (type == COSLAYOUT_TOKEN_PERCENTAGE_H ? COSLayoutDirh : COSLayoutDirv) :
+            rule.dir
+        );
+
+        CGFloat size = (dir == COSLayoutDirv ? COS_SUPERVIEW_HEIGHT : COS_SUPERVIEW_WIDTH);
 
         return size * percentage;
     };
