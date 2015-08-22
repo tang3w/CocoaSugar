@@ -874,7 +874,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
 @end
 
 
-#define COS_COORD_NAME(coord) \
+#define COS_STRING(coord) \
     [NSString stringWithCString:(coord) encoding:NSASCIIStringEncoding]
 
 
@@ -979,6 +979,14 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
 }
 
+#define COSCOORD_FOR_NAME(name_) ({ \
+    [self valueForKey:name_] ?: ({ \
+        COSCoord *coord = [COSCoord coordWithFloat:0]; \
+        [keeper addObject:coord]; \
+        coord; \
+    }); \
+})
+
 - (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent args:(id<COSLayoutArguments>)args keeper:(NSMutableSet *)keeper {
     if (ast == NULL) return;
 
@@ -991,16 +999,11 @@ void cos_initialize_driver_if_needed(UIView *view) {
             if (parent->node_type == '=' &&
                 parent->l == ast) break;
 
-            COSCoord *coord = [self valueForKey:COS_COORD_NAME(ast->value.coord)];
-
-            if (!coord) {
-                coord = [COSCoord coordWithFloat:0];
-                [keeper addObject:coord];
-            }
+            COSCoord *coord = COSCOORD_FOR_NAME(COS_STRING(ast->value.coord));
 
             ast->data = (__bridge void *)(coord);
         } else {
-            [self setValue:[COSCoord coordWithFloat:0] forKey:COS_COORD_NAME(ast->value.coord)];
+            [self setValue:[COSCoord coordWithFloat:0] forKey:COS_STRING(ast->value.coord)];
         }
     }
         break;
@@ -1063,7 +1066,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
 
             default: {
                 COSCoords *coords = [COSCoords coordsOfView:[args objectValue]];
-                coord = [coords valueForKey:COS_COORD_NAME(spec)];
+                coord = [coords valueForKey:COS_STRING(spec)];
             }
                 break;
             }
@@ -1182,7 +1185,35 @@ void cos_initialize_driver_if_needed(UIView *view) {
     case '=': {
         COSCoord *coord = (__bridge COSCoord *)(ast->r->data);
 
-        [self setValue:coord forKey:COS_COORD_NAME(ast->l->value.coord)];
+        [self setValue:coord forKey:COS_STRING(ast->l->value.coord)];
+
+        ast->data = (__bridge void *)(coord);
+    }
+        break;
+
+    case COSLAYOUT_TOKEN_ADD_ASSIGN:
+    case COSLAYOUT_TOKEN_SUB_ASSIGN:
+    case COSLAYOUT_TOKEN_MUL_ASSIGN:
+    case COSLAYOUT_TOKEN_DIV_ASSIGN: {
+        NSString *name = COS_STRING(ast->l->value.coord);
+
+        COSCoord *lval  = COSCOORD_FOR_NAME(name);
+        COSCoord *rval = (__bridge COSCoord *)(ast->r->data);
+
+        SEL sel = NULL;
+
+        switch (ast->node_type) {
+        case COSLAYOUT_TOKEN_ADD_ASSIGN: sel = @selector(add:); break;
+        case COSLAYOUT_TOKEN_SUB_ASSIGN: sel = @selector(sub:); break;
+        case COSLAYOUT_TOKEN_MUL_ASSIGN: sel = @selector(mul:); break;
+        case COSLAYOUT_TOKEN_DIV_ASSIGN: sel = @selector(div:); break;
+        }
+
+        IMP imp = [lval methodForSelector:sel];
+
+        COSCoord *coord = ((id(*)(id, SEL, id))(imp))(lval, sel, rval);
+
+        [self setValue:coord forKey:name];
 
         ast->data = (__bridge void *)(coord);
     }
