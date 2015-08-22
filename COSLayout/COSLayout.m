@@ -958,6 +958,16 @@ void cos_initialize_driver_if_needed(UIView *view) {
             return;
         }
     }
+
+    [self layoutSiblingViews];
+}
+
+- (void)layoutSiblingViews {
+    UIView *superview = self.view.superview;
+
+    if (superview) {
+        [[objc_getAssociatedObject(superview, COSLayoutDriverKey) solver] solve];
+    }
 }
 
 - (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent args:(id<COSLayoutArguments>)args keeper:(NSMutableSet *)keeper {
