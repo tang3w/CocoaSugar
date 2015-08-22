@@ -947,7 +947,7 @@ case 15:
 YY_RULE_SETUP
 #line 127 "COSLayoutLex.l"
 {
-                 fprintf(stderr, "COSLayout: unrecognized text %s\n", yytext);
+                 fprintf(stderr, "COSLayout: Unrecognized text \"%s\", ignored.\n", yytext);
              }
 	YY_BREAK
 case 16:

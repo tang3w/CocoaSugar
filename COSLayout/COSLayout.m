@@ -1193,6 +1193,14 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
 }
 
+- (void)setValue:(id)value forKey:(NSString *)key {
+    @try {
+        [super setValue:value forKey:key];
+    } @catch (NSException *exception) {
+        fprintf(stderr, "COSLayout: Invalid constraint \"%s\", ignored.\n", [key UTF8String]);
+    }
+}
+
 - (void)updateLayoutDriver {
     UIView *superview = _view.superview;
 
