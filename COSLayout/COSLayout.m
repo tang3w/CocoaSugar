@@ -55,6 +55,8 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 @interface COSCoord : NSObject
 
++ (instancetype)nilCoord;
+
 + (instancetype)coordWithFloat:(CGFloat)value;
 + (instancetype)coordWithPercentage:(CGFloat)percentage;
 + (instancetype)coordWithPercentage:(CGFloat)percentage dir:(COSLayoutDir)dir;
@@ -68,6 +70,8 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 - (instancetype)mul:(COSCoord *)other;
 - (instancetype)div:(COSCoord *)other;
 
+- (BOOL)valid;
+
 @end
 
 
@@ -80,7 +84,7 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 @interface COSLayoutRule : NSObject
 
-+ (COSLayoutRule *)layoutRuleWithView:(UIView *)view
++ (instancetype)layoutRuleWithView:(UIView *)view
     name:(NSString *)name
     coord:(COSCoord *)coord
     dir:(COSLayoutDir)dir;
@@ -91,6 +95,8 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 @property (nonatomic, assign) COSLayoutDir dir;
 
 - (CGFloat)floatValue;
+
+- (BOOL)valid;
 
 @end
 
@@ -215,7 +221,7 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 @implementation COSLayoutRule
 
-+ (COSLayoutRule *)layoutRuleWithView:(UIView *)view
++ (instancetype)layoutRuleWithView:(UIView *)view
     name:(NSString *)name
     coord:(COSCoord *)coord
     dir:(COSLayoutDir)dir
@@ -232,6 +238,10 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
 - (CGFloat)floatValue {
     return self.coord.block(self);
+}
+
+- (BOOL)valid {
+    return [self.coord valid];
 }
 
 @end
@@ -255,7 +265,7 @@ static NSString *COSLayoutSyntaxExceptionDesc = @"Layout rule has a syntax error
 
     if ([rules count] > 1) [rules removeObjectAtIndex:0];
 
-    if (rule.coord) [rules addObject:rule];
+    if ([rule valid]) [rules addObject:rule];
 }
 
 - (void)vAddRule:(COSLayoutRule *)rule {
@@ -328,9 +338,7 @@ do {                                                        \
 ({                                                  \
     COSLayoutRule *rule = layout.ruleMap[@(#var)];  \
                                                     \
-    rule.coord ?                                    \
-    rule.coord.block(rule) :                        \
-    NAN;                                            \
+    [rule valid] ? [rule floatValue] : NAN;         \
 })
 
 #define COS_VALID_DIM(value) (!isnan(value) && (value) >= 0)
@@ -689,14 +697,15 @@ void COSMakeViewVisited(UIView *view) {
     coord;                                         \
 })
 
+#define COSCOORD_OR_NIL(c_) ({ COSCoord *c = (c_); [c valid] ? c : nil; })
+
 #define COSLAYOUT_ADD_RULE(var, dir_)        \
 do {                                         \
-    _##var = (var);                          \
-    NSString *name = @(#var);                \
+    _##var = COSCOORD_OR_NIL(var);           \
                                              \
     COSLayoutRule *rule =                    \
     [COSLayoutRule layoutRuleWithView:_view  \
-        name:name                            \
+        name:@(#var)                         \
         coord:_##var                         \
         dir:COSLayoutDir##dir_];             \
                                              \
@@ -705,13 +714,13 @@ do {                                         \
 
 #define COSLAYOUT_ADD_TRANS_RULE(var, dst, exp)                 \
 do {                                                            \
-    COSCoord *c = _##var = (var);                               \
+    COSCoord *c = _##var = COSCOORD_OR_NIL(var);                \
     self.dst = c ? COSCOORD_MAKE(c.dependencies, (exp)) : nil;  \
 } while (0)
 
 #define COSLAYOUT_ADD_BOUND_RULE(var, dir_)  \
 do {                                         \
-    _##var = (var);                          \
+    _##var = COSCOORD_OR_NIL(var);           \
     NSString *name = @(#var);                \
                                              \
     COSLayoutRule *rule =                    \
@@ -1117,6 +1126,11 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
         break;
 
+    case COSLAYOUT_TOKEN_NIL: {
+        ast->data = (__bridge void *)([COSCoord nilCoord]);
+    }
+        break;
+
     case '+': {
         COSCoord *coord1 = (__bridge COSCoord *)(ast->l->data);
         COSCoord *coord2 = (__bridge COSCoord *)(ast->r->data);
@@ -1384,23 +1398,42 @@ void cos_initialize_driver_if_needed(UIView *view) {
 @end
 
 
-#define COSCOORD_CALC(expr)                          \
-do {                                                 \
-    COSCoord *coord = [[COSCoord alloc] init];       \
-    NSMutableSet *dependencies = self.dependencies;  \
-                                                     \
-    [dependencies unionSet:other.dependencies];      \
-                                                     \
-    coord.dependencies = dependencies;               \
-    coord.block = ^CGFloat(COSLayoutRule *rule) {    \
-        return (expr);                               \
-    };                                               \
-                                                     \
-    return coord;                                    \
+#define COSCOORD_CALC(expr)                              \
+do {                                                     \
+    if ([self valid] && [other valid]) {                 \
+        COSCoord *coord = [[COSCoord alloc] init];       \
+        NSMutableSet *dependencies = self.dependencies;  \
+                                                         \
+        [dependencies unionSet:other.dependencies];      \
+                                                         \
+        coord.dependencies = dependencies;               \
+        coord.block = ^CGFloat(COSLayoutRule *rule) {    \
+            return (expr);                               \
+        };                                               \
+                                                         \
+        return coord;                                    \
+    } else if ([self valid] && ![other valid]) {         \
+        return self;                                     \
+    } else if (![self valid] && [other valid]) {         \
+        return other;                                    \
+    } else {                                             \
+        return self;                                     \
+    }                                                    \
 } while (0)
 
 
 @implementation COSCoord
+
++ (instancetype)nilCoord {
+    static COSCoord *nilCoord = nil;
+    static dispatch_once_t onceToken;
+
+    dispatch_once(&onceToken, ^{
+        nilCoord = [[COSCoord alloc] init];
+    });
+
+    return nilCoord;
+}
 
 + (instancetype)coordWithFloat:(CGFloat)value {
     COSCoord *coord = [[COSCoord alloc] init];
@@ -1459,6 +1492,10 @@ do {                                                 \
 
 - (NSMutableSet *)dependencies {
     return _dependencies ?: (_dependencies = [[NSMutableSet alloc] init]);
+}
+
+- (BOOL)valid {
+    return self != [COSCoord nilCoord] && self.block;
 }
 
 @end
