@@ -924,7 +924,7 @@ case 17:
 YY_RULE_SETUP
 #line 91 "COSLayoutLex.l"
 {
-                 char *text = NULL;
+                 char *text = yytext;
                  int   type = COSLAYOUT_TOKEN_COORD_PERCENTAGE;
 
                  switch(yytext[0]) {
