@@ -45,7 +45,7 @@ Constraint | Direction  | Description
 `minh`     | Vertical   | Minimal height of view
 `maxh`     | Vertical   | Maximal height of view
 
-`COSLayout` supports 4 constraint value types:
+`COSLayout` supports 5 constraint value types:
 
 Constraint Value Type | Example             | Description
 ----------------------|---------------------|------------
@@ -53,6 +53,7 @@ CGFloat               | `5` `-10` `20.0`    | Fixed length on screen
 Percentage            | `5%` `-10%` `20.0%` | Percentage of superview's width or height
 Format specifier      | `%tt` `%w` `%f`     | Constraint value given by additional argument
 Constraint            | `tt` `maxw`         | Constraint value of current layout
+Nil                   | `nil`               | Used to reset a constraint
 
 Note that the percentage has different means for different constraint directions. If current constraint direction is horizontal, the percentage represents the percentage of superview's width, otherwise, the percentage of superview's height.
 
@@ -80,8 +81,8 @@ Format | Type                     | Description
 `%p`   | `CGFloat`                | Percentage of superview's width or superview's height
 `%^f`  | `CGFloat(^)(UIView *)`   | Space provided by a block
 `%^p`  | `CGFloat(^)(UIView *)`   | Percentage provided by a block
-`%:f`  | `id<COSCGFloatProtocol>` | Space provided by an object
-`%:p`  | `id<COSCGFloatProtocol>` | Percentage provided by an object
+`%@f`  | `id<COSCGFloatProtocol>` | Space provided by an object
+`%@p`  | `id<COSCGFloatProtocol>` | Percentage provided by an object
 
 It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `COSLayout`, the dependencies is presented by DAG. So `COSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
 
@@ -92,6 +93,10 @@ You can apply arithmetic operator between constraint values. Like other language
 Operator name | Priority | Associativity | Code examples
 --------------|----------|---------------|--------------
 `=`           | 1        | right         | `tt = 20` `ct = 50%`
+`+=`          | 1        | right         | `tt += 20` `ct += 50%`
+`-=`          | 1        | right         | `tt -= 20` `ct -= 50%`
+`*=`          | 1        | right         | `tt *= 20` `ct *= 50%`
+`/=`          | 1        | right         | `tt /= 20` `ct /= 50%`
 `+`           | 2        | left          | `10 + 20` `50% + 10` `%w + 5`
 `-`           | 2        | left          | `20 - 10` `50% - 10` `%h - 5`
 `*`           | 3        | left          | `50 * 2` `80% * 0.5` `%h * 2`
