@@ -812,7 +812,7 @@ void cos_initialize_driver_if_needed(UIView *view) {
 }
 
 - (CGFloat)floatValue {
-    return va_arg(_valist, CGFloat);
+    return va_arg(_valist, double);
 }
 
 - (COSFloatBlock)floatBlockValue {
