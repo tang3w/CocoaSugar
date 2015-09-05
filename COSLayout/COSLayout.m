@@ -979,12 +979,12 @@ void cos_initialize_driver_if_needed(UIView *view) {
     }
 }
 
-#define COSCOORD_FOR_NAME(name_) ({ \
-    [self valueForKey:name_] ?: ({ \
-        COSCoord *coord = [COSCoord coordWithFloat:0]; \
-        [keeper addObject:coord]; \
-        coord; \
-    }); \
+#define COSCOORD_FOR_NAME(name_) ({  \
+    [self valueForKey:name_] ?: ({   \
+        COSCoord *coord = [COSCoord coordWithFloat:0];  \
+        [keeper addObject:coord];    \
+        coord;                       \
+    });                              \
 })
 
 - (void)parseAst:(COSLAYOUT_AST *)ast parent:(COSLAYOUT_AST *)parent args:(id<COSLayoutArguments>)args keeper:(NSMutableSet *)keeper {
