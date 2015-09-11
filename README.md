@@ -55,7 +55,7 @@ Format specifier      | `%tt` `%w` `%f`     | Constraint value given by addition
 Constraint            | `tt` `maxw`         | Constraint value of current layout
 Nil                   | `nil`               | Used to reset a constraint
 
-Note that the percentage has different means for different constraint directions. If current constraint direction is horizontal, the percentage represents the percentage of superview's width, otherwise, the percentage of superview's height.
+Note that the percentage has different means for different constraint directions. If current constraint direction is horizontal, the percentage represents the percentage of superview's width, otherwise, the percentage of superview's height. You can also specify direction of percentage by `H:` (horizontal) or `V:` (vertical) prefix. For example, `H:50%` means 50% width of superview, `V:30%` means 30% height of superview.
 
 Format specifier represents a constraint value given by additional argument. For example, `%tt` is the space from other view's top to superview's top. Here, the other view is given by additional argument, and the superview is the superview of layout's view. It means that `COSLayout` can specify constraints between non-sibling views.
 
@@ -83,6 +83,8 @@ Format | Type                     | Description
 `%^p`  | `CGFloat(^)(UIView *)`   | Percentage provided by a block
 `%@f`  | `id<COSCGFloatProtocol>` | Space provided by an object
 `%@p`  | `id<COSCGFloatProtocol>` | Percentage provided by an object
+
+Like percentage constraint value, you can also use `H:` and `V:` prefix to specify direction of percentage. For example, `H:%p`, `H:%^p`, `H:%@p` means percentage is horizontal, `V:%p`, `V:%^p`, `V:%@p` means percentage is vertical.
 
 It is worth mentioning that, format specifier also create a dependency between two views: the layout view and the other view given by additional argument. In `COSLayout`, the dependencies is presented by DAG. So `COSLayout` do not support the circular dependencies. When superview needs layout, all layouts of subviews will solve it's constraints according to the dependencies.
 
